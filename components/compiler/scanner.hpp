@@ -70,7 +70,7 @@ namespace Compiler
                 && mData[3] == 0;
         }
 
-        bool isDigit() const { return std::isdigit(mData[0]) && mData[1] == 0 && mData[2] == 0 && mData[3] == 0; }
+        bool isDigit() const { return std::isdigit(static_cast<unsigned char>(mData[0])) && mData[1] == 0 && mData[2] == 0 && mData[3] == 0; }
 
         bool isMinusSign() const
         {
@@ -85,7 +85,7 @@ namespace Compiler
             if (isMinusSign())
                 return false;
 
-            return std::isalpha(mData[0]) || mData[1] != 0 || mData[2] != 0 || mData[3] != 0;
+            return std::isalpha(static_cast<unsigned char>(mData[0])) || mData[1] != 0 || mData[2] != 0 || mData[3] != 0;
         }
 
         void appendTo(std::string& str) const

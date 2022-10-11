@@ -16,7 +16,7 @@ void Wizard::LanguageSelectionPage::initializePage()
 {
     QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
         { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
-        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
+        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") }, { "Chinese(GBK)", tr("Chinese(GBK)") }, { "UTF-8", tr("UTF-8") } };
 
     for (auto lang : languages)
     {
