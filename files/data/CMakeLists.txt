@@ -20,6 +20,8 @@ set(BUILTIN_DATA_FILES
     fonts/MysticCards.ttf
     fonts/MysticCards.omwfont
     fonts/MysticCardsFontLicense.txt
+    fonts/zh_CN.omwfont
+    fonts/LXGWWenKaiGB-Regular.ttf
 
     # Month names and date formatting
     l10n/Calendar/en.yaml
