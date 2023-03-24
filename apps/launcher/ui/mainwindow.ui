@@ -124,7 +124,7 @@ QToolButton {
      <normaloff>:/images/openmw-plugin.png</normaloff>:/images/openmw-plugin.png</iconset>
    </property>
    <property name="text">
-    <string>Data Files</string>
+    <string>数据文件</string>
    </property>
    <property name="toolTip">
     <string>Allows to setup data files and directories</string>
@@ -145,7 +145,7 @@ QToolButton {
      <normaloff>:/images/preferences-video.png</normaloff>:/images/preferences-video.png</iconset>
    </property>
    <property name="text">
-    <string>Graphics</string>
+    <string>图像</string>
    </property>
    <property name="toolTip">
     <string>Allows to change graphics settings</string>
@@ -160,7 +160,7 @@ QToolButton {
      <normaloff>:/images/preferences.png</normaloff>:/images/preferences.png</iconset>
    </property>
    <property name="text">
-    <string>Settings</string>
+    <string>设置</string>
    </property>
    <property name="toolTip">
     <string>Allows to tweak engine settings</string>
@@ -175,7 +175,7 @@ QToolButton {
      <normaloff>:/images/preferences-advanced.png</normaloff>:/images/preferences-advanced.png</iconset>
    </property>
    <property name="text">
-    <string>Import</string>
+    <string>导入</string>
    </property>
    <property name="toolTip">
     <string>Allows to import data from original engine</string>

@@ -279,6 +279,14 @@ void Wizard::MainWizard::runSettingsImporter()
     {
         arguments.append(QLatin1String("win1251"));
     }
+    else if (language == QLatin1String("Chinese(GBK)"))
+    {
+        arguments.append(QLatin1String("gbk"));
+    }
+    else if (language == QLatin1String("UTF-8"))
+    {
+        arguments.append(QLatin1String("utf8"));
+    }
     else
     {
         arguments.append(QLatin1String("win1252"));

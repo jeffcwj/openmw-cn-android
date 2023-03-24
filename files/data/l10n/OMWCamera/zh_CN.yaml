@@ -20,33 +20,26 @@ shoulderOffsetYDescription: >
 
 autoSwitchShoulder: "自动切换左右越肩视角"
 autoSwitchShoulderDescription: >
-    当玩家一侧贴在障碍物旁时
-    将镜头移动到另一侧
-    此设置可将镜头自动切换到
-    远离障碍物的一侧
+    当玩家一侧贴在障碍物旁时将镜头移动到另一侧
+    此设置可将镜头自动切换到远离障碍物的一侧
 
 zoomOutWhenMoveCoef: "移动时退出缩放"
 zoomOutWhenMoveCoefDescription: >
-    在角色移动时,
-    将摄影机偏离(正值)或偏向(负值)玩家角色
-    仅在启用“越肩视角”时有效
-    将此设置为0以禁用 (默认: 20.0)
+    在角色移动时, 将摄影机偏离(正值)或偏向(负值)玩家角色
+    仅在启用“越肩视角”时有效, 将此设置为0以禁用 (默认: 20.0)
 
 previewIfStandStill: "站定不动时预览角色"
 previewIfStandStillDescription: >
-    防止玩家角色在空闲且收起武器时
-    转向摄影机方向
+    防止玩家角色在空闲且收起武器时转向摄影机方向
 
 deferredPreviewRotation: "预览旋转"
 deferredPreviewRotationDescription: |
-    如果启用,则角色在退出预览视角后
-    将平滑地旋转到正常视角
-    如果禁用,则相机旋转而不是角色旋转
+    如果启用, 则角色在退出预览视角后将平滑地旋转到正常视角
+    如果禁用, 则相机旋转而不是角色旋转
 
 ignoreNC: "忽略“无碰撞”标识"
 ignoreNCDescription: >
-    防止镜头穿过在NIF模型中
-    启用无碰撞标志的对象。
+    防止镜头穿过在NIF模型中启用无碰撞标志的对象。
 
 move360: "360度自由移动"
 move360Description: >
@@ -60,9 +53,8 @@ slowViewChange: "顺滑的视角切换"
 slowViewChangeDescription: "使一三人称视角转换时的镜头平滑移动"
 
 povAutoSwitch: "自动切换第一人称视角"
-povAutoSwitchDescription: >
-    如果玩家身后紧贴着障碍物
-    则自动切换到第一人称视角。
+povAutoSwitchDescription: "如果玩家身后紧贴着障碍物则自动切换到第一人称视角。"
+
 
 headBobbingSettings: "第一人称视角下头部摆动"
 

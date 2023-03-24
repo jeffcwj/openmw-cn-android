@@ -44,7 +44,14 @@ OpenMW原版官方网站: https://openmw.org/
 
 ■ 汉化版的ChangeLog:
 
-● 2022-12-?? v7
+● 2023-03-24 v8
+1. files: 根据原版调整和补充i10n里的zh_CN.yaml文件
+2. openmw: 修正fontloader的编码问题,确保UTF-8编码esp的支持(Morrowind.cel也必须为UTF-8编码)
+3. scripts: ui文件的字符串导出导入工具和翻译对照文本
+4. scripts: tes3enc和tes3dec支持TES4版本的esm/esp文件
+5. files/data/fonts: 更新默认的中文字体 LXGWWenKaiGB-Regular.ttf
+
+● 2022-12-26 v7
 1. scripts: 改进 check_topic.lua 转换时自动去掉CELL,LAND,PGRD条目, 更多的补充topic
 2. files: Morrowind.cel 删除重复项
 3. openmw: 修正某些情况启动时弹出"目标多字节代码页中不存在Unicode字符的映射"的bug

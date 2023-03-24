@@ -1,0 +1,16 @@
+ControlsPage: "OpenMW按键控制"
+ControlsPageDescription: "角色控制相关的附加设置"
+
+MovementSettings: "移动"
+
+alwaysRun: "总是奔跑"
+alwaysRunDescription: |
+    如果开启, 角色默认是奔跑状态, 否则角色默认是行走状态。
+    shift键可以临时切换状态, 而大小写锁定键会以锁定方式切换状态。
+
+toggleSneak: "切换潜行"
+toggleSneakDescription: |
+    此设置会影响潜行键的行为 (默认绑定到 Ctrl 键)。
+    切换潜行开关还是潜行时按住该键。
+    开启这个选项, 玩家将更容易控制长时间的潜行。
+

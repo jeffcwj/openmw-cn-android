@@ -232,10 +232,15 @@ end
 
 local f = io.open(arg[1], "rb")
 
+local function readInt2()
+	local a, b = byte(f:read(2), 1, 2)
+	return a + b * 0x100
+end
+
 local function readInt4(limit)
 	local a, b, c, d = byte(f:read(4), 1, 4)
-	local v = a + b * 0x100 + c * 0x10000 + d * 0x100000000
-	if limit and v > limit then error(format("ERROR: too large value: %d > %d", v, limit)) end
+	local v = a + b * 0x100 + c * 0x10000 + d * 0x1000000
+	if limit and v > limit then error(format("ERROR: 0x%08X: too large value: %d > %d", f:seek(), v, limit)) end
 	return v
 end
 
@@ -244,7 +249,7 @@ local stringTags = {
 }
 local binaryTags = {
 	"ACID", "BYDT", "CAST", "COUN", "DATA", "DISP", "DODT", "EFID", "FLAG", "FLTV", "FRMR",
-	"ICNT", "INDX", "INTV", "MGEF", "NAM0", "NAM9", "NPDT",
+	"ICNT", "INDX", "INTV", "MCDT", "MGEF", "NAM0", "NAM9", "NPDT",
 	"RGNC", "SPAW", "STAR", "STBA", "WNAM", "XSCL",
 }
 for _, v in ipairs(stringTags) do stringTags[v] = true end
@@ -286,25 +291,41 @@ WEAP: 485+110+74               -> 485   NAME -> FNAM       武器名
 TOTAL:                            40744
 --]]
 
+local classSize
+local classZeroData
+
 local function readFields(class, posEnd)
+	local largeSize
 	while true do
 		local pos = f:seek()
 		if pos >= posEnd then
 			if pos == posEnd then return end
-			error(format("ERROR: read overflow 0x%8X > 0x%8X", pos, posEnd))
+			error(format("ERROR: read overflow 0x%X > 0x%X", pos, posEnd))
 		end
 		local tag = f:read(4)
-		if not tag:find "^[%u%d_]+$" then error(format("ERROR: %08X: unknown tag: %q", pos, tag)) end
-		write(RAW and format(" %s.%s ", class, tag) or format("%08X: %s.%s ", pos, class, tag))
-		local n = readInt4(0x100000)
-		local s = f:read(n)
-		if not binaryTags[tag] and (stringTags[tag] or isStr(s)) then
-			write("\"", addEscape(s), "\"\n") -- :gsub("%z$", "")
+		if not tag:find "^[%u%d_<=>?:;@%z\x01-\x14][%u%d_]+$" then error(format("ERROR: 0x%08X: unknown tag: %q", pos, tag)) end
+		tag = tag:gsub("^[%z\x01-\x14]", function(s) return string.char(s:byte(1) + 0x61) end)
+		if tag == "XXXX" then
+			local n = readInt2()
+			if n ~= 4 then error(format("ERROR: 0x%08X: invalid size for XXXX", pos)) end
+			largeSize = readInt4(0x10000000)
 		else
-			for i = 1, n do
-				write(format(i == 1 and "[%02X" or " %02X", byte(s, i)))
+			write(RAW and format(" %s.%s ", class, tag) or format("%08X: %s.%s ", pos, class, tag))
+			local n = classSize == 8 and readInt4(0x10000000) or readInt2()
+			if largeSize then
+				if n ~= 0 then error(format("ERROR: 0x%08X: invalid size after XXXX", pos)) end
+				n = largeSize
 			end
-			write "]\n"
+			largeSize = nil
+			local s = f:read(n)
+			if not binaryTags[tag] and (stringTags[tag] or isStr(s)) then
+				write("\"", addEscape(s), "\"\n") -- :gsub("%z$", "")
+			else
+				for i = 1, n do
+					write(format(i == 1 and "[%02X" or " %02X", byte(s, i)))
+				end
+				write(n > 0 and "]\n" or "[]\n")
+			end
 		end
 	end
 end
@@ -315,22 +336,44 @@ local function readClasses(posEnd)
 		local pos = f:seek()
 		if pos >= posEnd then
 			if pos == posEnd then return end
-			error(format("ERROR: read overflow 0x%8X > 0x%8X", pos, posEnd))
+			error(format("ERROR: read overflow 0x%X > 0x%X", pos, posEnd))
 		end
 		local tag = f:read(4)
-		if not tag:find "^[%u%d_]+$" then error(format("ERROR: %08X: unknown tag: %q", pos, tag)) end
+		if not tag:find "^[%u%d_<=>?:;@%z\x01-\x14][%u%d_]+$" then error(format("ERROR: 0x%08X: unknown tag: %q", pos, tag)) end
+		tag = tag:gsub("^[%z\x01-\x14]", function(s) return string.char(s:byte(1) + 0x61) end)
+		if not classSize then
+			local p = f:seek()
+			classSize = tag == "TES3" and 8 or (f:read(8):byte(5) == 1 and 12 or 16)
+			classZeroData = ("\0"):rep(classSize)
+			f:seek("set", p)
+		end
 		count[tag] = (count[tag] or 0) + 1
-		write(RAW and format("-%s", tag) or format("%08X:-%s", pos, tag))
-		local n = readInt4(0x1000000)
-		local b = f:read(8)
-		if b ~= "\0\0\0\0\0\0\0\0" then
-			for j = 1, 8 do
+		local pre = tag == "GRUP" and "{" or "-"
+		write(RAW and format("%s%s", pre, tag) or format("%08X:%s%s", pos, pre, tag))
+		local n = readInt4(0x10000000)
+		local b = f:read(classSize)
+		if b ~= classZeroData then
+			for j = 1, classSize do
 				write(format(j == 1 and " [%02X" or " %02X", byte(b, j)))
 			end
 			write "]"
 		end
 		write "\n"
-		readFields(tag, f:seek() + n)
+		if tag == "GRUP" then
+			readClasses(pos + n)
+			write(RAW and format("}\n") or format("%08X:}\n", f:seek()))
+		else
+			if math.floor(b:byte(3) / 4) % 2 == 1 then
+				write(RAW and format(" ") or format("%08X: ", f:seek()))
+				b = f:read(n)
+				for i = 1, n do
+					write(format(i == 1 and "[%02X" or " %02X", byte(b, i)))
+				end
+				write(n > 0 and "]\n" or "[]\n")
+			else
+				readFields(tag, f:seek() + n)
+			end
+		end
 	end
 end
 

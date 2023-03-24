@@ -82,9 +82,23 @@ local function writeInt4(v)
 	f:write(char(v % 0x100, floor(v / 0x100) % 0x100, floor(v / 0x10000) % 0x100, floor(v / 0x1000000)))
 end
 
+local function writeInt2(v, tag)
+	if v <= 0xffff then
+		f:write(char(v % 0x100, floor(v / 0x100) % 0x100))
+	else
+		f:seek("cur", -4)
+		f:write "XXXX\x04\0"
+		writeInt4(v)
+		f:write(tag, "\0\0")
+	end
+end
+
 local t = clock()
 local i = 1
 local ss, q
+local groups = {}
+local ver
+local tag, param
 for line in io.lines(arg[1]) do
 	if ss then
 		local isEnd, s = readString(line, 1)
@@ -92,21 +106,33 @@ for line in io.lines(arg[1]) do
 		if isEnd then
 			s = concat(ss)
 			ss = nil
-			writeInt4(#s)
+			if ver == 3 then
+				writeInt4(#s)
+			else
+				writeInt2(#s, tag)
+			end
 			f:write(s)
 		else
 			ss[#ss + 1] = "\r\n"
 		end
 	else
 		line = line:gsub("^%x*:%s*", "")
-		local tag, param = line:match "^[%u%d_][%u%d_][%u%d_][%u%d_]%.([%u%d_][%u%d_][%u%d_][%u%d_])%s*(.+)$"
-		if tag then
-			f:write(tag)
+		tag, param = line:match "^[%w_<=>?:;@][%u%d_][%u%d_][%u%d_]%.([%w_<=>?:;@][%u%d_][%u%d_][%u%d_])%s*(.+)$"
+		if not tag then param = line:match "^%s*(%[[%w ]*%])%s*$" end
+		if param then
+			if tag then
+				tag = tag:gsub("%l", function(s) return string.char(s:byte(1) - 0x61) end)
+				f:write(tag)
+			end
 			local c = param:sub(1, 1)
 			if c == "\"" then
 				local isEnd, s = readString(param, 2)
 				if isEnd == true then
-					writeInt4(#s)
+					if ver == 3 then
+						writeInt4(#s)
+					else
+						writeInt2(#s, tag)
+					end
 					f:write(s)
 				elseif isEnd == false then
 					ss = { s, "\r\n" }
@@ -119,7 +145,13 @@ for line in io.lines(arg[1]) do
 					if e ~= "" then error("ERROR: invalid binary end at line " .. i) end
 					s = readBinary(s)
 					if s then
-						writeInt4(#s)
+						if tag then
+							if ver == 3 then
+								writeInt4(#s)
+							else
+								writeInt2(#s, tag)
+							end
+						end
 						f:write(s)
 					else
 						error("ERROR: invalid binary at line " .. i)
@@ -131,24 +163,34 @@ for line in io.lines(arg[1]) do
 				error("ERROR: invalid param at line " .. i)
 			end
 		else
-			tag, param = line:match "^%-([%u%d_][%u%d_][%u%d_][%u%d_])%s*(.*)$"
+			local pre
+			pre, tag, param = line:match "^([%-{])([%w_<=>?:;@][%u%d_?][%u%d_?][%u%d_?])%s*(.*)$"
 			if tag then
+				tag = tag:gsub("%l", function(s) return string.char(s:byte(1) - 0x61) end)
 				if q then
 					local p = f:seek()
 					f:seek("set", q)
-					writeInt4(p - q - 12)
+					writeInt4(p - q - ver * 4)
 					f:seek("set", p)
 					q = nil
 				end
+				if not ver then
+					ver = tag == "TES3" and 3 or 4
+				end
 				f:write(tag)
-				q = f:seek()
+				if pre == "{" then
+					groups[#groups + 1] = f:seek()
+				else
+					q = f:seek()
+				end
 				if param ~= "" then
 					local s, e = param:match "^%[(.-)%]%s*(.*)$"
 					if s then
 						if e ~= "" then error("ERROR: invalid class param end at line " .. i) end
 						s = readBinary(s)
 						if s then
-							if #s ~= 8 then error("ERROR: invalid class param length at line " .. i) end
+							if tag == "TES4" and s:byte(1) ~= 1 then ver = 5 end
+							if #s ~= ver * 4 - 4 then error("ERROR: invalid class param length at line " .. i) end
 							writeInt4(#s)
 							f:write(s)
 						else
@@ -160,6 +202,13 @@ for line in io.lines(arg[1]) do
 				else
 					f:write "\0\0\0\0\0\0\0\0\0\0\0\0"
 				end
+			elseif line:match "^}" and #groups > 0 then
+				local p = f:seek()
+				local b = groups[#groups]
+				groups[#groups] = nil
+				f:seek("set", b)
+				writeInt4(p - b + 4)
+				f:seek("set", p)
 			else
 				error("ERROR: invalid header at line " .. i)
 			end
@@ -173,11 +222,15 @@ end
 if q then
 	local p = f:seek()
 	f:seek("set", q)
-	writeInt4(p - q - 12)
+	writeInt4(p - q - ver * 4)
 end
 
 f:close()
 io.stderr:write("done! ", clock() - t, " seconds\n")
+
+if #groups > 0 then
+	error("ERROR: " .. #groups .. " group(s) not closed")
+end
 
 if badGBK and next(badGBK) and arg[1]:find "tes3cn" then
 	io.stderr:write "chars not in GB2312: ["

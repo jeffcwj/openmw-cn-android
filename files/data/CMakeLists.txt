@@ -25,9 +25,6 @@ set(BUILTIN_DATA_FILES
 
     # Month names and date formatting
     l10n/Calendar/en.yaml
-    l10n/Calendar/ru.yaml
-    l10n/Calendar/sv.yaml
-    l10n/Calendar/fr.yaml
     l10n/Calendar/zh_CN.yaml
 
     # Generic UI messages that can be reused by mods
@@ -49,6 +46,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWControls/en.yaml
     l10n/OMWControls/ru.yaml
     l10n/OMWControls/sv.yaml
+    l10n/OMWControls/zh_CN.yaml
 
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/de.yaml
@@ -64,6 +62,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWShaders/ru.yaml
     l10n/OMWShaders/sv.yaml
     l10n/OMWShaders/fr.yaml
+    l10n/OMWShaders/zh_CN.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua
