@@ -169,25 +169,51 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
+        auto [translation, rotation, scale] = GetCurrentTransformation(nv);
+
+        if (rotation)
+        {
+            osg::Quat lerpedRot;
+            lerpedRot.slerp(1.0f, node->getmRotation(), *rotation);
+            node->setRotation(lerpedRot);
+        }
+        else
+        {
+            //This is necessary to prevent first person animation glitching out
+            node->setRotation(node->mRotationScale);
+        }
+
+        if (translation)
+            node->setTranslation(*translation);
+
+        if (scale)
+            node->setScale(*scale);         
+               
+
+        traverse(node, nv);
+    }
+
+    KeyframeController::KfTransform KeyframeController::GetCurrentTransformation(osg::NodeVisitor* nv)
+    {
+        KfTransform out;
+
         if (hasInput())
         {
             float time = getInputValue(nv);
 
             if (!mRotations.empty())
-                node->setRotation(mRotations.interpKey(time));
+                out.rotation = mRotations.interpKey(time);
             else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-                node->setRotation(getXYZRotation(time));
-            else
-                node->setRotation(node->mRotationScale);
+                out.rotation = getXYZRotation(time);
 
             if (!mTranslations.empty())
-                node->setTranslation(mTranslations.interpKey(time));
+                out.translation = mTranslations.interpKey(time);
 
             if (!mScales.empty())
-                node->setScale(mScales.interpKey(time));
+                out.scale = mScales.interpKey(time);
         }
 
-        traverse(node, nv);
+        return out;
     }
 
     GeomMorpherController::GeomMorpherController() {}

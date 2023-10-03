@@ -16,6 +16,16 @@ namespace NifOsg
     {
     }
 
+    osg::Matrix MatrixTransform::NifToOsgMtx(Nif::Matrix3 nifMtx) {
+        osg::Matrix osgMtx;
+
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                osgMtx(i, j) = nifMtx.mValues[j][i]; // NB: column/row major difference
+
+        return osgMtx;
+    }
+
     void MatrixTransform::setScale(float scale)
     {
         // Update the decomposed scale.
@@ -62,6 +72,15 @@ namespace NifOsg
         _inverseDirty = true;
         dirtyBound();
     }
+
+    osg::Quat MatrixTransform::getmRotation() {
+        
+        osg::Matrix osgRotMtx = NifToOsgMtx(mRotationScale);     
+        return osgRotMtx.getRotate();
+
+    }
+
+    
 
     void MatrixTransform::setTranslation(const osg::Vec3f& translation)
     {

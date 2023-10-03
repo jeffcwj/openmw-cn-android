@@ -24,6 +24,8 @@ namespace NifOsg
         // we store the scale and rotation components separately here.
         float mScale{ 0.f };
         Nif::Matrix3 mRotationScale;
+        osg::Quat mRotation;
+        
 
         // Utility methods to transform the node and keep these components up-to-date.
         // The matrix's components should not be overridden manually or using preMult/postMult
@@ -31,7 +33,10 @@ namespace NifOsg
         void setScale(float scale);
         void setRotation(const osg::Quat& rotation);
         void setRotation(const Nif::Matrix3& rotation);
+        osg::Quat getmRotation();
         void setTranslation(const osg::Vec3f& translation);
+
+        osg::Matrix NifToOsgMtx(Nif::Matrix3);
     };
 
 }
