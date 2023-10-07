@@ -4,12 +4,12 @@
 #include "../mwworld/movementdirection.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include "animationblendingcontroller.hpp"
 #include <components/misc/strings/algorithm.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
-#include "animationblendingcontroller.hpp"
 
 #include <span>
 #include <unordered_map>
@@ -197,7 +197,7 @@ namespace MWRender
 
             typedef std::shared_ptr<float> TimePtr;
             TimePtr mTime;
-            float mSpeedMult;            
+            float mSpeedMult;
 
             bool mPlaying;
             bool mLoopingEnabled;
@@ -216,7 +216,7 @@ namespace MWRender
                 , mLoopStopTime(0.0f)
                 , mStopTime(0.0f)
                 , mTime(new float)
-                , mSpeedMult(1.0f)                
+                , mSpeedMult(1.0f)
                 , mPlaying(false)
                 , mLoopingEnabled(true)
                 , mLoopCount(0)
@@ -265,7 +265,8 @@ namespace MWRender
         std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> mActiveControllers;
 
         // Keep track of the animation controllers for easy access
-        std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimationBlendingController>>> mAnimBlendControllers;
+        std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimationBlendingController>>>
+            mAnimBlendControllers;
 
         std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
@@ -418,7 +419,7 @@ namespace MWRender
         void setAccumulation(const osg::Vec3f& accum);
 
         /** Plays an animation.
-         * Creates or updates AnimationStates to represent and manage animation playback.          
+         * Creates or updates AnimationStates to represent and manage animation playback.
          * \param groupname Name of the animation group to play.
          * \param priority Priority of the animation. The animation will play on
          *                 bone groups that don't have another animation set of a

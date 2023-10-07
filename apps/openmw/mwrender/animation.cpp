@@ -779,8 +779,7 @@ namespace MWRender
             return;
 
         Log(Debug::Info) << "Please play: " << groupname << " mask: " << blendMask
-                         << " priority: " << priority[(BoneGroup)blendMask] << " start stop: " << start << " "
-                         << stop;
+                         << " priority: " << priority[(BoneGroup)blendMask] << " start stop: " << start << " " << stop;
 
         if (groupname.empty())
         {
@@ -788,17 +787,18 @@ namespace MWRender
             return;
         }
 
-        AnimStateMap::iterator foundstateiter = mStates.find(groupname);        
+        AnimStateMap::iterator foundstateiter = mStates.find(groupname);
         if (foundstateiter != mStates.end())
         {
-            foundstateiter->second.mPriority = priority;                       
+            foundstateiter->second.mPriority = priority;
         }
 
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
         {
             if (stateiter->second.mPriority == priority && stateiter->first != groupname)
-                //This MIGH be a problem since we want old states to be still running so the AnimBlendingController can blend them properly
+                // This MIGH be a problem since we want old states to be still running so the AnimBlendingController can
+                // blend them properly
                 mStates.erase(stateiter++);
             else
                 ++stateiter;
@@ -806,10 +806,10 @@ namespace MWRender
 
         if (foundstateiter != mStates.end())
         {
-            resetActiveGroups(); 
+            resetActiveGroups();
             return;
-        }        
-        
+        }
+
         AnimState state;
 
         /* Look in reverse; last-inserted source has priority. */
@@ -825,7 +825,7 @@ namespace MWRender
                 state.mPlaying = (state.getTime() < state.mStopTime);
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
-                state.mAutoDisable = autodisable;   
+                state.mAutoDisable = autodisable;
                 state.groupname = groupname;
                 state.startKey = start;
                 mStates[std::string{ groupname }] = state;
@@ -952,7 +952,7 @@ namespace MWRender
     }
 
     void Animation::resetActiveGroups()
-    {       
+    {
         // remove all previous external controllers from the scene graph
         for (auto it = mActiveControllers.begin(); it != mActiveControllers.end(); ++it)
         {
@@ -963,7 +963,7 @@ namespace MWRender
             it->second->setNestedCallback(nullptr);
         }
 
-        mActiveControllers.clear();        
+        mActiveControllers.clear();
 
         mAccumCtrl = nullptr;
 
@@ -973,13 +973,13 @@ namespace MWRender
 
             AnimStateMap::const_iterator state = mStates.begin();
             for (; state != mStates.end(); ++state)
-            {                
+            {
                 if (!state->second.blendMaskContains(blendMask))
                     continue;
 
                 if (active == mStates.end()
                     || active->second.mPriority[(BoneGroup)blendMask] < state->second.mPriority[(BoneGroup)blendMask])
-                    active = state;                   
+                    active = state;
             }
 
             mAnimationTimePtr[blendMask]->setTimePtr(
@@ -996,7 +996,7 @@ namespace MWRender
                 {
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
-                    
+
                     // Update an existing animation blending controller or create a new one
                     osg::ref_ptr<AnimationBlendingController> animController;
 
@@ -1009,17 +1009,18 @@ namespace MWRender
                             break;
                         }
                     }
-                    
+
                     if (!animController)
                     {
-                        animController = osg::ref_ptr<AnimationBlendingController>(new AnimationBlendingController(it->second, stateData));
-                        mAnimBlendControllers.emplace_back(node, animController);   
+                        animController = osg::ref_ptr<AnimationBlendingController>(
+                            new AnimationBlendingController(it->second, stateData));
+                        mAnimBlendControllers.emplace_back(node, animController);
                     }
 
                     it->second->time = active->second.mTime;
 
                     osg::Callback* callback = animController->getAsCallback();
-                    //osg::Callback* callback = it->second->getAsCallback();
+                    // osg::Callback* callback = it->second->getAsCallback();
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 

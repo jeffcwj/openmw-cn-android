@@ -16,7 +16,8 @@ namespace NifOsg
     {
     }
 
-    osg::Matrix MatrixTransform::NifToOsgMtx(Nif::Matrix3 nifMtx) {
+    osg::Matrix MatrixTransform::NifToOsgMtx(Nif::Matrix3 nifMtx)
+    {
         osg::Matrix osgMtx;
 
         for (int i = 0; i < 3; ++i)
@@ -73,14 +74,12 @@ namespace NifOsg
         dirtyBound();
     }
 
-    osg::Quat MatrixTransform::getmRotation() {
-        
-        osg::Matrix osgRotMtx = NifToOsgMtx(mRotationScale);     
+    osg::Quat MatrixTransform::getmRotation()
+    {
+
+        osg::Matrix osgRotMtx = NifToOsgMtx(mRotationScale);
         return osgRotMtx.getRotate();
-
     }
-
-    
 
     void MatrixTransform::setTranslation(const osg::Vec3f& translation)
     {
@@ -91,7 +90,8 @@ namespace NifOsg
         dirtyBound();
     }
 
-    osg::Vec3f MatrixTransform::getTranslation() {
+    osg::Vec3f MatrixTransform::getTranslation()
+    {
         return _matrix.getTrans();
     }
 }

@@ -25,7 +25,6 @@ namespace NifOsg
         float mScale{ 0.f };
         Nif::Matrix3 mRotationScale;
         osg::Quat mRotation;
-        
 
         // Utility methods to transform the node and keep these components up-to-date.
         // The matrix's components should not be overridden manually or using preMult/postMult

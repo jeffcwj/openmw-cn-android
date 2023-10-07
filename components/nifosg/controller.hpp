@@ -235,16 +235,14 @@ namespace NifOsg
 
         META_Object(NifOsg, KeyframeController)
 
-        osg::Vec3f getTranslation(float time) const override;        
-        osg::Callback* getAsCallback() override { return this; } 
+        osg::Vec3f getTranslation(float time) const override;
+        osg::Callback* getAsCallback() override { return this; }
 
         KfTransform GetCurrentTransformation(osg::NodeVisitor* nv) override;
 
         void operator()(NifOsg::MatrixTransform*, osg::NodeVisitor*);
 
     private:
-        
-
         QuaternionInterpolator mRotations;
 
         FloatInterpolator mXRotations;

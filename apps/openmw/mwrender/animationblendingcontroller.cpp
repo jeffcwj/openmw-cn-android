@@ -1,21 +1,21 @@
 #include "animationblendingcontroller.hpp"
 
-
-
 namespace MWRender
 {
 
-    AnimationBlendingController::AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState)
+    AnimationBlendingController::AnimationBlendingController(
+        osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState)
     {
         SetKeyframeTrack(keyframeTrack, newState);
-        //Log(Debug::Info) << "AnimationBlendingController created for: " << keyframeTrack-> getName();
+        // Log(Debug::Info) << "AnimationBlendingController created for: " << keyframeTrack-> getName();
     }
 
     void AnimationBlendingController::SetKeyframeTrack(osg::ref_ptr<KeyframeController> kft, AnimStateData newState)
     {
         if (newState.groupname == "INIT_STATE")
             return;
-        if (newState.groupname != animState.groupname || newState.startKey != animState.startKey || kft != keyframeTrack)
+        if (newState.groupname != animState.groupname || newState.startKey != animState.startKey
+            || kft != keyframeTrack)
         {
             // Animation have changed, start blending!
             Log(Debug::Info) << "Animation change to: " << newState.groupname << " " << newState.startKey << " ";
@@ -27,18 +27,18 @@ namespace MWRender
     }
 
     osg::Vec3f AnimationBlendingController::Vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B)
-    {        
+    {
         return A + (B - A) * t;
     };
 
     void AnimationBlendingController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
-        auto [translation, rotation, scale] = keyframeTrack->GetCurrentTransformation(nv);  
+        auto [translation, rotation, scale] = keyframeTrack->GetCurrentTransformation(nv);
         float duration = 0.4;
 
-        //Log(Debug::Info) << "ABC Animating node: " << node->getName();
-        //Log(Debug::Info) << "Last TS: " << lastTimeStamp;
-        
+        // Log(Debug::Info) << "ABC Animating node: " << node->getName();
+        // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
+
         float time = nv->getFrameStamp()->getSimulationTime();
         if (lastTimeStamp == 0.0f)
         {
@@ -48,7 +48,7 @@ namespace MWRender
             lastTimeStamp = time;
         }
 
-        interpFactor = std::min((time-blendStartTime)/duration, 1.0f);
+        interpFactor = std::min((time - blendStartTime) / duration, 1.0f);
         interpFactor = springOutWeak(interpFactor);
 
         // Interpolate node's rotation
@@ -57,7 +57,7 @@ namespace MWRender
             osg::Quat lerpedRot;
             lerpedRot.slerp(interpFactor, blendStartRot, *rotation);
             node->setRotation(lerpedRot);
-            //node->setRotation(*rotation);
+            // node->setRotation(*rotation);
         }
         else
         {
@@ -71,15 +71,14 @@ namespace MWRender
             osg::Vec3f lerpedTrans = Vec3fLerp(interpFactor, blendStartTrans, *translation);
             node->setTranslation(lerpedTrans);
         }
-            
 
         // Update node's scale
         if (scale)
-            node->setScale(*scale);    
+            node->setScale(*scale);
 
         lastTimeStamp = time;
 
         traverse(node, nv);
     }
-    
+
 }
