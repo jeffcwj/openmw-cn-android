@@ -11,6 +11,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"
+#include <components/debug/debuglog.hpp>
 
 namespace NifOsg
 {
@@ -169,17 +170,17 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
+        Log(Debug::Info) << "KfC Animating node: " << node->getName();
+        
         auto [translation, rotation, scale] = GetCurrentTransformation(nv);
 
         if (rotation)
-        {
-            osg::Quat lerpedRot;
-            lerpedRot.slerp(1.0f, node->getmRotation(), *rotation);
-            node->setRotation(lerpedRot);
+        {                
+            node->setRotation(*rotation);
         }
         else
         {
-            //This is necessary to prevent first person animation glitching out
+            // This is necessary to prevent first person animations glitching out due to RotationController
             node->setRotation(node->mRotationScale);
         }
 
@@ -187,8 +188,7 @@ namespace NifOsg
             node->setTranslation(*translation);
 
         if (scale)
-            node->setScale(*scale);         
-               
+            node->setScale(*scale);       
 
         traverse(node, nv);
     }
@@ -200,6 +200,7 @@ namespace NifOsg
         if (hasInput())
         {
             float time = getInputValue(nv);
+            //float time = *this->time;
 
             if (!mRotations.empty())
                 out.rotation = mRotations.interpKey(time);

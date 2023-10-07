@@ -35,6 +35,7 @@ namespace NifOsg
         void setRotation(const Nif::Matrix3& rotation);
         osg::Quat getmRotation();
         void setTranslation(const osg::Vec3f& translation);
+        osg::Vec3f getTranslation();
 
         osg::Matrix NifToOsgMtx(Nif::Matrix3);
     };

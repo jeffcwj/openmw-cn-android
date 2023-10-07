@@ -1,4 +1,5 @@
 #include "animation.hpp"
+#include <csignal>
 
 #include <algorithm>
 #include <iomanip>
@@ -807,10 +808,11 @@ namespace MWRender
         {
             resetActiveGroups(); 
             return;
-        }
+        }        
         
-        /* Look in reverse; last-inserted source has priority. */
         AnimState state;
+
+        /* Look in reverse; last-inserted source has priority. */
         AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
         for (; iter != mAnimSources.rend(); ++iter)
         {
@@ -823,7 +825,9 @@ namespace MWRender
                 state.mPlaying = (state.getTime() < state.mStopTime);
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
-                state.mAutoDisable = autodisable;                
+                state.mAutoDisable = autodisable;   
+                state.groupname = groupname;
+                state.startKey = start;
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
@@ -959,8 +963,7 @@ namespace MWRender
             it->second->setNestedCallback(nullptr);
         }
 
-        mActiveControllers.clear();
-        mAnimBlendControllers.clear();
+        mActiveControllers.clear();        
 
         mAccumCtrl = nullptr;
 
@@ -986,6 +989,7 @@ namespace MWRender
             if (active != mStates.end())
             {
                 std::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                AnimationBlendingController::AnimStateData stateData = active->second.asAnimStateData();
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin();
                      it != animsrc->mControllerMap[blendMask].end(); ++it)
@@ -993,11 +997,29 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
                     
-                    // This should be a pointer instead
-                    osg::ref_ptr<AnimationBlendingController> animController(new AnimationBlendingController(it->second));
-                    mAnimBlendControllers.emplace_back(node, animController);
+                    // Update an existing animation blending controller or create a new one
+                    osg::ref_ptr<AnimationBlendingController> animController;
+
+                    for (auto& el : mAnimBlendControllers)
+                    {
+                        if (el.first == node)
+                        {
+                            animController = el.second;
+                            animController->SetKeyframeTrack(it->second, stateData);
+                            break;
+                        }
+                    }
+                    
+                    if (!animController)
+                    {
+                        animController = osg::ref_ptr<AnimationBlendingController>(new AnimationBlendingController(it->second, stateData));
+                        mAnimBlendControllers.emplace_back(node, animController);   
+                    }
+
+                    it->second->time = active->second.mTime;
 
                     osg::Callback* callback = animController->getAsCallback();
+                    //osg::Callback* callback = it->second->getAsCallback();
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 

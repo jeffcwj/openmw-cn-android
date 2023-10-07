@@ -90,4 +90,8 @@ namespace NifOsg
         _inverseDirty = true;
         dirtyBound();
     }
+
+    osg::Vec3f MatrixTransform::getTranslation() {
+        return _matrix.getTrans();
+    }
 }
