@@ -450,6 +450,8 @@ namespace MWRender
         ControllerMap mControllerMap[Animation::sNumBlendMasks];
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
+
+        std::vector<AnimationBlendingController::AnimBlendRule> blendingRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -608,21 +610,42 @@ namespace MWRender
 
             if (Misc::getFileExtension(name) == "kf")
             {
-                /*std::string configname = name;
-                Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
+                // Parsing YAML file into a set of rule objects
+                // std::string configname = name;
+                // Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
 
-                std::string source(std::istreambuf_iterator<char>(*mResourceSystem->getVFS()->get(configname)), {});
-                YAML::Node root = YAML::Load(source);
+                // std::string source(std::istreambuf_iterator<char>(*mResourceSystem->getVFS()->get(configname)), {});
+                // YAML::Node root = YAML::Load(source);
 
-                if (root["blending_rules"])
-                {
-                    for (const auto& it : root["blending_rules"])
-                    {
-                        Log(Debug::Info) << "Rule: " << it.second;
-                    }
-                }*/
+                // std::vector<AnimationBlendingController::AnimBlendRule> rules;
 
-                addSingleAnimSource(name, baseModel);
+                // if (root["blending_rules"])
+                //{
+                //     for (const auto& it : root["blending_rules"])
+                //     {
+                //         auto fromNames
+                //             =
+                //             AnimationBlendingController::AnimBlendRule::ParseFullName(it["from"].as<std::string>());
+                //         auto toNames
+                //             = AnimationBlendingController::AnimBlendRule::ParseFullName(it["to"].as<std::string>());
+
+                //        // TO DO, do this through a proper constructor to ensure that fields have to be filled
+                //        AnimationBlendingController::AnimBlendRule ruleObj = {
+                //            .fromGroup = fromNames.first,
+                //            .fromKey = fromNames.second,
+                //            .toGroup = toNames.first,
+                //            .toKey = toNames.second,
+                //            .duration = it["duration"].as<float>(),
+                //            .easing = it["easing"].as<std::string>(),
+                //        };
+
+                //        rules.emplace_back(ruleObj);
+                //    }
+                //}
+                ////////////
+
+                auto animSrc = addSingleAnimSource(name, baseModel);
+                /*animSrc->blendingRules = rules;*/
             }
         }
     }
@@ -640,17 +663,18 @@ namespace MWRender
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
-    void Animation::addSingleAnimSource(const std::string& kfname, const std::string& baseModel)
+    std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
+        const std::string& kfname, const std::string& baseModel)
     {
         if (!mResourceSystem->getVFS()->exists(kfname))
-            return;
+            return nullptr;
 
         auto animsrc = std::make_shared<AnimSource>();
         animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty()
             || animsrc->mKeyframes->mKeyframeControllers.empty())
-            return;
+            return nullptr;
 
         const NodeMap& nodeMap = getNodeMap();
         const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
@@ -678,7 +702,7 @@ namespace MWRender
             animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
         }
 
-        mAnimSources.push_back(std::move(animsrc));
+        mAnimSources.push_back(animsrc);
 
         for (const std::string& group : mAnimSources.back()->getTextKeys().getGroups())
             mSupportedAnimations.insert(group);
@@ -710,6 +734,8 @@ namespace MWRender
                     break;
             }
         }
+
+        return animsrc;
     }
 
     void Animation::clearAnimSources()
@@ -795,8 +821,9 @@ namespace MWRender
         if (!mObjectRoot || mAnimSources.empty())
             return;
 
-        Log(Debug::Info) << "Please play: " << groupname << " mask: " << blendMask
-                         << " priority: " << priority[(BoneGroup)blendMask] << " start stop: " << start << " " << stop;
+        /*Log(Debug::Info) << "Please play: " << groupname << " mask: " << blendMask
+                         << " priority: " << priority[(BoneGroup)blendMask] << " start stop: " << start << " " <<
+           stop;*/
 
         if (groupname.empty())
         {
@@ -1020,12 +1047,12 @@ namespace MWRender
                     if (mAnimBlendControllers.contains(node))
                     {
                         animController = mAnimBlendControllers[node];
-                        animController->SetKeyframeTrack(it->second, stateData);
+                        animController->SetKeyframeTrack(it->second, stateData, animsrc->blendingRules);
                     }
                     else
                     {
                         animController = osg::ref_ptr<AnimationBlendingController>(
-                            new AnimationBlendingController(it->second, stateData));
+                            new AnimationBlendingController(it->second, stateData, animsrc->blendingRules));
 
                         mAnimBlendControllers[node] = animController;
                     }

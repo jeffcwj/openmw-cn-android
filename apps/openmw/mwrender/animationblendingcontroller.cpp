@@ -4,16 +4,23 @@
 
 namespace MWRender
 {
+    using AnimBlendRule = AnimationBlendingController::AnimBlendRule;
+    using AnimStateData = AnimationBlendingController::AnimStateData;
 
     AnimationBlendingController::AnimationBlendingController(
-        osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState)
+        osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState, std::vector<AnimBlendRule> blendRules)
     {
-        SetKeyframeTrack(keyframeTrack, newState);
+        SetKeyframeTrack(keyframeTrack, newState, blendRules);
         // Log(Debug::Info) << "AnimationBlendingController created for: " << keyframeTrack-> getName();
     }
 
-    void AnimationBlendingController::SetKeyframeTrack(osg::ref_ptr<KeyframeController> kft, AnimStateData newState)
+    void AnimationBlendingController::SetKeyframeTrack(
+        osg::ref_ptr<KeyframeController> kft, AnimStateData newState, std::vector<AnimBlendRule> blendRules)
     {
+        // Default blend settings
+        blendDuration = 0.25;
+        easingFn = &Easings::sineOut;
+
         if (newState.groupname == "INIT_STATE")
             return;
         if (newState.groupname != animState.groupname || newState.startKey != animState.startKey
@@ -21,6 +28,12 @@ namespace MWRender
         {
             // Animation have changed, start blending!
             Log(Debug::Info) << "Animation change to: " << newState.groupname << " " << newState.startKey << " ";
+            auto blendRule = FindBlendingRule(blendRules, animState, newState);
+            if (blendRule)
+            {
+                blendDuration = blendRule->duration;
+                easingFn = easingFnMap[blendRule->easing];
+            }
             keyframeTrack = kft;
             animState = newState;
             interpFactor = 0.0f;
@@ -37,9 +50,6 @@ namespace MWRender
     {
         auto [translation, rotation, scale] = keyframeTrack->GetCurrentTransformation(nv);
 
-        float duration = 0.4;
-        std::string_view easingFnName = "springOutWeak";
-
         // Log(Debug::Info) << "ABC Animating node: " << node->getName();
         // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
 
@@ -52,9 +62,8 @@ namespace MWRender
             lastTimeStamp = time;
         }
 
-        interpFactor = std::min((time - blendStartTime) / duration, 1.0f);
-        auto fn = easingFnMap[easingFnName];
-        interpFactor = fn(interpFactor);
+        interpFactor = std::min((time - blendStartTime) / blendDuration, 1.0f);
+        interpFactor = easingFn(interpFactor);
 
         // Interpolate node's rotation
         if (rotation)
@@ -86,9 +95,8 @@ namespace MWRender
         traverse(node, nv);
     }
 
-    std::optional<AnimationBlendingController::AnimBlendRule> FindBlendingRule(
-        std::vector<AnimationBlendingController::AnimBlendRule> rules,
-        AnimationBlendingController::AnimStateData fromState, AnimationBlendingController::AnimStateData toState)
+    std::optional<AnimBlendRule> AnimationBlendingController::FindBlendingRule(
+        std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState)
     {
         for (auto rule = rules.rbegin(); rule != rules.rend(); ++rule)
         {
@@ -109,9 +117,25 @@ namespace MWRender
             }
 
             if (fromMatch && toMatch)
-                return std::make_optional<AnimationBlendingController::AnimBlendRule>(*rule);
+                return std::make_optional<AnimBlendRule>(*rule);
         }
 
         return std::nullopt;
     }
+
+    std::pair<std::string, std::string> AnimationBlendingController::AnimBlendRule::ParseFullName(std::string full)
+    {
+        std::string group = "";
+        std::string key = "";
+        size_t delimiterInd = full.find(":");
+        if (delimiterInd == std::string::npos)
+            group = full;
+        else
+        {
+            group = full.substr(0, delimiterInd);
+            key = full.substr(delimiterInd);
+        }
+        return std::make_pair(group, key);
+    }
+
 }

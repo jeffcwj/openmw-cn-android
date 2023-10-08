@@ -170,7 +170,7 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
-        Log(Debug::Info) << "KfC Animating node: " << node->getName();
+        /*Log(Debug::Info) << "KfC Animating node: " << node->getName();*/
 
         auto [translation, rotation, scale] = GetCurrentTransformation(nv);
 

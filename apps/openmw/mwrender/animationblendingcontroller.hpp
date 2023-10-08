@@ -3,6 +3,7 @@
 
 #include <map>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 #include <components/debug/debuglog.hpp>
@@ -87,6 +88,8 @@ namespace MWRender
           public SceneUtil::Controller
     {
     public:
+        typedef float (*EasingFn)(float);
+
         struct AnimStateData
         {
             std::string groupname;
@@ -112,16 +115,19 @@ namespace MWRender
             std::string toKey;
             float duration;
             std::string easing;
+
+            static std::pair<std::string, std::string> ParseFullName(std::string fullName);
         };
 
-        std::optional<AnimBlendRule> FindBlendingRule(
-            std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState);
-
-        AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState);
+        AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
+            std::vector<AnimBlendRule> blendRules);
 
         void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
 
-        void SetKeyframeTrack(osg::ref_ptr<KeyframeController> kft, AnimStateData animState);
+        std::optional<AnimBlendRule> FindBlendingRule(
+            std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState);
+        void SetKeyframeTrack(
+            osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::vector<AnimBlendRule> blendRules);
         osg::Vec3f Vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);
         osg::Callback* getAsCallback() { return this; }
 
@@ -129,6 +135,8 @@ namespace MWRender
         osg::ref_ptr<KeyframeController> keyframeTrack;
 
     private:
+        EasingFn easingFn;
+        float blendDuration;
         float lastTimeStamp;
         float interpFactor;
 
@@ -139,9 +147,7 @@ namespace MWRender
 
         AnimStateData animState;
 
-        typedef float (*EasingFn)(float);
-
-        std::unordered_map<std::string_view, EasingFn> easingFnMap = { { "linear", Easings::linear },
+        std::unordered_map<std::string, EasingFn> easingFnMap = { { "linear", Easings::linear },
             { "sineOut", Easings::sineOut }, { "sineIn", Easings::sineIn }, { "sineInOut", Easings::sineInOut },
             { "cubicOut", Easings::cubicOut }, { "cubicIn", Easings::cubicIn }, { "cubicInOut", Easings::cubicInOut },
             { "quartOut", Easings::quartOut }, { "quartIn", Easings::quartIn }, { "quartInOut", Easings::quartInOut },
