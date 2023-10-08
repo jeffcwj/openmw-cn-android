@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SCENEUTIL_KEYFRAME_HPP
 
 #include <map>
+#include <optional>
 
 #include <osg/Object>
 

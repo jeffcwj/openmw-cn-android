@@ -10,7 +10,9 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
+#include <yaml-cpp/yaml.h>
 
+#include <map>
 #include <span>
 #include <unordered_map>
 #include <unordered_set>
@@ -240,6 +242,14 @@ namespace MWRender
         typedef std::map<std::string, AnimState, std::less<>> AnimStateMap;
         AnimStateMap mStates;
 
+        struct AnimBlendRule
+        {
+            std::string_view from;
+            std::string_view to;
+            std::string_view duration;
+            std::string_view easing;
+        };
+
         typedef std::vector<std::shared_ptr<AnimSource>> AnimSourceList;
         AnimSourceList mAnimSources;
 
@@ -265,8 +275,7 @@ namespace MWRender
         std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> mActiveControllers;
 
         // Keep track of the animation controllers for easy access
-        std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimationBlendingController>>>
-            mAnimBlendControllers;
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimationBlendingController>> mAnimBlendControllers;
 
         std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 

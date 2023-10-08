@@ -605,8 +605,25 @@ namespace MWRender
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
+
             if (Misc::getFileExtension(name) == "kf")
+            {
+                /*std::string configname = name;
+                Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
+
+                std::string source(std::istreambuf_iterator<char>(*mResourceSystem->getVFS()->get(configname)), {});
+                YAML::Node root = YAML::Load(source);
+
+                if (root["blending_rules"])
+                {
+                    for (const auto& it : root["blending_rules"])
+                    {
+                        Log(Debug::Info) << "Rule: " << it.second;
+                    }
+                }*/
+
                 addSingleAnimSource(name, baseModel);
+            }
         }
     }
 
@@ -1000,21 +1017,17 @@ namespace MWRender
                     // Update an existing animation blending controller or create a new one
                     osg::ref_ptr<AnimationBlendingController> animController;
 
-                    for (auto& el : mAnimBlendControllers)
+                    if (mAnimBlendControllers.contains(node))
                     {
-                        if (el.first == node)
-                        {
-                            animController = el.second;
-                            animController->SetKeyframeTrack(it->second, stateData);
-                            break;
-                        }
+                        animController = mAnimBlendControllers[node];
+                        animController->SetKeyframeTrack(it->second, stateData);
                     }
-
-                    if (!animController)
+                    else
                     {
                         animController = osg::ref_ptr<AnimationBlendingController>(
                             new AnimationBlendingController(it->second, stateData));
-                        mAnimBlendControllers.emplace_back(node, animController);
+
+                        mAnimBlendControllers[node] = animController;
                     }
 
                     it->second->time = active->second.mTime;

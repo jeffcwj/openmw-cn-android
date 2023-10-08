@@ -49,7 +49,8 @@ namespace MWRender
         }
 
         interpFactor = std::min((time - blendStartTime) / duration, 1.0f);
-        interpFactor = springOutWeak(interpFactor);
+        auto fn = easingFnMap["springOutWeak"];
+        interpFactor = fn(interpFactor);
 
         // Interpolate node's rotation
         if (rotation)
