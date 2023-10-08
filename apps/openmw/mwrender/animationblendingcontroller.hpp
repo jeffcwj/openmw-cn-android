@@ -2,6 +2,7 @@
 #define OPENMW_MWRENDER_ANIMATIONBLENDINGCONTROLLER_H
 
 #include <map>
+#include <optional>
 #include <unordered_map>
 
 #include <components/debug/debuglog.hpp>
@@ -88,9 +89,9 @@ namespace MWRender
     public:
         struct AnimStateData
         {
-            std::string_view groupname;
-            std::string_view startKey;
-            AnimStateData(std::string_view g, std::string_view k)
+            std::string groupname;
+            std::string startKey;
+            AnimStateData(std::string g, std::string k)
                 : groupname(g)
                 , startKey(k)
             {
@@ -102,6 +103,19 @@ namespace MWRender
             {
             }
         };
+
+        struct AnimBlendRule
+        {
+            std::string fromGroup;
+            std::string fromKey;
+            std::string toGroup;
+            std::string toKey;
+            float duration;
+            std::string easing;
+        };
+
+        std::optional<AnimBlendRule> FindBlendingRule(
+            std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState);
 
         AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState);
 
@@ -121,7 +135,7 @@ namespace MWRender
         float blendStartTime;
         osg::Quat blendStartRot;
         osg::Vec3f blendStartTrans;
-        float blendStartScale;
+        // float blendStartScale;
 
         AnimStateData animState;
 

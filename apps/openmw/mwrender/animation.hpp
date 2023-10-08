@@ -14,6 +14,7 @@
 
 #include <map>
 #include <span>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -234,21 +235,13 @@ namespace MWRender
             bool blendMaskContains(size_t blendMask) const { return (mBlendMask & (1 << blendMask)); }
             AnimationBlendingController::AnimStateData asAnimStateData() const
             {
-                return AnimationBlendingController::AnimStateData(groupname, startKey);
+                return AnimationBlendingController::AnimStateData(std::string(groupname), std::string(startKey));
             }
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }
         };
         typedef std::map<std::string, AnimState, std::less<>> AnimStateMap;
         AnimStateMap mStates;
-
-        struct AnimBlendRule
-        {
-            std::string_view from;
-            std::string_view to;
-            std::string_view duration;
-            std::string_view easing;
-        };
 
         typedef std::vector<std::shared_ptr<AnimSource>> AnimSourceList;
         AnimSourceList mAnimSources;

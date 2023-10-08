@@ -1,4 +1,6 @@
 #include "animationblendingcontroller.hpp"
+#include <string>
+#include <vector>
 
 namespace MWRender
 {
@@ -29,12 +31,14 @@ namespace MWRender
     osg::Vec3f AnimationBlendingController::Vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B)
     {
         return A + (B - A) * t;
-    };
+    }
 
     void AnimationBlendingController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
         auto [translation, rotation, scale] = keyframeTrack->GetCurrentTransformation(nv);
+
         float duration = 0.4;
+        std::string_view easingFnName = "springOutWeak";
 
         // Log(Debug::Info) << "ABC Animating node: " << node->getName();
         // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
@@ -49,7 +53,7 @@ namespace MWRender
         }
 
         interpFactor = std::min((time - blendStartTime) / duration, 1.0f);
-        auto fn = easingFnMap["springOutWeak"];
+        auto fn = easingFnMap[easingFnName];
         interpFactor = fn(interpFactor);
 
         // Interpolate node's rotation
@@ -82,4 +86,32 @@ namespace MWRender
         traverse(node, nv);
     }
 
+    std::optional<AnimationBlendingController::AnimBlendRule> FindBlendingRule(
+        std::vector<AnimationBlendingController::AnimBlendRule> rules,
+        AnimationBlendingController::AnimStateData fromState, AnimationBlendingController::AnimStateData toState)
+    {
+        for (auto rule = rules.rbegin(); rule != rules.rend(); ++rule)
+        {
+            bool fromMatch = false;
+            bool toMatch = false;
+
+            if ((fromState.groupname == rule->fromGroup || rule->fromGroup == "*")
+                && (fromState.startKey == rule->fromKey || rule->fromKey == "*" || rule->fromKey == ""))
+            {
+                fromMatch = true;
+            }
+
+            if ((toState.groupname == rule->toGroup || rule->toGroup == "*"
+                    || (rule->toGroup == "$" && toState.groupname == fromState.groupname))
+                && (toState.startKey == rule->toKey || rule->toKey == "*" || rule->toKey == ""))
+            {
+                toMatch = true;
+            }
+
+            if (fromMatch && toMatch)
+                return std::make_optional<AnimationBlendingController::AnimBlendRule>(*rule);
+        }
+
+        return std::nullopt;
+    }
 }
