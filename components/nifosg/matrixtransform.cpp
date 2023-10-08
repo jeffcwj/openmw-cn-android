@@ -18,7 +18,9 @@ namespace NifOsg
 
     osg::Matrix MatrixTransform::NifToOsgMtx(Nif::Matrix3 nifMtx)
     {
-        osg::Matrix osgMtx;
+        // Identity matrix
+        osg::Matrix osgMtx(
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
 
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
