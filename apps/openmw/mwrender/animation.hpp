@@ -210,8 +210,8 @@ namespace MWRender
             int mBlendMask;
             bool mAutoDisable;
 
-            std::string_view groupname;
-            std::string_view startKey;
+            std::string groupname;
+            std::string startKey;
 
             AnimState()
                 : mStartTime(0.0f)
@@ -235,7 +235,7 @@ namespace MWRender
             bool blendMaskContains(size_t blendMask) const { return (mBlendMask & (1 << blendMask)); }
             AnimationBlendingController::AnimStateData asAnimStateData() const
             {
-                return AnimationBlendingController::AnimStateData(std::string(groupname), std::string(startKey));
+                return AnimationBlendingController::AnimStateData(groupname, startKey);
             }
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }

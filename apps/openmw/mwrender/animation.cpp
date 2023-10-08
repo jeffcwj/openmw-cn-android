@@ -870,8 +870,8 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
-                state.groupname = groupname;
-                state.startKey = start;
+                state.groupname = std::string(groupname);
+                state.startKey = std::string(start);
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
