@@ -7,6 +7,8 @@ namespace MWRender
     using AnimBlendRule = AnimationBlendingController::AnimBlendRule;
     using AnimStateData = AnimationBlendingController::AnimStateData;
 
+    // AnimationBlendingController::AnimationBlendingController() {}
+
     AnimationBlendingController::AnimationBlendingController(
         osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState, std::vector<AnimBlendRule> blendRules)
     {
@@ -14,11 +16,17 @@ namespace MWRender
         // Log(Debug::Info) << "AnimationBlendingController created for: " << keyframeTrack-> getName();
     }
 
+    /*AnimationBlendingController::AnimationBlendingController(
+        const AnimationBlendingController& copy, const osg::CopyOp& copyop)
+        : osg::Object(copy, copyop)
+    {
+    }*/
+
     void AnimationBlendingController::SetKeyframeTrack(
         osg::ref_ptr<KeyframeController> kft, AnimStateData newState, std::vector<AnimBlendRule> blendRules)
     {
         // Default blend settings
-        blendDuration = 0.25;
+        blendDuration = 0.22;
         easingFn = &Easings::sineOut;
 
         if (newState.groupname == "INIT_STATE")
@@ -46,9 +54,21 @@ namespace MWRender
         return A + (B - A) * t;
     }
 
-    void AnimationBlendingController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
+    void AnimationBlendingController::operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
+        // HOW ANIMATIONS WORK: The actual retrieval of the bone transformation based on animation is done by the
+        // KeyframeController. KeyframeController retreives time data (playback position) every frame from a controller
+        // source which is bound to an appropriate AnimationState in Animation.cpp. Animation.cpp ultimately manages
+        // animation playback via updating AnimationState objects and determines when and what should be playing.
         auto [translation, rotation, scale] = keyframeTrack->GetCurrentTransformation(nv);
+
+        // To do - don't cast every frame, cache.
+        auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node);
+
+        // Im not sure what to do here, do we need a fallback that will still somehow apply the animation if its not a
+        // NifOsg::MatrixTransform?
+        if (!mtx)
+            return;
 
         // Log(Debug::Info) << "ABC Animating node: " << node->getName();
         // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
@@ -57,8 +77,8 @@ namespace MWRender
         if (lastTimeStamp == 0.0f)
         {
             blendStartTime = time;
-            blendStartRot = node->getmRotation();
-            blendStartTrans = node->getTranslation();
+            blendStartRot = mtx->getmRotation();
+            blendStartTrans = mtx->getTranslation();
             lastTimeStamp = time;
         }
 
@@ -70,25 +90,25 @@ namespace MWRender
         {
             osg::Quat lerpedRot;
             lerpedRot.slerp(interpFactor, blendStartRot, *rotation);
-            node->setRotation(lerpedRot);
-            // node->setRotation(*rotation);
+            mtx->setRotation(lerpedRot);
+            // mtx->setRotation(*rotation);
         }
         else
         {
             // This is necessary to prevent first person animation glitching out
-            node->setRotation(node->mRotationScale);
+            mtx->setRotation(mtx->mRotationScale);
         }
 
         // Update node's translation
         if (translation)
         {
             osg::Vec3f lerpedTrans = Vec3fLerp(interpFactor, blendStartTrans, *translation);
-            node->setTranslation(lerpedTrans);
+            mtx->setTranslation(lerpedTrans);
         }
 
         // Update node's scale
         if (scale)
-            node->setScale(*scale);
+            mtx->setScale(*scale);
 
         lastTimeStamp = time;
 
@@ -96,7 +116,7 @@ namespace MWRender
     }
 
     std::optional<AnimBlendRule> AnimationBlendingController::FindBlendingRule(
-        std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState)
+        std::vector<AnimBlendRule>& rules, AnimStateData& fromState, AnimStateData& toState)
     {
         for (auto rule = rules.rbegin(); rule != rules.rend(); ++rule)
         {

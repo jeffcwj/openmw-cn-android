@@ -83,9 +83,8 @@ namespace MWRender
         }
     }
 
-    class AnimationBlendingController
-        : public SceneUtil::NodeCallback<AnimationBlendingController, NifOsg::MatrixTransform*>,
-          public SceneUtil::Controller
+    class AnimationBlendingController : public SceneUtil::NodeCallback<AnimationBlendingController>,
+                                        public SceneUtil::Controller
     {
     public:
         typedef float (*EasingFn)(float);
@@ -119,13 +118,19 @@ namespace MWRender
             static std::pair<std::string, std::string> ParseFullName(std::string fullName);
         };
 
+        /*AnimationBlendingController();*/
+
         AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
             std::vector<AnimBlendRule> blendRules);
 
-        void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
+        /*AnimationBlendingController(const AnimationBlendingController& copy, const osg::CopyOp& copyop);*/
+
+        /*META_Object(NifOsg, AnimationBlendingController)*/
+
+        void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
         std::optional<AnimBlendRule> FindBlendingRule(
-            std::vector<AnimBlendRule> rules, AnimStateData fromState, AnimStateData toState);
+            std::vector<AnimBlendRule>& rules, AnimStateData& fromState, AnimStateData& toState);
         void SetKeyframeTrack(
             osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::vector<AnimBlendRule> blendRules);
         osg::Vec3f Vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);

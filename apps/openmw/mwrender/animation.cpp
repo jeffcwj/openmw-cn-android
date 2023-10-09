@@ -611,37 +611,45 @@ namespace MWRender
             if (Misc::getFileExtension(name) == "kf")
             {
                 // Parsing YAML file into a set of rule objects
-                // std::string configname = name;
-                // Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
+                std::string configname = name;
+                Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
 
-                // std::string source(std::istreambuf_iterator<char>(*mResourceSystem->getVFS()->get(configname)), {});
-                // YAML::Node root = YAML::Load(source);
+                auto vfs = mResourceSystem->getVFS();
 
-                // std::vector<AnimationBlendingController::AnimBlendRule> rules;
+                if (vfs->exists(configname))
+                {
+                    std::string source(std::istreambuf_iterator<char>(*vfs->get(configname)), {});
+                    YAML::Node root = YAML::Load(source);
 
-                // if (root["blending_rules"])
-                //{
-                //     for (const auto& it : root["blending_rules"])
-                //     {
-                //         auto fromNames
-                //             =
-                //             AnimationBlendingController::AnimBlendRule::ParseFullName(it["from"].as<std::string>());
-                //         auto toNames
-                //             = AnimationBlendingController::AnimBlendRule::ParseFullName(it["to"].as<std::string>());
+                    std::vector<AnimationBlendingController::AnimBlendRule> rules;
 
-                //        // TO DO, do this through a proper constructor to ensure that fields have to be filled
-                //        AnimationBlendingController::AnimBlendRule ruleObj = {
-                //            .fromGroup = fromNames.first,
-                //            .fromKey = fromNames.second,
-                //            .toGroup = toNames.first,
-                //            .toKey = toNames.second,
-                //            .duration = it["duration"].as<float>(),
-                //            .easing = it["easing"].as<std::string>(),
-                //        };
+                    if (root["blending_rules"])
+                    {
+                        for (const auto& it : root["blending_rules"])
+                        {
+                            if (it["from"] && it["to"] && it["duration"] && it["easing"])
+                            {
+                                auto fromNames = AnimationBlendingController::AnimBlendRule::ParseFullName(
+                                    it["from"].as<std::string>());
+                                auto toNames = AnimationBlendingController::AnimBlendRule::ParseFullName(
+                                    it["to"].as<std::string>());
 
-                //        rules.emplace_back(ruleObj);
-                //    }
-                //}
+                                // TO DO, do this through a proper constructor to ensure that fields have to be filled
+                                AnimationBlendingController::AnimBlendRule ruleObj = {
+                                    .fromGroup = fromNames.first,
+                                    .fromKey = fromNames.second,
+                                    .toGroup = toNames.first,
+                                    .toKey = toNames.second,
+                                    .duration = it["duration"].as<float>(),
+                                    .easing = it["easing"].as<std::string>(),
+                                };
+
+                                rules.emplace_back(ruleObj);
+                            }
+                        }
+                    }
+                }
+
                 ////////////
 
                 auto animSrc = addSingleAnimSource(name, baseModel);
@@ -1810,13 +1818,14 @@ namespace MWRender
         osg::Callback* cb = node->getUpdateCallback();
         while (cb)
         {
-            if (dynamic_cast<SceneUtil::KeyframeController*>(cb))
+            if (dynamic_cast<AnimationBlendingController*>(cb))
             {
                 foundKeyframeCtrl = true;
                 break;
             }
             cb = cb->getNestedCallback();
         }
+        // Note: AnimationBlendingController also does the reset so if one is present - we should add the rotation node
         // Without KeyframeController the orientation will not be reseted each frame, so
         // RotateController shouldn't be used for such nodes.
         if (!foundKeyframeCtrl)
