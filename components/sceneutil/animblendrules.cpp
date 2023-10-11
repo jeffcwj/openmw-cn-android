@@ -50,7 +50,7 @@ namespace SceneUtil
 
     void AnimBlendRules::init(const VFS::Manager* vfs, std::string configpath)
     {
-        if (!vfs->exists(configpath))
+        if (configpath.find_first_of(".yaml") == std::string::npos || !vfs->exists(configpath))
             return;
 
         // Retrieving animation rules
@@ -68,7 +68,8 @@ namespace SceneUtil
         std::vector<BlendRule> rules;
 
         YAML::Node root = YAML::Load(rawYaml);
-        if (!root.IsDefined())
+
+        if (!root.IsDefined() || root.IsNull() || root.IsScalar())
         {
             Log(Debug::Warning) << "Warning: Can't parse YAML file '" << path
                                 << "'. Check that it's a valid YAML file.";

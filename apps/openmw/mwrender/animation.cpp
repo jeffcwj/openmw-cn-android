@@ -706,12 +706,14 @@ namespace MWRender
 
         auto vfs = mResourceSystem->getVFS();
 
+        // TO DO: Activate this only if a flag in Settings::game() is set to true
         std::shared_ptr<AnimBlendRules> globBlendRules;
         std::shared_ptr<AnimBlendRules> blendRules;
 
         globBlendRules = std::make_shared<AnimBlendRules>(vfs, mGlobalBlendConfigPath);
         blendRules = std::make_shared<AnimBlendRules>(vfs, globBlendRules, configpath);
         animsrc->mAnimBlendRules = blendRules;
+        //
 
         return animsrc;
     }

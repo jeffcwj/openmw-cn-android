@@ -34,6 +34,7 @@ namespace MWRender
             // Log(Debug::Info) << "Animation change to: " << newState.mGroupname << " " << newState.mStartKey << " ";
 
             // Default blend settings
+            // TO DO: Activate this only if a flag in Settings::game() is set to true
             mBlendDuration = 0.22;
             mEasingFn = &Easings::sineOut;
 
