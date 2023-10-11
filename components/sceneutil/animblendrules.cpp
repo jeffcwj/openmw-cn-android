@@ -1,4 +1,4 @@
-#include "animblendrules.hpp";
+#include "animblendrules.hpp"
 
 namespace SceneUtil
 {

@@ -84,11 +84,11 @@ namespace MWRender
         // animation playback via updating AnimationState objects and determines when and what should be playing.
         auto [translation, rotation, scale] = mKeyframeTrack->GetCurrentTransformation(nv);
 
-        // TO DO: don't cast every frame, cache.
+        // TO DO: don't cast every frame, cache the cast.
         auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node);
 
-        // Im not sure what to do here, do we need a fallback that will still somehow apply the animation if its not a
-        // NifOsg::MatrixTransform?
+        // TO DO: if it's not a NifOsg::MatrixTransform - don't do blending, simply apply the transforms to a matrix,
+        // so atleast non-nif animated objects will not freeze
         if (!mtx)
             return;
 
