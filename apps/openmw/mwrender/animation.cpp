@@ -451,7 +451,7 @@ namespace MWRender
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
 
-        std::vector<AnimationBlendingController::AnimBlendRule> blendingRules;
+        std::shared_ptr<AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -610,50 +610,7 @@ namespace MWRender
 
             if (Misc::getFileExtension(name) == "kf")
             {
-                // Parsing YAML file into a set of rule objects
-                std::string configname = name;
-                Misc::StringUtils::replaceLast(configname, ".kf", ".yaml");
-
-                auto vfs = mResourceSystem->getVFS();
-
-                if (vfs->exists(configname))
-                {
-                    std::string source(std::istreambuf_iterator<char>(*vfs->get(configname)), {});
-                    YAML::Node root = YAML::Load(source);
-
-                    std::vector<AnimationBlendingController::AnimBlendRule> rules;
-
-                    if (root["blending_rules"])
-                    {
-                        for (const auto& it : root["blending_rules"])
-                        {
-                            if (it["from"] && it["to"] && it["duration"] && it["easing"])
-                            {
-                                auto fromNames = AnimationBlendingController::AnimBlendRule::ParseFullName(
-                                    it["from"].as<std::string>());
-                                auto toNames = AnimationBlendingController::AnimBlendRule::ParseFullName(
-                                    it["to"].as<std::string>());
-
-                                // TO DO, do this through a proper constructor to ensure that fields have to be filled
-                                AnimationBlendingController::AnimBlendRule ruleObj = {
-                                    .fromGroup = fromNames.first,
-                                    .fromKey = fromNames.second,
-                                    .toGroup = toNames.first,
-                                    .toKey = toNames.second,
-                                    .duration = it["duration"].as<float>(),
-                                    .easing = it["easing"].as<std::string>(),
-                                };
-
-                                rules.emplace_back(ruleObj);
-                            }
-                        }
-                    }
-                }
-
-                ////////////
-
-                auto animSrc = addSingleAnimSource(name, baseModel);
-                /*animSrc->blendingRules = rules;*/
+                addSingleAnimSource(name, baseModel);
             }
         }
     }
@@ -743,6 +700,19 @@ namespace MWRender
             }
         }
 
+        // Get the blending rules
+        std::string configpath = kfname;
+        Misc::StringUtils::replaceLast(configpath, ".kf", ".yaml");
+
+        auto vfs = mResourceSystem->getVFS();
+
+        std::shared_ptr<AnimBlendRules> globBlendRules;
+        std::shared_ptr<AnimBlendRules> blendRules;
+
+        globBlendRules = std::make_shared<AnimBlendRules>(vfs, mGlobalBlendConfigPath);
+        blendRules = std::make_shared<AnimBlendRules>(vfs, globBlendRules, configpath);
+        animsrc->mAnimBlendRules = blendRules;
+
         return animsrc;
     }
 
@@ -829,9 +799,7 @@ namespace MWRender
         if (!mObjectRoot || mAnimSources.empty())
             return;
 
-        /*Log(Debug::Info) << "Please play: " << groupname << " mask: " << blendMask
-                         << " priority: " << priority[(BoneGroup)blendMask] << " start stop: " << start << " " <<
-           stop;*/
+        Log(Debug::Info) << "Please play: " << groupname << ":" << start << "..." << stop << " mask: " << blendMask;
 
         if (groupname.empty())
         {
@@ -1055,12 +1023,12 @@ namespace MWRender
                     if (mAnimBlendControllers.contains(node))
                     {
                         animController = mAnimBlendControllers[node];
-                        animController->SetKeyframeTrack(it->second, stateData, animsrc->blendingRules);
+                        animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
                     }
                     else
                     {
                         animController = osg::ref_ptr<AnimationBlendingController>(
-                            new AnimationBlendingController(it->second, stateData, animsrc->blendingRules));
+                            new AnimationBlendingController(it->second, stateData, animsrc->mAnimBlendRules));
 
                         mAnimBlendControllers[node] = animController;
                     }

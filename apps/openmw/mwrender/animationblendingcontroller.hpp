@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/nifosg/matrixtransform.hpp>
+#include <components/sceneutil/animblendrules.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/nodecallback.hpp>
@@ -91,37 +92,25 @@ namespace MWRender
 
         struct AnimStateData
         {
-            std::string groupname;
-            std::string startKey;
+            std::string mGroupname;
+            std::string mStartKey;
             AnimStateData(std::string g, std::string k)
-                : groupname(g)
-                , startKey(k)
+                : mGroupname(g)
+                , mStartKey(k)
             {
             }
 
             AnimStateData()
-                : groupname("INIT_STATE")
-                , startKey("")
+                : mGroupname("INIT_STATE")
+                , mStartKey("")
             {
             }
-        };
-
-        struct AnimBlendRule
-        {
-            std::string fromGroup;
-            std::string fromKey;
-            std::string toGroup;
-            std::string toKey;
-            float duration;
-            std::string easing;
-
-            static std::pair<std::string, std::string> ParseFullName(std::string fullName);
         };
 
         /*AnimationBlendingController();*/
 
         AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
-            std::vector<AnimBlendRule> blendRules);
+            std::shared_ptr<AnimBlendRules> blendRules);
 
         /*AnimationBlendingController(const AnimationBlendingController& copy, const osg::CopyOp& copyop);*/
 
@@ -129,30 +118,30 @@ namespace MWRender
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
-        std::optional<AnimBlendRule> FindBlendingRule(
-            std::vector<AnimBlendRule>& rules, AnimStateData& fromState, AnimStateData& toState);
-        void SetKeyframeTrack(
-            osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::vector<AnimBlendRule> blendRules);
-        osg::Vec3f Vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);
+        void setKeyframeTrack(
+            osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::shared_ptr<AnimBlendRules> blendRules);
+        osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);
         osg::Callback* getAsCallback() { return this; }
 
     protected:
-        osg::ref_ptr<KeyframeController> keyframeTrack;
+        osg::ref_ptr<KeyframeController> mKeyframeTrack;
 
     private:
-        EasingFn easingFn;
-        float blendDuration;
-        float lastTimeStamp;
-        float interpFactor;
+        EasingFn mEasingFn;
+        float mBlendDuration;
 
-        float blendStartTime;
-        osg::Quat blendStartRot;
-        osg::Vec3f blendStartTrans;
+        bool mBlendTrigger = false;
+        float mBlendStartTime;
+        osg::Quat mBlendStartRot;
+        osg::Vec3f mBlendStartTrans;
         // float blendStartScale;
 
-        AnimStateData animState;
+        float mInterpFactor;
 
-        std::unordered_map<std::string, EasingFn> easingFnMap = { { "linear", Easings::linear },
+        AnimStateData mAnimState;
+        std::shared_ptr<AnimBlendRules> mAnimBlendRules;
+
+        std::unordered_map<std::string, EasingFn> mEasingFnMap = { { "linear", Easings::linear },
             { "sineOut", Easings::sineOut }, { "sineIn", Easings::sineIn }, { "sineInOut", Easings::sineInOut },
             { "cubicOut", Easings::cubicOut }, { "cubicIn", Easings::cubicIn }, { "cubicInOut", Easings::cubicInOut },
             { "quartOut", Easings::quartOut }, { "quartIn", Easings::quartIn }, { "quartInOut", Easings::quartInOut },

@@ -6,11 +6,11 @@
 
 #include "animationblendingcontroller.hpp"
 #include <components/misc/strings/algorithm.hpp>
+#include <components/sceneutil/animblendrules.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
-#include <yaml-cpp/yaml.h>
 
 #include <map>
 #include <span>
@@ -240,6 +240,7 @@ namespace MWRender
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }
         };
+
         typedef std::map<std::string, AnimState, std::less<>> AnimStateMap;
         AnimStateMap mStates;
 
@@ -536,6 +537,7 @@ namespace MWRender
         virtual void removeFromScene();
 
     private:
+        std::string mGlobalBlendConfigPath = "animations/animation-config.yaml";
         Animation(const Animation&);
         void operator=(Animation&);
     };
