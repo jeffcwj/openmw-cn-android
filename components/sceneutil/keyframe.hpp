@@ -23,7 +23,7 @@ namespace SceneUtil
         {
         }
 
-        std::shared_ptr<float> time = std::make_shared<float>(0.0f);
+        std::shared_ptr<float> mTime = std::make_shared<float>(0.0f);
 
         struct KfTransform
         {

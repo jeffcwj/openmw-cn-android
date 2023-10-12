@@ -1035,7 +1035,7 @@ namespace MWRender
                         mAnimBlendControllers[node] = animController;
                     }
 
-                    it->second->time = active->second.mTime;
+                    it->second->mTime = active->second.mTime;
 
                     osg::Callback* callback = animController->getAsCallback();
                     // osg::Callback* callback = it->second->getAsCallback();
