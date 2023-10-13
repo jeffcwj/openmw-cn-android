@@ -84,8 +84,9 @@ namespace MWRender
         }
     }
 
-    class AnimationBlendingController : public SceneUtil::NodeCallback<AnimationBlendingController>,
-                                        public SceneUtil::Controller
+    class AnimationBlendingController
+        : public SceneUtil::NodeCallback<AnimationBlendingController, NifOsg::MatrixTransform*>,
+          public SceneUtil::Controller
     {
     public:
         typedef float (*EasingFn)(float);
@@ -116,7 +117,7 @@ namespace MWRender
 
         /*META_Object(NifOsg, AnimationBlendingController)*/
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv);
+        void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
 
         void setKeyframeTrack(
             osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::shared_ptr<AnimBlendRules> blendRules);

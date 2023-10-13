@@ -55,14 +55,6 @@ namespace MWRender
                             << "Warning: animation blending rule contains invalid easing type: " << blendRule->mEasing;
                     }
                 }
-                else
-                {
-                    Log(Debug::Warning) << "No blend rule at all, why?";
-                }
-            }
-            else
-            {
-                Log(Debug::Warning) << "No blend rules at all, why?";
             }
 
             mAnimBlendRules = blendRules;
@@ -77,26 +69,23 @@ namespace MWRender
         return A + (B - A) * t;
     }
 
-    void AnimationBlendingController::operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void AnimationBlendingController::operator()(NifOsg::MatrixTransform* mtx, osg::NodeVisitor* nv)
     {
-        // HOW ANIMATIONS WORK: The actual retrieval of the bone transformation based on animation is done by the
-        // KeyframeController. KeyframeController retreives time data (playback position) every frame from a controller
-        // source which is bound to an appropriate AnimationState in Animation.cpp. Animation.cpp ultimately manages
-        // animation playback via updating AnimationState objects and determines when and what should be playing.
+        // HOW THIS WORK: The actual retrieval of the bone transformation based on animation is done by the
+        // KeyframeController (mKeyframeTrack). The KeyframeController retreives time data (playback position) every
+        // frame from controller's input (getInputValue(nv)) which is bound to an appropriate AnimationState time value
+        // in Animation.cpp. Animation.cpp ultimately manages animation playback via updating AnimationState objects and
+        // determines when and what should be playing.
+        // This controller exploits KeyframeController to get transformations and upon animation change blends from
+        // the last known position to the new animated one.
         auto [translation, rotation, scale] = mKeyframeTrack->GetCurrentTransformation(nv);
-
-        // TO DO: don't cast every frame, cache the cast.
-        auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node);
-
-        // TO DO: if it's not a NifOsg::MatrixTransform - don't do blending, simply apply the transforms to a matrix,
-        // so atleast non-nif animated objects will not freeze
-        if (!mtx)
-            return;
 
         // Log(Debug::Info) << "ABC Animating node: " << node->getName();
         // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
 
+        // Probably might make sence to adjust this by animation speed?
         float time = nv->getFrameStamp()->getSimulationTime();
+
         if (mBlendTrigger)
         {
             mBlendTrigger = false;
@@ -137,7 +126,7 @@ namespace MWRender
         if (scale)
             mtx->setScale(*scale);
 
-        traverse(node, nv);
+        traverse(mtx, nv);
     }
 
 }

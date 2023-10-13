@@ -706,14 +706,16 @@ namespace MWRender
 
         auto vfs = mResourceSystem->getVFS();
 
-        // TO DO: Activate this only if a flag in Settings::game() is set to true
-        std::shared_ptr<AnimBlendRules> globBlendRules;
-        std::shared_ptr<AnimBlendRules> blendRules;
+        if (Settings::game().mUseAnimationBlending)
+        {
+            std::shared_ptr<AnimBlendRules> globBlendRules;
+            std::shared_ptr<AnimBlendRules> blendRules;
 
-        globBlendRules = std::make_shared<AnimBlendRules>(vfs, mGlobalBlendConfigPath);
-        blendRules = std::make_shared<AnimBlendRules>(vfs, globBlendRules, configpath);
-        animsrc->mAnimBlendRules = blendRules;
-        //
+            // TO DO: Implement AnimBlendRulesManager that will take care of caching
+            globBlendRules = std::make_shared<AnimBlendRules>(vfs, mGlobalBlendConfigPath);
+            blendRules = std::make_shared<AnimBlendRules>(vfs, globBlendRules, configpath);
+            animsrc->mAnimBlendRules = blendRules;
+        }
 
         return animsrc;
     }
@@ -1019,26 +1021,48 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    // Update an existing animation blending controller or create a new one
-                    osg::ref_ptr<AnimationBlendingController> animController;
+                    auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node.get());
+                    osg::Callback* callback;
 
-                    if (mAnimBlendControllers.contains(node))
+                    if (mtx && Settings::game().mUseAnimationBlending)
                     {
-                        animController = mAnimBlendControllers[node];
-                        animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
+                        // Note: AnimationBlendingController currently works only with nifOsg::MatrixTransform due
+                        // to the fact that all of the different file formats use differen separate MatrixTransform
+                        // class implementations and therefore require their own AnimationBlendingController classes
+                        // which I don't feel like implementing.
+                        //
+                        // A proper way to fix this might be having a singular virtual MatrixTransform class
+                        // be provided to everything that needs to affect transforms, instead of keeping
+                        // completely separate implementation in osg::MatrixTransform children.
+                        //
+                        // For now instead if the node is not a NifOsg::MatrixTransform - animation will fallback
+                        // to KeyframeControllers and won't do any blending
+
+                        // Update an existing animation blending controller or create a new one
+                        osg::ref_ptr<AnimationBlendingController> animController;
+
+                        if (mAnimBlendControllers.contains(node))
+                        {
+                            animController = mAnimBlendControllers[node];
+                            animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
+                        }
+                        else
+                        {
+                            animController = osg::ref_ptr<AnimationBlendingController>(
+                                new AnimationBlendingController(it->second, stateData, animsrc->mAnimBlendRules));
+
+                            mAnimBlendControllers[node] = animController;
+                        }
+
+                        it->second->mTime = active->second.mTime;
+
+                        callback = animController->getAsCallback();
                     }
                     else
                     {
-                        animController = osg::ref_ptr<AnimationBlendingController>(
-                            new AnimationBlendingController(it->second, stateData, animsrc->mAnimBlendRules));
-
-                        mAnimBlendControllers[node] = animController;
+                        callback = it->second->getAsCallback();
                     }
 
-                    it->second->mTime = active->second.mTime;
-
-                    osg::Callback* callback = animController->getAsCallback();
-                    // osg::Callback* callback = it->second->getAsCallback();
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 

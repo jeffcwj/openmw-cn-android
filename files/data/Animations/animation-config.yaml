@@ -1,0 +1,16 @@
+# This is a comment
+blending_rules:  
+  - from: "*"
+    to: "*"
+    easing: "sineOut"
+    duration: 0.22
+  - from: "*"
+    to: "idlesneak"
+    easing: "springOutWeak"
+    duration: 0.4
+  - from: "*"
+    to: "sneakforward"
+    easing: "springOutWeak"
+    duration: 0.4
+  
+  
