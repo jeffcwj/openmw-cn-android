@@ -135,7 +135,7 @@ namespace MWRender
         float mBlendStartTime;
         osg::Quat mBlendStartRot;
         osg::Vec3f mBlendStartTrans;
-        // float blendStartScale;
+        float mBlendStartScale;
 
         float mInterpFactor;
 

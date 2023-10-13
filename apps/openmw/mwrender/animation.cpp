@@ -803,7 +803,7 @@ namespace MWRender
         if (!mObjectRoot || mAnimSources.empty())
             return;
 
-        Log(Debug::Info) << "Please play: " << groupname << ":" << start << "..." << stop << " mask: " << blendMask;
+        // Log(Debug::Info) << "Please play: " << groupname << ":" << start << "..." << stop << " mask: " << blendMask;
 
         if (groupname.empty())
         {

@@ -52,6 +52,20 @@ namespace Nif
                         return false;
             return true;
         }
+
+        osg::Matrixf toOsgMatrix() const
+        {
+            // Identity matrix
+            osg::Matrixf osgMtx;
+
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j)
+                    osgMtx(i, j) = mValues[j][i]; // NB: column/row major difference
+
+            return osgMtx;
+        }
+
+        osg::Quat getOsgRotation() const { return toOsgMatrix().getRotate(); }
     };
 
     struct NiTransform

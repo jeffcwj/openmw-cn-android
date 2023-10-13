@@ -83,15 +83,16 @@ namespace MWRender
         // Log(Debug::Info) << "ABC Animating node: " << node->getName();
         // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
 
-        // Probably might make sence to adjust this by animation speed?
+        // Probably might make sense to adjust this by animation speed?
         float time = nv->getFrameStamp()->getSimulationTime();
 
         if (mBlendTrigger)
         {
             mBlendTrigger = false;
             mBlendStartTime = time;
-            mBlendStartRot = mtx->getmRotation();
+            mBlendStartRot = mtx->mNifRotation.getOsgRotation();
             mBlendStartTrans = mtx->getTranslation();
+            mBlendStartScale = mtx->mScale;
         }
 
         if (mBlendDuration != 0)
@@ -112,7 +113,7 @@ namespace MWRender
         else
         {
             // This is necessary to prevent first person animation glitching out
-            mtx->setRotation(mtx->mRotationScale);
+            mtx->setRotation(mtx->mNifRotation);
         }
 
         // Update node's translation
@@ -124,6 +125,7 @@ namespace MWRender
 
         // Update node's scale
         if (scale)
+            // TO DO: Lerp the scale as well
             mtx->setScale(*scale);
 
         traverse(mtx, nv);
