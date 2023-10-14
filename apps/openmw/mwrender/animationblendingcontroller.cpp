@@ -127,7 +127,8 @@ namespace MWRender
 
         // Update node's scale
         if (scale)
-            // TO DO: Lerp the scale as well
+            // Scale is not lerped based on the idea that it is much more likely that scale animation will be used to
+            // instantly hide/show objects in which case the scale interpolation is undesirable.
             mtx->setScale(*scale);
 
         traverse(mtx, nv);
