@@ -705,8 +705,6 @@ namespace MWRender
         std::string configpath = kfname;
         Misc::StringUtils::replaceLast(configpath, ".kf", ".yaml");
 
-        auto vfs = mResourceSystem->getVFS();
-
         if (Settings::game().mUseAnimationBlending)
         {
             auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, configpath);

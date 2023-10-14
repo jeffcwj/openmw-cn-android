@@ -31,7 +31,7 @@ namespace MWRender
             || kft != mKeyframeTrack)
         {
             // Animation have changed, start blending!
-            Log(Debug::Info) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
+            // Log(Debug::Info) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
 
             // Default blend settings
             mBlendDuration = 0.22;
