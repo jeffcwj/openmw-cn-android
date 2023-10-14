@@ -17,6 +17,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/resource/animblendrulesmanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -451,7 +452,7 @@ namespace MWRender
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
 
-        std::shared_ptr<AnimBlendRules> mAnimBlendRules;
+        osg::ref_ptr<const AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -708,12 +709,8 @@ namespace MWRender
 
         if (Settings::game().mUseAnimationBlending)
         {
-            std::shared_ptr<AnimBlendRules> globBlendRules;
-            std::shared_ptr<AnimBlendRules> blendRules;
+            auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, configpath);
 
-            // TO DO: Implement AnimBlendRulesManager that will take care of caching
-            globBlendRules = std::make_shared<AnimBlendRules>(vfs, mGlobalBlendConfigPath);
-            blendRules = std::make_shared<AnimBlendRules>(vfs, globBlendRules, configpath);
             animsrc->mAnimBlendRules = blendRules;
         }
 

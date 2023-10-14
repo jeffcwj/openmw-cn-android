@@ -21,13 +21,11 @@
 
 namespace SceneUtil
 {
-    class AnimBlendRules : osg::Object
+    class AnimBlendRules : public osg::Object
     {
     public:
         AnimBlendRules();
         AnimBlendRules(const VFS::Manager* vfs, std::string configpath);
-        AnimBlendRules(
-            const VFS::Manager* vfs, std::shared_ptr<AnimBlendRules> const fallbackRules, std::string configpath);
         AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
 
         META_Object(SceneUtil, AnimBlendRules)
@@ -46,10 +44,14 @@ namespace SceneUtil
 
         void init(const VFS::Manager* vfs, std::string configpath);
 
+        void addOverrideRules(const AnimBlendRules& overrideRules);
+
         std::vector<BlendRule> parseYaml(std::string rawYaml, std::string path);
 
+        inline bool fitsRuleString(std::string str, std::string ruleStr) const;
+
         std::optional<BlendRule> findBlendingRule(
-            std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey);
+            std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const;
 
         std::vector<BlendRule> getRules() const { return mRules; }
 

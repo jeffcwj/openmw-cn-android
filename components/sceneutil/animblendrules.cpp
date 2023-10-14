@@ -39,32 +39,30 @@ namespace SceneUtil
         init(vfs, configpath);
     }
 
-    AnimBlendRules::AnimBlendRules(
-        const VFS::Manager* vfs, std::shared_ptr<AnimBlendRules> const fallbackRules, std::string configpath)
-    {
-        if (fallbackRules)
-            mRules = fallbackRules->getRules();
-
-        init(vfs, configpath);
-    }
-
     void AnimBlendRules::init(const VFS::Manager* vfs, std::string configpath)
     {
         if (configpath.find_first_of(".yaml") == std::string::npos || !vfs->exists(configpath))
             return;
 
         // Retrieving animation rules
+        Log(Debug::Info) << "Loading animation blending YAML '" << configpath << "'.";
         std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(configpath)), {});
         auto rules = parseYaml(rawYaml, configpath);
 
         // Concat rules together, local rules should come last since the first rule matching from the end takes
         // priority
+        mRules = rules;
+    }
+
+    void AnimBlendRules::addOverrideRules(const AnimBlendRules& overrideRules)
+    {
+        auto rules = overrideRules.getRules();
         mRules.insert(mRules.end(), rules.begin(), rules.end());
     }
 
     std::vector<BlendRule> AnimBlendRules::parseYaml(std::string rawYaml, std::string path)
     {
-        Log(Debug::Info) << "Loading animation blending YAML '" << path << "'.";
+
         std::vector<BlendRule> rules;
 
         YAML::Node root = YAML::Load(rawYaml);
@@ -113,8 +111,16 @@ namespace SceneUtil
         return rules;
     }
 
+    inline bool AnimBlendRules::fitsRuleString(std::string str, std::string ruleStr) const
+    {
+        // A wildcard only supported in the beginning or the end of the rule string in hopes that this will be more
+        // performant. And most likely this kind of support is enough.
+        return ruleStr == "*" || str == ruleStr || (ruleStr.starts_with("*") && str.ends_with(ruleStr.substr(1)))
+            || (ruleStr.ends_with("*") && str.starts_with(ruleStr.substr(0, ruleStr.length() - 1)));
+    }
+
     std::optional<BlendRule> AnimBlendRules::findBlendingRule(
-        std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey)
+        std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const
     {
         fromGroup = toLower(fromGroup);
         fromKey = toLower(fromKey);
@@ -126,14 +132,18 @@ namespace SceneUtil
             bool fromMatch = false;
             bool toMatch = false;
 
-            if ((fromGroup == rule->mFromGroup || rule->mFromGroup == "*")
-                && (fromKey == rule->mFromKey || rule->mFromKey == "*" || rule->mFromKey == ""))
+            // Pseudocode:
+            // If not a wildcard and found a wildcard
+            // starts with substr(0,wildcard)
+
+            if (fitsRuleString(fromGroup, rule->mFromGroup)
+                && (fitsRuleString(fromKey, rule->mFromKey) || rule->mFromKey == ""))
             {
                 fromMatch = true;
             }
 
-            if ((toGroup == rule->mToGroup || rule->mToGroup == "*" || (rule->mToGroup == "$" && toGroup == fromGroup))
-                && (toKey == rule->mToKey || rule->mToKey == "*" || rule->mToKey == ""))
+            if ((fitsRuleString(toGroup, rule->mToGroup) || (rule->mToGroup == "$" && toGroup == fromGroup))
+                && (fitsRuleString(toKey, rule->mToKey) || rule->mToKey == ""))
             {
                 toMatch = true;
             }

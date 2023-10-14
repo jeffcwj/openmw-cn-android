@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_RESOURCESYSTEM_H
 #define OPENMW_COMPONENTS_RESOURCE_RESOURCESYSTEM_H
 
+#include "animblendrulesmanager.hpp"
 #include <memory>
 #include <vector>
 
@@ -37,6 +38,7 @@ namespace Resource
         ImageManager* getImageManager();
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
+        AnimBlendRulesManager* getAnimBlendRulesManager();
 
         /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer
         /// referenced.
@@ -70,6 +72,7 @@ namespace Resource
         std::unique_ptr<ImageManager> mImageManager;
         std::unique_ptr<NifFileManager> mNifFileManager;
         std::unique_ptr<KeyframeManager> mKeyframeManager;
+        std::unique_ptr<AnimBlendRulesManager> mAnimBlendRulesManager;
 
         // Store the base classes separately to get convenient access to the common interface
         // Here users can register their own resourcemanager as well

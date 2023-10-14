@@ -1,0 +1,33 @@
+#ifndef OPENMW_COMPONENTS_ANIMBLENDRULESMANAGER_H
+#define OPENMW_COMPONENTS_ANIMBLENDRULESMANAGER_H
+
+#include <osg/ref_ptr>
+#include <string>
+
+#include <components/sceneutil/animblendrules.hpp>
+
+#include "resourcemanager.hpp"
+
+namespace Resource
+{
+    /// @brief Managing of keyframe resources
+    /// @note May be used from any thread.
+    class AnimBlendRulesManager : public ResourceManager
+    {
+    public:
+        explicit AnimBlendRulesManager(const VFS::Manager* vfs, double expiryDelay);
+        ~AnimBlendRulesManager() = default;
+
+        const VFS::Manager* mVfs;
+
+        /// Retrieve a read-only keyframe resource by name (case-insensitive).
+        /// @note Throws an exception if the resource is not found.
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> get(const std::string& path, const std::string& overridePath);
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> get(const std::string& path);
+
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
+    };
+
+}
+
+#endif

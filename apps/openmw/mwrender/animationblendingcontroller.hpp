@@ -111,7 +111,7 @@ namespace MWRender
         /*AnimationBlendingController();*/
 
         AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
-            std::shared_ptr<AnimBlendRules> blendRules);
+            osg::ref_ptr<const AnimBlendRules> blendRules);
 
         /*AnimationBlendingController(const AnimationBlendingController& copy, const osg::CopyOp& copyop);*/
 
@@ -119,8 +119,8 @@ namespace MWRender
 
         void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
 
-        void setKeyframeTrack(
-            osg::ref_ptr<KeyframeController> kft, AnimStateData animState, std::shared_ptr<AnimBlendRules> blendRules);
+        void setKeyframeTrack(osg::ref_ptr<KeyframeController> kft, AnimStateData animState,
+            osg::ref_ptr<const AnimBlendRules> blendRules);
         osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);
         osg::Callback* getAsCallback() { return this; }
 
@@ -140,7 +140,7 @@ namespace MWRender
         float mInterpFactor;
 
         AnimStateData mAnimState;
-        std::shared_ptr<AnimBlendRules> mAnimBlendRules;
+        osg::ref_ptr<const AnimBlendRules> mAnimBlendRules;
 
         std::unordered_map<std::string, EasingFn> mEasingFnMap = { { "linear", Easings::linear },
             { "sineOut", Easings::sineOut }, { "sineIn", Easings::sineIn }, { "sineInOut", Easings::sineInOut },

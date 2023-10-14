@@ -9,7 +9,7 @@ namespace MWRender
     // AnimationBlendingController::AnimationBlendingController() {}
 
     AnimationBlendingController::AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack,
-        AnimStateData newState, std::shared_ptr<AnimBlendRules> blendRules)
+        AnimStateData newState, osg::ref_ptr<const AnimBlendRules> blendRules)
     {
         setKeyframeTrack(keyframeTrack, newState, blendRules);
         // Log(Debug::Info) << "AnimationBlendingController created for: " << keyframeTrack-> getName();
@@ -22,7 +22,7 @@ namespace MWRender
     }*/
 
     void AnimationBlendingController::setKeyframeTrack(
-        osg::ref_ptr<KeyframeController> kft, AnimStateData newState, std::shared_ptr<AnimBlendRules> blendRules)
+        osg::ref_ptr<KeyframeController> kft, AnimStateData newState, osg::ref_ptr<const AnimBlendRules> blendRules)
     {
 
         if (newState.mGroupname == "INIT_STATE")
@@ -31,17 +31,21 @@ namespace MWRender
             || kft != mKeyframeTrack)
         {
             // Animation have changed, start blending!
-            // Log(Debug::Info) << "Animation change to: " << newState.mGroupname << " " << newState.mStartKey << " ";
+            Log(Debug::Info) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
 
             // Default blend settings
-            // TO DO: Activate this only if a flag in Settings::game() is set to true
             mBlendDuration = 0.22;
             mEasingFn = &Easings::sineOut;
 
             if (blendRules)
             {
+                // Finds a matching blend rule either in this or previous ruleset
                 auto blendRule = blendRules->findBlendingRule(
                     mAnimState.mGroupname, mAnimState.mStartKey, newState.mGroupname, newState.mStartKey);
+                // This will also check the previous ruleset, not sure it's a good idea though
+                /*if (!blendRule && mAnimBlendRules)
+                    blendRule = mAnimBlendRules->findBlendingRule(
+                        mAnimState.mGroupname, mAnimState.mStartKey, newState.mGroupname, newState.mStartKey);*/
                 if (blendRule)
                 {
                     if (mEasingFnMap.contains(blendRule->mEasing))
@@ -78,10 +82,8 @@ namespace MWRender
         // determines when and what should be playing.
         // This controller exploits KeyframeController to get transformations and upon animation change blends from
         // the last known position to the new animated one.
-        auto [translation, rotation, scale] = mKeyframeTrack->GetCurrentTransformation(nv);
 
-        // Log(Debug::Info) << "ABC Animating node: " << node->getName();
-        // Log(Debug::Info) << "Last TS: " << lastTimeStamp;
+        auto [translation, rotation, scale] = mKeyframeTrack->GetCurrentTransformation(nv);
 
         // Probably might make sense to adjust this by animation speed?
         float time = nv->getFrameStamp()->getSimulationTime();
