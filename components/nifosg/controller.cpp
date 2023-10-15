@@ -11,7 +11,6 @@
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"
-#include <components/debug/debuglog.hpp>
 
 namespace NifOsg
 {
