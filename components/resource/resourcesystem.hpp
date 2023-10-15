@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_RESOURCESYSTEM_H
 #define OPENMW_COMPONENTS_RESOURCE_RESOURCESYSTEM_H
 
-#include "animblendrulesmanager.hpp"
 #include <memory>
 #include <vector>
 
@@ -24,6 +23,7 @@ namespace Resource
     class NifFileManager;
     class KeyframeManager;
     class BaseResourceManager;
+    class AnimBlendRulesManager;
 
     /// @brief Wrapper class that constructs and provides access to the most commonly used resource subsystems.
     /// @par Resource subsystems can be used with multiple OpenGL contexts, just like the OSG equivalents, but

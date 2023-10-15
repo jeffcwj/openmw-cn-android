@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "animblendrulesmanager.hpp"
 #include "imagemanager.hpp"
 #include "keyframemanager.hpp"
 #include "niffilemanager.hpp"

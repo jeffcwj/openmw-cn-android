@@ -1,5 +1,4 @@
 #include "animation.hpp"
-#include <csignal>
 
 #include <algorithm>
 #include <iomanip>
