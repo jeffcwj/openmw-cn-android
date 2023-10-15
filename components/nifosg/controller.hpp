@@ -238,7 +238,7 @@ namespace NifOsg
         osg::Vec3f getTranslation(float time) const override;
         osg::Callback* getAsCallback() override { return this; }
 
-        KfTransform GetCurrentTransformation(osg::NodeVisitor* nv) override;
+        KfTransform getCurrentTransformation(osg::NodeVisitor* nv) override;
 
         void operator()(NifOsg::MatrixTransform*, osg::NodeVisitor*);
 

@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 #define OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 
+#include <iterator>
 #include <map>
 #include <optional>
 #include <string>
@@ -8,16 +9,20 @@
 #include <unordered_set>
 #include <vector>
 
+#include <yaml-cpp/yaml.h>
+
 #include <osg/Object>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/configfileparser.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/vfs/manager.hpp>
-#include <iterator>
-#include <yaml-cpp/yaml.h>
+
+using namespace Misc::StringUtils;
 
 namespace SceneUtil
 {
@@ -46,9 +51,9 @@ namespace SceneUtil
 
         void addOverrideRules(const AnimBlendRules& overrideRules);
 
-        std::vector<BlendRule> parseYaml(std::string rawYaml, std::string path);
+        std::vector<BlendRule> parseYaml(const std::string& rawYaml, const std::string& path);
 
-        inline bool fitsRuleString(std::string str, std::string ruleStr) const;
+        inline bool fitsRuleString(const std::string& str, const std::string& ruleStr) const;
 
         std::optional<BlendRule> findBlendingRule(
             std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const;

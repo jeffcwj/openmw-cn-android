@@ -55,17 +55,14 @@ namespace Nif
 
         osg::Matrixf toOsgMatrix() const
         {
-            // Identity matrix
-            osg::Matrixf osgMtx;
+            osg::Matrixf osgMat;
 
             for (int i = 0; i < 3; ++i)
                 for (int j = 0; j < 3; ++j)
-                    osgMtx(i, j) = mValues[j][i]; // NB: column/row major difference
+                    osgMat(i, j) = mValues[j][i]; // NB: column/row major difference
 
-            return osgMtx;
+            return osgMat;
         }
-
-        osg::Quat getOsgRotation() const { return toOsgMatrix().getRotate(); }
     };
 
     struct NiTransform

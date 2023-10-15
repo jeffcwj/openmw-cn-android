@@ -845,8 +845,8 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
-                state.groupname = std::string(groupname);
-                state.startKey = std::string(start);
+                state.mGroupname = std::string(groupname);
+                state.mStartKey = std::string(start);
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
@@ -1008,7 +1008,7 @@ namespace MWRender
             if (active != mStates.end())
             {
                 std::shared_ptr<AnimSource> animsrc = active->second.mSource;
-                AnimationBlendingController::AnimStateData stateData = active->second.asAnimStateData();
+                AnimBlendController::AnimStateData stateData = active->second.asAnimStateData();
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin();
                      it != animsrc->mControllerMap[blendMask].end(); ++it)
@@ -1021,20 +1021,17 @@ namespace MWRender
 
                     if (mtx && Settings::game().mUseAnimationBlending)
                     {
-                        // Note: AnimationBlendingController currently works only with nifOsg::MatrixTransform due
-                        // to the fact that all of the different file formats use differen separate MatrixTransform
-                        // class implementations and therefore require their own AnimationBlendingController classes
-                        // which I don't feel like implementing.
+                        // Note: AnimBlendController currently works only with nifOsg::MatrixTransform. Due to
+                        // the side-effect of RotationController (and probably RollController) applying undesired
+                        // rotations to the osg::MatrixTransofrm - the AnimBlendController or KeyframeController need
+                        // to have access to mNifRotation of NifOsg::MatrixTransform (which is unaffected by the
+                        // side-effect) so they can use it to override the undesired rotations.
                         //
-                        // A proper way to fix this might be having a singular virtual MatrixTransform class
-                        // be provided to everything that needs to affect transforms, instead of keeping
-                        // completely separate implementation in osg::MatrixTransform children.
-                        //
-                        // For now instead if the node is not a NifOsg::MatrixTransform - animation will fallback
+                        // For now if the node is not a NifOsg::MatrixTransform - animation will fallback
                         // to KeyframeControllers and won't do any blending
 
                         // Update an existing animation blending controller or create a new one
-                        osg::ref_ptr<AnimationBlendingController> animController;
+                        osg::ref_ptr<AnimBlendController> animController;
 
                         if (mAnimBlendControllers.contains(node))
                         {
@@ -1043,8 +1040,8 @@ namespace MWRender
                         }
                         else
                         {
-                            animController = osg::ref_ptr<AnimationBlendingController>(
-                                new AnimationBlendingController(it->second, stateData, animsrc->mAnimBlendRules));
+                            animController = osg::ref_ptr<AnimBlendController>(
+                                new AnimBlendController(it->second, stateData, animsrc->mAnimBlendRules));
 
                             mAnimBlendControllers[node] = animController;
                         }
@@ -1807,14 +1804,14 @@ namespace MWRender
         osg::Callback* cb = node->getUpdateCallback();
         while (cb)
         {
-            if (dynamic_cast<AnimationBlendingController*>(cb))
+            if (dynamic_cast<AnimBlendController*>(cb))
             {
                 foundKeyframeCtrl = true;
                 break;
             }
             cb = cb->getNestedCallback();
         }
-        // Note: AnimationBlendingController also does the reset so if one is present - we should add the rotation node
+        // Note: AnimBlendController also does the reset so if one is present - we should add the rotation node
         // Without KeyframeController the orientation will not be reseted each frame, so
         // RotateController shouldn't be used for such nodes.
         if (!foundKeyframeCtrl)

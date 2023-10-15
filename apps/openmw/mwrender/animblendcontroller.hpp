@@ -1,5 +1,5 @@
-#ifndef OPENMW_MWRENDER_ANIMATIONBLENDINGCONTROLLER_H
-#define OPENMW_MWRENDER_ANIMATIONBLENDINGCONTROLLER_H
+#ifndef OPENMW_MWRENDER_ANIMBLENDCONTROLLER_H
+#define OPENMW_MWRENDER_ANIMBLENDCONTROLLER_H
 
 #include <map>
 #include <optional>
@@ -84,44 +84,34 @@ namespace MWRender
         }
     }
 
-    class AnimationBlendingController
-        : public SceneUtil::NodeCallback<AnimationBlendingController, NifOsg::MatrixTransform*>,
-          public SceneUtil::Controller
+    namespace
+    {
+        // Helper methods
+        osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B)
+        {
+            return A + (B - A) * t;
+        };
+    }
+
+    class AnimBlendController : public SceneUtil::NodeCallback<AnimBlendController, NifOsg::MatrixTransform*>,
+                                public SceneUtil::Controller
     {
     public:
         typedef float (*EasingFn)(float);
 
         struct AnimStateData
         {
-            std::string mGroupname;
+            std::string mGroupname = "INIT_STATE";
             std::string mStartKey;
-            AnimStateData(std::string g, std::string k)
-                : mGroupname(g)
-                , mStartKey(k)
-            {
-            }
-
-            AnimStateData()
-                : mGroupname("INIT_STATE")
-                , mStartKey("")
-            {
-            }
         };
 
-        /*AnimationBlendingController();*/
-
-        AnimationBlendingController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
+        AnimBlendController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData animState,
             osg::ref_ptr<const AnimBlendRules> blendRules);
-
-        /*AnimationBlendingController(const AnimationBlendingController& copy, const osg::CopyOp& copyop);*/
-
-        /*META_Object(NifOsg, AnimationBlendingController)*/
 
         void operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv);
 
         void setKeyframeTrack(osg::ref_ptr<KeyframeController> kft, AnimStateData animState,
             osg::ref_ptr<const AnimBlendRules> blendRules);
-        osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B);
         osg::Callback* getAsCallback() { return this; }
 
     protected:

@@ -4,27 +4,6 @@ namespace SceneUtil
 {
     using BlendRule = AnimBlendRules::BlendRule;
 
-    // String utilities
-    std::string trimSpaces(std::string s)
-    {
-        std::string::size_type n, n2;
-        n = s.find_first_not_of(" \t\r\n");
-        if (n == std::string::npos)
-            return std::string();
-        else
-        {
-            n2 = s.find_last_not_of(" \t\r\n");
-            return s.substr(n, n2 - n + 1);
-        }
-    }
-
-    std::string toLower(std::string s)
-    {
-        std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-        return s;
-    }
-    //
-
     AnimBlendRules::AnimBlendRules() {}
 
     AnimBlendRules::AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop)
@@ -60,7 +39,7 @@ namespace SceneUtil
         mRules.insert(mRules.end(), rules.begin(), rules.end());
     }
 
-    std::vector<BlendRule> AnimBlendRules::parseYaml(std::string rawYaml, std::string path)
+    std::vector<BlendRule> AnimBlendRules::parseYaml(const std::string& rawYaml, const std::string& path)
     {
 
         std::vector<BlendRule> rules;
@@ -111,7 +90,7 @@ namespace SceneUtil
         return rules;
     }
 
-    inline bool AnimBlendRules::fitsRuleString(std::string str, std::string ruleStr) const
+    inline bool AnimBlendRules::fitsRuleString(const std::string& str, const std::string& ruleStr) const
     {
         // A wildcard only supported in the beginning or the end of the rule string in hopes that this will be more
         // performant. And most likely this kind of support is enough.
@@ -122,10 +101,10 @@ namespace SceneUtil
     std::optional<BlendRule> AnimBlendRules::findBlendingRule(
         std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const
     {
-        fromGroup = toLower(fromGroup);
-        fromKey = toLower(fromKey);
-        toGroup = toLower(toGroup);
-        toKey = toLower(toKey);
+        fromGroup = lowerCase(fromGroup);
+        fromKey = lowerCase(fromKey);
+        toGroup = lowerCase(toGroup);
+        toKey = lowerCase(toKey);
         for (auto rule = mRules.rbegin(); rule != mRules.rend(); ++rule)
         {
             // TO DO: Also allow for partial wildcards at the end of groups and keys via std::string startswith method
@@ -157,17 +136,23 @@ namespace SceneUtil
 
     std::pair<std::string, std::string> BlendRule::parseFullName(std::string full)
     {
-        std::string group = "";
-        std::string key = "";
+        std::string group;
+        std::string key;
         size_t delimiterInd = full.find(":");
 
-        if (delimiterInd == std::string::npos)
+        lowerCaseInPlace(full);
 
-            group = toLower(trimSpaces(full));
+        if (delimiterInd == std::string::npos)
+        {
+            group = full;
+            trim(group);
+        }
         else
         {
-            group = toLower(trimSpaces(full.substr(0, delimiterInd)));
-            key = toLower(trimSpaces(full.substr(delimiterInd + 1)));
+            group = full.substr(0, delimiterInd);
+            key = full.substr(delimiterInd + 1);
+            trim(group);
+            trim(key);
         }
         return std::make_pair(group, key);
     }

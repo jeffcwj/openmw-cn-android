@@ -4,7 +4,7 @@
 #include "../mwworld/movementdirection.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include "animationblendingcontroller.hpp"
+#include "animblendcontroller.hpp"
 #include <components/misc/strings/algorithm.hpp>
 #include <components/sceneutil/animblendrules.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -210,8 +210,8 @@ namespace MWRender
             int mBlendMask;
             bool mAutoDisable;
 
-            std::string groupname;
-            std::string startKey;
+            std::string mGroupname;
+            std::string mStartKey;
 
             AnimState()
                 : mStartTime(0.0f)
@@ -233,9 +233,10 @@ namespace MWRender
             float getTime() const { return *mTime; }
             void setTime(float time) { *mTime = time; }
             bool blendMaskContains(size_t blendMask) const { return (mBlendMask & (1 << blendMask)); }
-            AnimationBlendingController::AnimStateData asAnimStateData() const
+            AnimBlendController::AnimStateData asAnimStateData() const
             {
-                return AnimationBlendingController::AnimStateData(groupname, startKey);
+                AnimBlendController::AnimStateData stateData = { .mGroupname = mGroupname, .mStartKey = mStartKey };
+                return stateData;
             }
 
             bool shouldLoop() const { return getTime() >= mLoopStopTime && mLoopingEnabled && mLoopCount > 0; }
@@ -269,7 +270,7 @@ namespace MWRender
         std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::Callback>>> mActiveControllers;
 
         // Keep track of the animation controllers for easy access
-        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimationBlendingController>> mAnimBlendControllers;
+        std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<AnimBlendController>> mAnimBlendControllers;
 
         std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 

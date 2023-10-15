@@ -23,7 +23,6 @@ namespace NifOsg
         // problems when a KeyframeController wants to change only one of these components. So
         // we store the scale and rotation components separately here.
         float mScale{ 0.f };
-        osg::Quat mRotation;
 
         Nif::Matrix3 mNifRotation;
 

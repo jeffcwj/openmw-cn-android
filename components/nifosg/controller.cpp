@@ -172,7 +172,7 @@ namespace NifOsg
     {
         /*Log(Debug::Info) << "KfC Animating node: " << node->getName();*/
 
-        auto [translation, rotation, scale] = GetCurrentTransformation(nv);
+        auto [translation, rotation, scale] = getCurrentTransformation(nv);
 
         if (rotation)
         {
@@ -193,7 +193,7 @@ namespace NifOsg
         traverse(node, nv);
     }
 
-    KeyframeController::KfTransform KeyframeController::GetCurrentTransformation(osg::NodeVisitor* nv)
+    KeyframeController::KfTransform KeyframeController::getCurrentTransformation(osg::NodeVisitor* nv)
     {
         KfTransform out;
 
@@ -203,15 +203,15 @@ namespace NifOsg
             // float time = *this->time;
 
             if (!mRotations.empty())
-                out.rotation = mRotations.interpKey(time);
+                out.mRotation = mRotations.interpKey(time);
             else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-                out.rotation = getXYZRotation(time);
+                out.mRotation = getXYZRotation(time);
 
             if (!mTranslations.empty())
-                out.translation = mTranslations.interpKey(time);
+                out.mTranslation = mTranslations.interpKey(time);
 
             if (!mScales.empty())
-                out.scale = mScales.interpKey(time);
+                out.mScale = mScales.interpKey(time);
         }
 
         return out;
