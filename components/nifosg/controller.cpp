@@ -170,8 +170,6 @@ namespace NifOsg
 
     void KeyframeController::operator()(NifOsg::MatrixTransform* node, osg::NodeVisitor* nv)
     {
-        /*Log(Debug::Info) << "KfC Animating node: " << node->getName();*/
-
         auto [translation, rotation, scale] = getCurrentTransformation(nv);
 
         if (rotation)
@@ -200,7 +198,6 @@ namespace NifOsg
         if (hasInput())
         {
             float time = getInputValue(nv);
-            // float time = *this->time;
 
             if (!mRotations.empty())
                 out.mRotation = mRotations.interpKey(time);
