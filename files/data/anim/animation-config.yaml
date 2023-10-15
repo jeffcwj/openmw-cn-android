@@ -1,0 +1,86 @@
+# This is a default OpenMW animation blending config, it provides smooth locomotion and snappy attack transitions.
+# Meant to be used with OpenMW animation blending system.
+#
+# HOW TO EDIT ANIMATION CONFIG FILES:
+# "From" and "to" are rules that will attempt to match animation names, they usually look like 
+# "animationGroupName:keyName" where keyName is essentially a name of a specific action within the animation group. 
+# Examples: "weapononehanded: chop start", "idle1h", "jump: start" e.t.c 
+# Note that "keyName" is not always present and if omitted - the rule will match any "keyName".
+# Different animation names the game uses can be inspected by opening .kf animation files in blender.
+#
+# Both animationGroupName and keyName support wildcard character either at the beginning, the end of the name, or instead of the name:
+# "*" will match any name.
+# "*idle:sta*" will match an animationGroupName ending with "idle" and a keyName starting with "sta".
+# "weapon*handed: chop*attack" will not work since we don't support wildcards in the middle.
+# 
+# "easing" is an animation blending function, i.e a style of transition between animations. "sineOut" easing is usually a safe bet.
+# For a list of possible easings check OpenMW documention.
+#
+# "duration" is a transition duration in seconds, 0.2-0.4 are usually reasonable transition times, but this highly depends on your use case.
+#
+# Bottom-most rule takes precedence.
+#
+# NOTE TO MOD DEVELOPERS: 
+# If you want to provide an animation blending config for your modded animations - DO NOT override this file in your mod,
+# instead create a "your_modded_animation_file_name.yaml" file and put it in the same folder with your .kf file. For example
+# if your mod includes an "newAnimations.kf" file, you can put a "newAnimations.yaml" file beside it and fill it with your blending rules.
+# Animation config files shipped in this fashion will only affect your modded animations and will not meddle with other animations in the game. 
+#
+# Author: Maksim Eremenko (Max Yari)
+
+blending_rules:  
+  # General blending rule, any transition that will not be caught by the rules below - will use this rule
+  - from: "*"
+    to: "*"
+    easing: "sineOut"
+    duration: 0.22
+  # From anything to sneaking
+  - from: "*"
+    to: "idlesneak*"
+    easing: "springOutWeak"
+    duration: 0.4
+  - from: "*"
+    to: "sneakforward*"
+    easing: "springOutWeak"
+    duration: 0.4
+  # From any to preparing for an attack swing (e.g "weapononehanded: chop start").
+  # Note that Rules like *:chop* will technically match any weapon attack animation with
+  # an animation key beginning on "chop". This includes attack preparation, attack itself and follow-through.
+  # Yet since rules below this block take care of more specific transitions - most likely this block will  
+  # only affect "any animation"->"attack swing preparation".
+  - from: "*"
+    to: "*:shoot*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:chop*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:thrust*"
+    easing: "sineOut"
+    duration: 0.1
+  - from: "*"
+    to: "*:slash*"
+    easing: "sineOut"
+    duration: 0.1
+  # From preparing for an attack swing (e.g "weapononehanded: chop start") to an attack swing (e.g "weapononehanded: chop max attack").
+  - from: "*:*start"
+    to: "*:*attack"
+    easing: "sineOut"
+    duration: 0.05
+  # From a weapon swing to the final follow-through
+  - from: "*"
+    to: "*:*follow start"
+    easing: "linear"
+    duration: 0
+  # Inventory doll poses don't work with transitions, so 0 duraion.
+  - from: "*"
+    to: "inventory*"
+    easing: "linear"
+    duration: 0
+  - from: "inventory*"
+    to: "*"
+    easing: "linear"
+    duration: 0
+  
