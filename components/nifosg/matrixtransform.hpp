@@ -32,9 +32,7 @@ namespace NifOsg
         void setScale(float scale);
         void setRotation(const osg::Quat& rotation);
         void setRotation(const Nif::Matrix3& rotation);
-
         void setTranslation(const osg::Vec3f& translation);
-        osg::Vec3f getTranslation();
     };
 
 }

@@ -81,7 +81,7 @@ namespace MWRender
             mBlendStartTime = time;
             // Nif mNifRotation is used here because it's unaffected by the side-effects of RotationController
             mBlendStartRot = node->mNifRotation.toOsgMatrix().getRotate();
-            mBlendStartTrans = node->getTranslation();
+            mBlendStartTrans = node->getMatrix().getTrans();
             mBlendStartScale = node->mScale;
         }
 
