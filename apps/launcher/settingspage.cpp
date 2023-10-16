@@ -189,7 +189,7 @@ bool Launcher::SettingsPage::loadSettings()
             loadSettingBool(Settings::game().mWeaponSheathing, *weaponSheathingCheckBox);
             loadSettingBool(Settings::game().mShieldSheathing, *shieldSheathingCheckBox);
         }
-        loadSettingBool(Settings::game().mUseAnimationBlending, *animBlendingCheckBox);
+        loadSettingBool(Settings::game().mSmoothAnimTransitions, *smoothAnimTransitionsCheckBox);
         loadSettingBool(Settings::game().mTurnToMovementDirection, *turnToMovementDirectionCheckBox);
         loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
         loadSettingBool(Settings::game().mPlayerMovementIgnoresAnimation, *playerMovementIgnoresAnimationCheckBox);
@@ -339,7 +339,7 @@ void Launcher::SettingsPage::saveSettings()
         saveSettingBool(*weaponSheathingCheckBox, Settings::game().mWeaponSheathing);
         saveSettingBool(*shieldSheathingCheckBox, Settings::game().mShieldSheathing);
         saveSettingBool(*turnToMovementDirectionCheckBox, Settings::game().mTurnToMovementDirection);
-        saveSettingBool(*animBlendingCheckBox, Settings::game().mUseAnimationBlending);
+        saveSettingBool(*smoothAnimTransitionsCheckBox, Settings::game().mSmoothAnimTransitions);
         saveSettingBool(*smoothMovementCheckBox, Settings::game().mSmoothMovement);
         saveSettingBool(*playerMovementIgnoresAnimationCheckBox, Settings::game().mPlayerMovementIgnoresAnimation);
 

@@ -701,7 +701,7 @@ namespace MWRender
         }
 
         // Get the blending rules
-        if (Settings::game().mUseAnimationBlending)
+        if (Settings::game().mSmoothAnimTransitions)
         {
             auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, kfname);
 
@@ -1015,7 +1015,7 @@ namespace MWRender
                     auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node.get());
                     osg::Callback* callback;
 
-                    if (mtx && Settings::game().mUseAnimationBlending)
+                    if (mtx && Settings::game().mSmoothAnimTransitions)
                     {
                         // Note: AnimBlendController currently works only with nifOsg::MatrixTransform. Due to
                         // the side-effect of RotationController (and probably RollController) applying undesired
