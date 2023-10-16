@@ -30,7 +30,7 @@ namespace SceneUtil
     {
     public:
         AnimBlendRules();
-        AnimBlendRules(const VFS::Manager* vfs, std::string configpath);
+        AnimBlendRules(const VFS::Manager* vfs, std::string kfpath);
         AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
 
         META_Object(SceneUtil, AnimBlendRules)
@@ -47,7 +47,7 @@ namespace SceneUtil
             static std::pair<std::string, std::string> parseFullName(std::string fullName);
         };
 
-        void init(const VFS::Manager* vfs, std::string configpath);
+        void init(const VFS::Manager* vfs, std::string kfpath);
 
         void addOverrideRules(const AnimBlendRules& overrideRules);
 

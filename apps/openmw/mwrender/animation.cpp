@@ -701,12 +701,9 @@ namespace MWRender
         }
 
         // Get the blending rules
-        std::string configpath = kfname;
-        Misc::StringUtils::replaceLast(configpath, ".kf", ".yaml");
-
         if (Settings::game().mUseAnimationBlending)
         {
-            auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, configpath);
+            auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, kfname);
 
             animsrc->mAnimBlendRules = blendRules;
         }

@@ -12,30 +12,37 @@ namespace SceneUtil
     {
     }
 
-    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string configpath)
-        : mConfigPath(configpath)
+    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string kfpath)
+        : mConfigPath(kfpath)
     {
-        init(vfs, configpath);
+        init(vfs, kfpath);
     }
 
-    void AnimBlendRules::init(const VFS::Manager* vfs, std::string configpath)
+    void AnimBlendRules::init(const VFS::Manager* vfs, std::string kfpath)
     {
-        if (configpath.find_first_of(".yaml") == std::string::npos || !vfs->exists(configpath))
+        if (kfpath.find_first_of(".kf") == std::string::npos)
             return;
 
-        // Retrieving animation rules
-        Log(Debug::Info) << "Loading animation blending YAML '" << configpath << "'.";
-        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(configpath)), {});
-        auto rules = parseYaml(rawYaml, configpath);
+        Misc::StringUtils::replaceLast(kfpath, ".kf", ".yaml");
+        if (!vfs->exists(kfpath))
+        {
+            Misc::StringUtils::replaceLast(kfpath, ".yaml", ".json");
+        }
+        if (!vfs->exists(kfpath))
+            return;
 
-        // Concat rules together, local rules should come last since the first rule matching from the end takes
-        // priority
+        // Retrieving and parsing animation rules
+        Log(Debug::Info) << "Loading animation blending config '" << kfpath << "'.";
+        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(kfpath)), {});
+        auto rules = parseYaml(rawYaml, kfpath);
+
         mRules = rules;
     }
 
     void AnimBlendRules::addOverrideRules(const AnimBlendRules& overrideRules)
     {
         auto rules = overrideRules.getRules();
+        // Concat the rules together, overrides added at the end since the bottom-most rule has the highest priority.
         mRules.insert(mRules.end(), rules.begin(), rules.end());
     }
 
@@ -48,8 +55,8 @@ namespace SceneUtil
 
         if (!root.IsDefined() || root.IsNull() || root.IsScalar())
         {
-            Log(Debug::Warning) << "Warning: Can't parse YAML file '" << path
-                                << "'. Check that it's a valid YAML file.";
+            Log(Debug::Warning) << "Warning: Can't parse YAML/JSON file '" << path
+                                << "'. Check that it's a valid YAML/JSON file.";
             return rules;
         }
 
