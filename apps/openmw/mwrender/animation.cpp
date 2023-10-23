@@ -703,7 +703,17 @@ namespace MWRender
         // Get the blending rules
         if (Settings::game().mSmoothAnimTransitions)
         {
-            auto blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, kfname);
+            // Note, even if the actual config is .json - we should send a .yaml path to AnimBlendRulesManager, the
+            // manager will check for .json if it will not find a specified .yaml file.
+            auto yamlpath = kfname;
+            Misc::StringUtils::replaceLast(yamlpath, ".kf", ".yaml");
+
+            // mGlobalBlendConfigPath is only used with actors! Objects have no default blending.
+            osg::ref_ptr<const AnimBlendRules> blendRules;
+            if (mPtr.getClass().isActor())
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, yamlpath);
+            else
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(yamlpath);
 
             animsrc->mAnimBlendRules = blendRules;
         }

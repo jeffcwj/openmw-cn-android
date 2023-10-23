@@ -25,7 +25,7 @@ namespace MWRender
             // Log(Debug::Info) << "Animation change to: " << newState.mGroupname << ":" << newState.mStartKey;
 
             // Default blend settings
-            mBlendDuration = 0.22;
+            mBlendDuration = 0;
             mEasingFn = &Easings::sineOut;
 
             if (blendRules)

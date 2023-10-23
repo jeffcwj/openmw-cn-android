@@ -18,23 +18,22 @@ namespace SceneUtil
         init(vfs, kfpath);
     }
 
-    void AnimBlendRules::init(const VFS::Manager* vfs, std::string kfpath)
+    void AnimBlendRules::init(const VFS::Manager* vfs, std::string yamlpath)
     {
-        if (kfpath.find_first_of(".kf") == std::string::npos)
+        if (yamlpath.find(".yaml") == std::string::npos)
             return;
 
-        Misc::StringUtils::replaceLast(kfpath, ".kf", ".yaml");
-        if (!vfs->exists(kfpath))
+        if (!vfs->exists(yamlpath))
         {
-            Misc::StringUtils::replaceLast(kfpath, ".yaml", ".json");
+            Misc::StringUtils::replaceLast(yamlpath, ".yaml", ".json");
         }
-        if (!vfs->exists(kfpath))
+        if (!vfs->exists(yamlpath))
             return;
 
         // Retrieving and parsing animation rules
-        Log(Debug::Info) << "Loading animation blending config '" << kfpath << "'.";
-        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(kfpath)), {});
-        auto rules = parseYaml(rawYaml, kfpath);
+        Log(Debug::Info) << "Loading animation blending config '" << yamlpath << "'.";
+        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(yamlpath)), {});
+        auto rules = parseYaml(rawYaml, yamlpath);
 
         mRules = rules;
     }
