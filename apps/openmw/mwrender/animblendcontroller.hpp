@@ -84,15 +84,6 @@ namespace MWRender
         }
     }
 
-    namespace
-    {
-        // Helper methods
-        osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B)
-        {
-            return A + (B - A) * t;
-        }
-    }
-
     class AnimBlendController : public SceneUtil::NodeCallback<AnimBlendController, NifOsg::MatrixTransform*>,
                                 public SceneUtil::Controller
     {

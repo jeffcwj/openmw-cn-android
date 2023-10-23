@@ -6,6 +6,15 @@ namespace MWRender
 {
     using AnimStateData = AnimBlendController::AnimStateData;
 
+    namespace
+    {
+        // Helper methods
+        osg::Vec3f vec3fLerp(float t, osg::Vec3f A, osg::Vec3f B)
+        {
+            return A + (B - A) * t;
+        }
+    }
+
     AnimBlendController::AnimBlendController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState,
         osg::ref_ptr<const AnimBlendRules> blendRules)
     {
