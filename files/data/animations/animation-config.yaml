@@ -97,4 +97,9 @@ blending_rules:
     to: "*"
     easing: "linear"
     duration: 0
+  # Transitions from a no-state are always instant
+  - from: ""
+    to: "*"
+    easing: "linear"
+    duration: 0
   

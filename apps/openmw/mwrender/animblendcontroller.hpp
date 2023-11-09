@@ -92,7 +92,7 @@ namespace MWRender
 
         struct AnimStateData
         {
-            std::string mGroupname = "INIT_STATE";
+            std::string mGroupname;
             std::string mStartKey;
         };
 

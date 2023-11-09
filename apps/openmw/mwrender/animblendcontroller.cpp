@@ -24,9 +24,6 @@ namespace MWRender
     void AnimBlendController::setKeyframeTrack(
         osg::ref_ptr<KeyframeController> kft, AnimStateData newState, osg::ref_ptr<const AnimBlendRules> blendRules)
     {
-
-        if (newState.mGroupname == "INIT_STATE")
-            return;
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey
             || kft != mKeyframeTrack)
         {
