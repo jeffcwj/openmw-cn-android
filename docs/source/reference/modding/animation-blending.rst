@@ -1,10 +1,11 @@
 Animation blending
 ##################
 
-It smooths out animation transitions for essentially every animation in the game without affecting gameplay. If ``smooth animation transitions`` setting is enabled in the launcher or the config files. The default OpenMW animation blending config file (the global config) affects actors only.
+It smooths out animation transitions for essentially every animation in the game without affecting gameplay. If ``smooth animation transitions`` setting is enabled in the launcher or the config files.
 
 Animation makers can bundle ``.yaml``/``.json`` files together with their ``.kf`` files to specify the blending style of their animations. Those settings will only affect the corresponding animation files.
 
+The default OpenMW animation blending config file (the global config) affects actors only, that restriction doesn't apply to other animation blending config files; they can affect animated objects too.
 Do not override the global config file in your mod, instead create a ``your_modded_animation_file_name.yaml`` file and put it in the same folder as your ``.kf`` file.
 
 For example, if your mod includes a ``newAnimations.kf`` file, you can put a ``newAnimations.yaml`` file beside it and fill it with your blending rules.
@@ -25,6 +26,7 @@ Examples: ``"weapononehanded: chop start"``, ``"idle1h"``, ``"jump: start"`` e.t
 
 
 Both ``animationGroupName`` and ``keyName`` support wildcard characters either at the beginning, the end of the name, or instead of the name:
+
 - ``"*"`` will match any name.
 - ``"*idle:sta*"`` will match an animationGroupName ending with ``idle`` and a keyName starting with ``sta``.
 - ``"weapon*handed: chop*attack"`` will not work since we don't support wildcards in the middle.
