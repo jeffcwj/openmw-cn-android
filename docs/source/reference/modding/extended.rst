@@ -279,7 +279,7 @@ default arrow fetching animation does not look good).
 Animation blending
 ------------------
 
-It smooths out animation transitions for essentially every animation in the game without affecting gameplay. If ``smooth animation transitions`` setting is enabled in the launcher or the config files. The default OpenMW animation blending config file (the global config) affects actors only.
+It smooths out animation transitions for essentially every animation in the game without affecting gameplay. If ``smooth animation transitions`` setting is enabled in the launcher or the config files.
 
 Animation makers can bundle ``.yaml``/``.json`` files together with their ``.kf`` files to specify the blending style of their animations. Those settings will only affect the corresponding animation files. For more details see :doc:`animation-blending`.
 
