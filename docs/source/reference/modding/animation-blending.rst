@@ -8,7 +8,6 @@ Animation makers can bundle ``.yaml``/``.json`` files together with their ``.kf`
 Do not override the global config file in your mod, instead create a ``your_modded_animation_file_name.yaml`` file and put it in the same folder as your ``.kf`` file.
 
 For example, if your mod includes a ``newAnimations.kf`` file, you can put a ``newAnimations.yaml`` file beside it and fill it with your blending rules.
-
 Animation config files shipped in this fashion will only affect your modded animations and will not meddle with other animations in the game. 
 
 Local (per-kf-file) animation rules will only affect transitions between animations provided in that file and transitions to those animations; they will not affect transitions from the file animation to some other animation.
@@ -17,18 +16,15 @@ Editing animation config files
 ------------------------------
 
 ``from`` and ``to`` are rules that will attempt to match animation names; they usually look like ``animationGroupName:keyName`` where ``keyName`` is essentially the name of a specific action within the animation group. 
-
 Examples: ``"weapononehanded: chop start"``, ``"idle1h"``, ``"jump: start"`` e.t.c.
 
 .. note::
 
     "keyName" is not always present and if omitted; the rule will match any "keyName".
-    
-    The different animation names the game uses can be inspected by opening .kf animation files in Blender.
+    The different animation names the game uses can be inspected by opening ".kf" animation files in Blender.
 
 
 Both ``animationGroupName`` and ``keyName`` support wildcard characters either at the beginning, the end of the name, or instead of the name:
-
 - ``"*"`` will match any name.
 - ``"*idle:sta*"`` will match an animationGroupName ending with ``idle`` and a keyName starting with ``sta``.
 - ``"weapon*handed: chop*attack"`` will not work since we don't support wildcards in the middle.
@@ -37,7 +33,10 @@ Both ``animationGroupName`` and ``keyName`` support wildcard characters either a
 
 ``duration`` is the transition duration in seconds, 0.2-0.4 are usually reasonable transition times, but this highly depends on your use case.
 
-Bottom-most rule takes precedence in the animation config files.
+.. note::
+
+    The bottom-most rule takes precedence in the animation config files.
+
 
 List of possible easings
 ------------------------
