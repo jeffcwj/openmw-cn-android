@@ -16,7 +16,7 @@ Local (per-kf-file) animation rules will only affect transitions between animati
 Editing animation config files
 ------------------------------
 
-``from`` and ``to`` are rules that will attempt to match animation names; they usually look like ``animationGroupName:keyName`` where keyName is essentially a name of a specific action within the animation group. 
+``from`` and ``to`` are rules that will attempt to match animation names; they usually look like ``animationGroupName:keyName`` where ``keyName`` is essentially the name of a specific action within the animation group. 
 
 Examples: ``"weapononehanded: chop start"``, ``"idle1h"``, ``"jump: start"`` e.t.c.
 
@@ -35,7 +35,7 @@ Both ``animationGroupName`` and ``keyName`` support wildcard characters either a
 
 ``easing`` is an animation blending function, i.e., a style of transition between animations, look below to see the list of possible easings.
 
-``duration`` is a transition duration in seconds, 0.2-0.4 are usually reasonable transition times, but this highly depends on your use case.
+``duration`` is the transition duration in seconds, 0.2-0.4 are usually reasonable transition times, but this highly depends on your use case.
 
 Bottom-most rule takes precedence in the animation config files.
 
@@ -58,10 +58,10 @@ List of possible easings
 - "springOutStrong"
 - "springOutTooMuch"
 
-``"sineOut"`` easing is usually a safe bet. In general ``"...Out"`` easing functions will yield a transition that is fast in the beginning of the transition but slowdown towards the end, that style of transitions usually looks good on organic animations.
+``"sineOut"`` easing is usually a safe bet. In general ``"...Out"`` easing functions will yield a transition that is fast at the beginning of the transition but slowdown towards the end, that style of transitions usually looks good on organic animations.
 
-``"...In"`` transitions being slow but end fast, ``"...InOut"`` begin fast, slowdown in the middle, end fast.
+``"...In"`` transitions begin slow but end fast, ``"...InOut"`` begin fast, slowdown in the middle, end fast.
 
-Its hard to give an example of the use case for the latter 2 types of easing functions, they are there for developers to experiment.
+Its hard to give an example of use cases for the latter 2 types of easing functions, they are there for developers to experiment.
 
 The possible easings are largely ported from `here <https://easings.net/>`__ and have similar names. Except for the ``springOut`` family, those are similar to ``elasticOut`` from `easings.net <https://easings.net/>`__, with ``springOutWeak`` being almost identical to ``elasticOut``.
