@@ -334,7 +334,7 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QCheckBox" name="turnToMovementDirectionCheckBox">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -344,7 +344,7 @@
                 </property>
                </widget>
               </item>
-               <item row="2" column="1">
+               <item row="1" column="1">
                  <widget class="QCheckBox" name="smoothAnimTransitionsCheckBox">
                    <property name="toolTip">
                      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config .yaml files that can be bundled with the modded animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -387,7 +387,7 @@
                 </item>
                </layout>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <widget class="QCheckBox" name="playerMovementIgnoresAnimationCheckBox">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In third person, the camera will sway along with the movement animations of the player. Enabling this option disables this swaying by having the player character move independently of its animation. This was the default behavior of OpenMW 0.48 and earlier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
