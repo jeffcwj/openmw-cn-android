@@ -33,8 +33,6 @@ namespace SceneUtil
 
     using BlendRule = AnimBlendRules::BlendRule;
 
-    AnimBlendRules::AnimBlendRules() {}
-
     AnimBlendRules::AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop)
         : mConfigPath(copy.mConfigPath)
         , mRules(copy.mRules)

@@ -27,7 +27,7 @@ namespace SceneUtil
     class AnimBlendRules : public osg::Object
     {
     public:
-        AnimBlendRules();
+        AnimBlendRules() = default;
         AnimBlendRules(const VFS::Manager* vfs, const std::string& yamlpath);
         AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
 
