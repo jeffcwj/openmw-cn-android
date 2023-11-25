@@ -434,6 +434,7 @@ namespace Resource
                 "Image",
                 "Nif",
                 "Keyframe",
+                "Blending Rules",
                 "",
                 "Groundcover Chunk",
                 "Object Chunk",

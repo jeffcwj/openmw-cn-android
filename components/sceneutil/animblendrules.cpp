@@ -2,6 +2,33 @@
 
 namespace SceneUtil
 {
+    namespace
+    {
+        std::pair<std::string, std::string> splitRuleName(std::string full)
+        {
+            std::string group;
+            std::string key;
+            size_t delimiterInd = full.find(":");
+
+            lowerCaseInPlace(full);
+
+            if (delimiterInd == std::string::npos)
+            {
+                group = full;
+                trim(group);
+            }
+            else
+            {
+                group = full.substr(0, delimiterInd);
+                key = full.substr(delimiterInd + 1);
+                trim(group);
+                trim(key);
+            }
+            return std::make_pair(group, key);
+        }
+
+    }
+
     using BlendRule = AnimBlendRules::BlendRule;
 
     AnimBlendRules::AnimBlendRules() {}
@@ -12,10 +39,10 @@ namespace SceneUtil
     {
     }
 
-    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string kfpath)
-        : mConfigPath(kfpath)
+    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, const std::string& yamlpath)
+        : mConfigPath(yamlpath)
     {
-        init(vfs, kfpath);
+        init(vfs, yamlpath);
     }
 
     void AnimBlendRules::init(const VFS::Manager* vfs, std::string yamlpath)
@@ -65,8 +92,8 @@ namespace SceneUtil
             {
                 if (it["from"] && it["to"] && it["duration"] && it["easing"])
                 {
-                    auto fromNames = BlendRule::parseFullName(it["from"].as<std::string>());
-                    auto toNames = BlendRule::parseFullName(it["to"].as<std::string>());
+                    auto fromNames = splitRuleName(it["from"].as<std::string>());
+                    auto toNames = splitRuleName(it["to"].as<std::string>());
 
                     BlendRule ruleObj = {
                         .mFromGroup = fromNames.first,
@@ -138,29 +165,6 @@ namespace SceneUtil
         }
 
         return std::nullopt;
-    }
-
-    std::pair<std::string, std::string> BlendRule::parseFullName(std::string full)
-    {
-        std::string group;
-        std::string key;
-        size_t delimiterInd = full.find(":");
-
-        lowerCaseInPlace(full);
-
-        if (delimiterInd == std::string::npos)
-        {
-            group = full;
-            trim(group);
-        }
-        else
-        {
-            group = full.substr(0, delimiterInd);
-            key = full.substr(delimiterInd + 1);
-            trim(group);
-            trim(key);
-        }
-        return std::make_pair(group, key);
     }
 
 }

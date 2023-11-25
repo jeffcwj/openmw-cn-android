@@ -16,6 +16,8 @@ Local (per-kf-file) animation rules will only affect transitions between animati
 Editing animation config files
 ------------------------------
 
+In examples below ``.yaml`` config file will be used. You can provide ``.json`` files instead of ``.yaml`` if you adhere to the same overall structures and field names.
+
 Animation blending config file is a list of blending rules that look like this:
 
 ```

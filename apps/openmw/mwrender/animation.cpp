@@ -451,7 +451,7 @@ namespace MWRender
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
 
-        osg::ref_ptr<const AnimBlendRules> mAnimBlendRules;
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -708,14 +708,19 @@ namespace MWRender
             auto yamlpath = kfname;
             Misc::StringUtils::replaceLast(yamlpath, ".kf", ".yaml");
 
-            // mGlobalBlendConfigPath is only used with actors! Objects have no default blending.
-            osg::ref_ptr<const AnimBlendRules> blendRules;
+            // globalBlendConfigPath is only used with actors! Objects have no default blending.
+            std::string globalBlendConfigPath = "animations/animation-config.yaml";
+
+            osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(mGlobalBlendConfigPath, yamlpath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(globalBlendConfigPath, yamlpath);
             else
                 blendRules = mResourceSystem->getAnimBlendRulesManager()->get(yamlpath);
 
-            animsrc->mAnimBlendRules = blendRules;
+            if (blendRules && blendRules->getRules().size() > 0)
+            {
+                animsrc->mAnimBlendRules = blendRules;
+            }
         }
 
         return animsrc;
@@ -851,8 +856,8 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
-                state.mGroupname = std::string(groupname);
-                state.mStartKey = std::string(start);
+                state.mGroupname = groupname;
+                state.mStartKey = start;
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
@@ -1810,7 +1815,7 @@ namespace MWRender
         osg::Callback* cb = node->getUpdateCallback();
         while (cb)
         {
-            if (dynamic_cast<AnimBlendController*>(cb))
+            if (dynamic_cast<AnimBlendController*>(cb) || dynamic_cast<SceneUtil::KeyframeController*>(cb))
             {
                 foundKeyframeCtrl = true;
                 break;

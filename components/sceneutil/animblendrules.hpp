@@ -30,7 +30,7 @@ namespace SceneUtil
     {
     public:
         AnimBlendRules();
-        AnimBlendRules(const VFS::Manager* vfs, std::string kfpath);
+        AnimBlendRules(const VFS::Manager* vfs, const std::string& yamlpath);
         AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
 
         META_Object(SceneUtil, AnimBlendRules)
@@ -43,28 +43,24 @@ namespace SceneUtil
             std::string mToKey;
             float mDuration;
             std::string mEasing;
-
-            static std::pair<std::string, std::string> parseFullName(std::string fullName);
         };
 
-        void init(const VFS::Manager* vfs, std::string kfpath);
-
         void addOverrideRules(const AnimBlendRules& overrideRules);
-
-        std::vector<BlendRule> parseYaml(const std::string& rawYaml, const std::string& path);
-
-        inline bool fitsRuleString(const std::string& str, const std::string& ruleStr) const;
 
         std::optional<BlendRule> findBlendingRule(
             std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const;
 
-        std::vector<BlendRule> getRules() const { return mRules; }
-
-        bool isValid() const { return mRules.size() > 0; }
+        const std::vector<BlendRule>& getRules() const { return mRules; }
 
     private:
         std::string mConfigPath;
         std::vector<BlendRule> mRules;
+
+        void init(const VFS::Manager* vfs, std::string yamlpath);
+
+        std::vector<BlendRule> parseYaml(const std::string& rawYaml, const std::string& path);
+
+        inline bool fitsRuleString(const std::string& str, const std::string& ruleStr) const;
     };
 }
 

@@ -6,6 +6,79 @@ namespace MWRender
 {
     using AnimStateData = AnimBlendController::AnimStateData;
 
+    /// Animation Easing/Blending functions
+    namespace Easings
+    {
+        float linear(float x)
+        {
+            return x;
+        }
+        float sineOut(float x)
+        {
+            return sin((x * 3.14) / 2);
+        }
+        float sineIn(float x)
+        {
+            return 1 - cos((x * 3.14) / 2);
+        }
+        float sineInOut(float x)
+        {
+            return -(cos(3.14 * x) - 1) / 2;
+        }
+        float cubicOut(float t)
+        {
+            return 1 - powf(1 - t, 3);
+        }
+        float cubicIn(float x)
+        {
+            return powf(x, 3);
+        }
+        float cubicInOut(float x)
+        {
+            return x < 0.5 ? 4 * x * x * x : 1 - powf(-2 * x + 2, 3) / 2;
+        }
+        float quartOut(float t)
+        {
+            return 1 - powf(1 - t, 4);
+        }
+        float quartIn(float t)
+        {
+            return powf(t, 4);
+        }
+        float quartInOut(float x)
+        {
+            return x < 0.5 ? 8 * x * x * x * x : 1 - powf(-2 * x + 2, 4) / 2;
+        }
+        float springOutGeneric(float x, float lambda, float w)
+        {
+            // Higher lambda = lower swing amplitude. 1 = 150% swing amplitude.
+            // W corresponds to the amount of overswings, more = more. 4.71 = 1 overswing, 7.82 = 2
+            return 1 - expf(-lambda * x) * cos(w * x);
+        }
+        float springOutWeak(float x)
+        {
+            return springOutGeneric(x, 4, 4.71);
+        }
+        float springOutMed(float x)
+        {
+            return springOutGeneric(x, 3, 4.71);
+        }
+        float springOutStrong(float x)
+        {
+            return springOutGeneric(x, 2, 4.71);
+        }
+        float springOutTooMuch(float x)
+        {
+            return springOutGeneric(x, 1, 4.71);
+        }
+        std::unordered_map<std::string, EasingFn> easingsMap = { { "linear", Easings::linear },
+            { "sineOut", Easings::sineOut }, { "sineIn", Easings::sineIn }, { "sineInOut", Easings::sineInOut },
+            { "cubicOut", Easings::cubicOut }, { "cubicIn", Easings::cubicIn }, { "cubicInOut", Easings::cubicInOut },
+            { "quartOut", Easings::quartOut }, { "quartIn", Easings::quartIn }, { "quartInOut", Easings::quartInOut },
+            { "springOutWeak", Easings::springOutWeak }, { "springOutMed", Easings::springOutMed },
+            { "springOutStrong", Easings::springOutStrong }, { "springOutTooMuch", Easings::springOutTooMuch } };
+    }
+
     namespace
     {
         // Helper methods
@@ -15,14 +88,14 @@ namespace MWRender
         }
     }
 
-    AnimBlendController::AnimBlendController(osg::ref_ptr<KeyframeController> keyframeTrack, AnimStateData newState,
-        osg::ref_ptr<const AnimBlendRules> blendRules)
+    AnimBlendController::AnimBlendController(osg::ref_ptr<SceneUtil::KeyframeController> keyframeTrack,
+        AnimStateData newState, osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
     {
         setKeyframeTrack(keyframeTrack, newState, blendRules);
     }
 
-    void AnimBlendController::setKeyframeTrack(
-        osg::ref_ptr<KeyframeController> kft, AnimStateData newState, osg::ref_ptr<const AnimBlendRules> blendRules)
+    void AnimBlendController::setKeyframeTrack(osg::ref_ptr<SceneUtil::KeyframeController> kft, AnimStateData newState,
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules)
     {
         if (newState.mGroupname != mAnimState.mGroupname || newState.mStartKey != mAnimState.mStartKey
             || kft != mKeyframeTrack)
@@ -46,10 +119,10 @@ namespace MWRender
                         mAnimState.mGroupname, mAnimState.mStartKey, newState.mGroupname, newState.mStartKey);*/
                 if (blendRule)
                 {
-                    if (mEasingFnMap.contains(blendRule->mEasing))
+                    if (Easings::easingsMap.contains(blendRule->mEasing))
                     {
                         mBlendDuration = blendRule->mDuration;
-                        mEasingFn = mEasingFnMap[blendRule->mEasing];
+                        mEasingFn = Easings::easingsMap[blendRule->mEasing];
                     }
                     else
                     {

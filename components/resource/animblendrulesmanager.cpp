@@ -57,7 +57,7 @@ namespace Resource
 
     void AnimBlendRulesManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "AnimBlendRules", mCache->getCacheSize());
+        stats->setAttribute(frameNumber, "Blending Rules", mCache->getCacheSize());
     }
 
 }

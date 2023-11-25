@@ -538,7 +538,6 @@ namespace MWRender
         virtual void removeFromScene();
 
     private:
-        std::string mGlobalBlendConfigPath = "animations/animation-config.yaml";
         Animation(const Animation&);
         void operator=(Animation&);
     };
