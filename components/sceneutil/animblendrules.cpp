@@ -134,10 +134,10 @@ namespace SceneUtil
     std::optional<BlendRule> AnimBlendRules::findBlendingRule(
         std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const
     {
-        fromGroup = lowerCase(fromGroup);
-        fromKey = lowerCase(fromKey);
-        toGroup = lowerCase(toGroup);
-        toKey = lowerCase(toKey);
+        lowerCaseInPlace(fromGroup);
+        lowerCaseInPlace(fromKey);
+        lowerCaseInPlace(toGroup);
+        lowerCaseInPlace(toKey);
         for (auto rule = mRules.rbegin(); rule != mRules.rend(); ++rule)
         {
             // TO DO: Also allow for partial wildcards at the end of groups and keys via std::string startswith method
