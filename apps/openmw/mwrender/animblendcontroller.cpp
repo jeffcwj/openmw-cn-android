@@ -158,8 +158,8 @@ namespace MWRender
         {
             mBlendTrigger = false;
             mBlendStartTime = time;
-            // Nif mNifRotation is used here because it's unaffected by the side-effects of RotationController
-            mBlendStartRot = node->mNifRotation.toOsgMatrix().getRotate();
+            // Nif mRotation is used here because it's unaffected by the side-effects of RotationController
+            mBlendStartRot = node->mRotation.toOsgMatrix().getRotate();
             mBlendStartTrans = node->getMatrix().getTrans();
             mBlendStartScale = node->mScale;
         }
@@ -181,7 +181,7 @@ namespace MWRender
         else
         {
             // This is necessary to prevent first person animation glitching out
-            node->setRotation(node->mNifRotation);
+            node->setRotation(node->mRotation);
         }
 
         // Update node's translation

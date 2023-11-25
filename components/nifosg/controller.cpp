@@ -178,7 +178,7 @@ namespace NifOsg
         else
         {
             // This is necessary to prevent first person animations glitching out due to RotationController
-            node->setRotation(node->mNifRotation);
+            node->setRotation(node->mRotation);
         }
 
         if (translation)

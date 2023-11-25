@@ -1035,7 +1035,7 @@ namespace MWRender
                         // Note: AnimBlendController currently works only with nifOsg::MatrixTransform. Due to
                         // the side-effect of RotationController (and probably RollController) applying undesired
                         // rotations to the osg::MatrixTransofrm - the AnimBlendController or KeyframeController need
-                        // to have access to mNifRotation of NifOsg::MatrixTransform (which is unaffected by the
+                        // to have access to mRotation of NifOsg::MatrixTransform (which is unaffected by the
                         // side-effect) so they can use it to override the undesired rotations.
                         //
                         // For now if the node is not a NifOsg::MatrixTransform - animation will fallback

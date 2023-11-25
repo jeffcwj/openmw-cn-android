@@ -1,5 +1,7 @@
 #include "animblendrules.hpp"
 
+using namespace Misc::StringUtils;
+
 namespace SceneUtil
 {
     namespace

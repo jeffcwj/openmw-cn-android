@@ -22,8 +22,6 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/vfs/manager.hpp>
 
-using namespace Misc::StringUtils;
-
 namespace SceneUtil
 {
     class AnimBlendRules : public osg::Object
