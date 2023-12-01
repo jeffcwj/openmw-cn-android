@@ -3,7 +3,7 @@
 # For details on how to edit and create your own blending rules, see https://openmw.readthedocs.io/en/latest/reference/modding/animation-blending.html
 # Author: Maksim Eremenko (Max Yari)
 
-blending_rules:  
+blending_rules:
   # General blending rule, any transition that will not be caught by the rules below - will use this rule
   - from: "*"
     to: "*"
@@ -21,7 +21,7 @@ blending_rules:
   # From any to preparing for an attack swing (e.g "weapononehanded: chop start").
   # Note that Rules like *:chop* will technically match any weapon attack animation with
   # an animation key beginning on "chop". This includes attack preparation, attack itself and follow-through.
-  # Yet since rules below this block take care of more specific transitions - most likely this block will  
+  # Yet since rules below this block take care of more specific transitions - most likely this block will
   # only affect "any animation"->"attack swing preparation".
   - from: "*"
     to: "*:shoot*"
@@ -49,6 +49,11 @@ blending_rules:
     to: "*:*follow start"
     easing: "linear"
     duration: 0
+  # Sharper out of jumping transition, so bunny-hopping looks similar to vanilla
+  - from: "jump:start"
+    to: "*"
+    easing: "sineOut"
+    duration: 0.1
   # Inventory doll poses don't work with transitions, so 0 duraion.
   - from: "*"
     to: "inventory*"
@@ -63,4 +68,3 @@ blending_rules:
     to: "*"
     easing: "linear"
     duration: 0
-  

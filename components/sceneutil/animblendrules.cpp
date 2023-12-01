@@ -1,6 +1,18 @@
 #include "animblendrules.hpp"
 
-using namespace Misc::StringUtils;
+#include <iterator>
+#include <map>
+
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
+
+#include <components/debug/debuglog.hpp>
+#include <components/files/configfileparser.hpp>
+#include <components/files/conversion.hpp>
+#include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/textkeymap.hpp>
+
+#include <yaml-cpp/yaml.h>
 
 namespace SceneUtil
 {
@@ -12,19 +24,19 @@ namespace SceneUtil
             std::string key;
             size_t delimiterInd = full.find(":");
 
-            lowerCaseInPlace(full);
+            Misc::StringUtils::lowerCaseInPlace(full);
 
             if (delimiterInd == std::string::npos)
             {
                 group = full;
-                trim(group);
+                Misc::StringUtils::trim(group);
             }
             else
             {
                 group = full.substr(0, delimiterInd);
                 key = full.substr(delimiterInd + 1);
-                trim(group);
-                trim(key);
+                Misc::StringUtils::trim(group);
+                Misc::StringUtils::trim(key);
             }
             return std::make_pair(group, key);
         }
@@ -134,10 +146,10 @@ namespace SceneUtil
     std::optional<BlendRule> AnimBlendRules::findBlendingRule(
         std::string fromGroup, std::string fromKey, std::string toGroup, std::string toKey) const
     {
-        lowerCaseInPlace(fromGroup);
-        lowerCaseInPlace(fromKey);
-        lowerCaseInPlace(toGroup);
-        lowerCaseInPlace(toKey);
+        Misc::StringUtils::lowerCaseInPlace(fromGroup);
+        Misc::StringUtils::lowerCaseInPlace(fromKey);
+        Misc::StringUtils::lowerCaseInPlace(toGroup);
+        Misc::StringUtils::lowerCaseInPlace(toKey);
         for (auto rule = mRules.rbegin(); rule != mRules.rend(); ++rule)
         {
             // TO DO: Also allow for partial wildcards at the end of groups and keys via std::string startswith method

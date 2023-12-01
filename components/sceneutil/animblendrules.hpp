@@ -1,25 +1,12 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 #define OPENMW_COMPONENTS_SCENEUTIL_ANIMBLENDRULES_HPP
 
-#include <iterator>
-#include <map>
 #include <optional>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
-
-#include <yaml-cpp/yaml.h>
 
 #include <osg/Object>
 
-#include <components/debug/debuglog.hpp>
-#include <components/files/configfileparser.hpp>
-#include <components/files/conversion.hpp>
-#include <components/misc/strings/algorithm.hpp>
-#include <components/misc/strings/lower.hpp>
-#include <components/sceneutil/controller.hpp>
-#include <components/sceneutil/textkeymap.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace SceneUtil
