@@ -293,8 +293,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>671</width>
-            <height>774</height>
+            <width>676</width>
+            <height>914</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
@@ -355,7 +355,7 @@
                  </widget>
                </item>
               <item row="2" column="0">
-               <layout class="QVBoxLayout" name="sheathingLayout">
+               <layout class="QVBoxLayout" name="weaponSheathingLayout">
                 <property name="leftMargin">
                  <number>20</number>
                 </property>
@@ -372,20 +372,27 @@
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="shieldSheathingCheckBox">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Shield sheathing</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
+              </item>
+              <item row="3" column="0">
+                <layout class="QVBoxLayout" name="shieldSheathingLayout">
+                <property name="leftMargin">
+                  <number>20</number>
+                </property>
+                  <item>
+                  <widget class="QCheckBox" name="shieldSheathingCheckBox">
+                    <property name="enabled">
+                    <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                    <string>Shield sheathing</string>
+                    </property>
+                  </widget>
+                  </item>
+                </layout>
               </item>
               <item row="3" column="1">
                <widget class="QCheckBox" name="playerMovementIgnoresAnimationCheckBox">
