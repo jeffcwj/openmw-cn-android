@@ -15,7 +15,7 @@ namespace SceneUtil
     {
     public:
         AnimBlendRules() = default;
-        AnimBlendRules(const VFS::Manager* vfs, const std::string& yamlpath);
+        AnimBlendRules(const VFS::Manager* vfs, std::string yamlpath);
         AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop);
 
         META_Object(SceneUtil, AnimBlendRules)
@@ -40,8 +40,6 @@ namespace SceneUtil
     private:
         std::string mConfigPath;
         std::vector<BlendRule> mRules;
-
-        void init(const VFS::Manager* vfs, std::string yamlpath);
 
         std::vector<BlendRule> parseYaml(const std::string& rawYaml, const std::string& path);
 

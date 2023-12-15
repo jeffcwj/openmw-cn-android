@@ -713,14 +713,12 @@ namespace MWRender
 
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(globalBlendConfigPath, yamlpath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(globalBlendConfigPath, yamlpath);
             else
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->get(yamlpath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(yamlpath);
 
-            if (blendRules && blendRules->getRules().size() > 0)
-            {
-                animsrc->mAnimBlendRules = blendRules;
-            }
+            // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
+            animsrc->mAnimBlendRules = blendRules;
         }
 
         return animsrc;

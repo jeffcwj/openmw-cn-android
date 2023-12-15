@@ -51,14 +51,11 @@ namespace SceneUtil
     {
     }
 
-    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, const std::string& yamlpath)
+    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string yamlpath)
         : mConfigPath(yamlpath)
     {
-        init(vfs, yamlpath);
-    }
+        Log(Debug::Info) << "Attempting to load animation blending config '" << yamlpath << "'";
 
-    void AnimBlendRules::init(const VFS::Manager* vfs, std::string yamlpath)
-    {
         if (yamlpath.find(".yaml") == std::string::npos)
             return;
 
@@ -70,7 +67,6 @@ namespace SceneUtil
             return;
 
         // Retrieving and parsing animation rules
-        Log(Debug::Info) << "Loading animation blending config '" << yamlpath << "'.";
         std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(yamlpath)), {});
         auto rules = parseYaml(rawYaml, yamlpath);
 

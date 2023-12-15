@@ -15,6 +15,8 @@
 #include <components/sceneutil/osgacontroller.hpp>
 #include <components/vfs/pathutil.hpp>
 
+#include <components/resource/scenemanager.hpp>
+
 #include "objectcache.hpp"
 #include "scenemanager.hpp"
 
@@ -28,13 +30,26 @@ namespace Resource
     {
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::get(
+    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::getInstance(
         const std::string& path, const std::string& overridePath)
     {
-        osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*get(path), osg::CopyOp::SHALLOW_COPY));
-        auto blendRuleOverrides = get(overridePath);
+        // Note: Providing a non-existing path but an existing overridePath is not supported!
+        auto tmpl = get(path);
+        if (!tmpl)
+            return nullptr;
 
-        blendRules->addOverrideRules(*blendRuleOverrides);
+        osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*tmpl, osg::CopyOp::SHALLOW_COPY));
+        blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(tmpl));
+
+        if (overridePath.empty())
+        {
+            auto blendRuleOverrides = get(overridePath);
+            if (blendRuleOverrides)
+            {
+                blendRules->addOverrideRules(*blendRuleOverrides);
+            }
+            blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(blendRuleOverrides));
+        }
 
         return blendRules;
     }
@@ -43,15 +58,32 @@ namespace Resource
     {
         const std::string normalized = VFS::Path::normalizeFilename(path);
 
-        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
-        if (obj)
-            return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj.get()));
-        else
+        std::optional<osg::ref_ptr<osg::Object>> obj = mCache->getRefFromObjectCacheOrNone(normalized);
+        if (obj && obj.value() && obj.value().get())
+            // Found cached rules for this VFS path!
+            return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj.value().get()));
+        else if (obj && !obj.value())
+        {
+            // Found nullptr. This VFS path was checked before and it was empty.
+            return nullptr;
+        }
+        else if (!obj)
         {
             osg::ref_ptr<AnimBlendRules> blendRules(new AnimBlendRules(mVfs, path));
-            mCache->addEntryToObjectCache(normalized, blendRules);
-
-            return blendRules;
+            if (blendRules->getRules().size() == 0)
+            {
+                // No blend rules were found in VFS, cache a nullptr.
+                osg::ref_ptr<AnimBlendRules> nullRules = nullptr;
+                mCache->addEntryToObjectCache(normalized, nullRules);
+                // To avoid confusion - never return blend rules with 0 rules
+                return nullRules;
+            }
+            else
+            {
+                // Blend rules were found in VFS, cache them.
+                mCache->addEntryToObjectCache(normalized, blendRules);
+                return blendRules;
+            }
         }
     }
 
