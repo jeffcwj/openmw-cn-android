@@ -38,10 +38,12 @@ namespace Resource
         if (!tmpl)
             return nullptr;
 
+        // Create an instance based on template and store template reference inside so the template will not be removed
+        // from cache
         osg::ref_ptr<SceneUtil::AnimBlendRules> blendRules(new AnimBlendRules(*tmpl, osg::CopyOp::SHALLOW_COPY));
         blendRules->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(tmpl));
 
-        if (overridePath.empty())
+        if (!overridePath.empty())
         {
             auto blendRuleOverrides = get(overridePath);
             if (blendRuleOverrides)
@@ -65,7 +67,7 @@ namespace Resource
         else if (obj && !obj.value())
         {
             // Found nullptr. This VFS path was checked before and it was empty.
-            return nullptr;
+            return osg::ref_ptr<AnimBlendRules>(static_cast<AnimBlendRules*>(obj.value().get()));
         }
         else if (!obj)
         {
