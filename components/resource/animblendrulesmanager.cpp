@@ -87,6 +87,8 @@ namespace Resource
                 return blendRules;
             }
         }
+
+        return nullptr;
     }
 
     void AnimBlendRulesManager::reportStats(unsigned int frameNumber, osg::Stats* stats) const
