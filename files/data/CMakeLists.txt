@@ -23,6 +23,7 @@ set(BUILTIN_DATA_FILES
 
     # Default animation blending config
     animations/animation-config.yaml
+    meshes/xbase_anim.1st.yaml
 
     # Month names and date formatting
     l10n/Calendar/en.yaml
