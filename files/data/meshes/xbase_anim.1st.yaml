@@ -9,10 +9,6 @@ blending_rules:
     to: "sneak*:start"
     easing: "linear"
     duration: 0
-  - from: "idle*:start"
-    to: "walk*:start"
-    easing: "linear"
-    duration: 0
   - from: "sneak*:start"
     to: "idle*:start"
     easing: "linear"
