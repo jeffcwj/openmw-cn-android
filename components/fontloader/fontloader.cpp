@@ -333,7 +333,7 @@ namespace Gui
         MyGUI::ResourceManager::getInstance().addResource(font);
         Log(Debug::Info) << "Created font texture size=" << font->getTextureFont()->getWidth() << 'x'
                          << font->getTextureFont()->getHeight() << 'x' << font->getTextureFont()->getNumElemBytes()
-                         << ", fontHeight=" << mFontHeight << ", resolution=" << resolutionNode->findAttribute("value");
+                         << ", fontSize=" << Settings::gui().mFontSize << ", resolution=" << resolutionNode->findAttribute("value");
 
         resolutionNode->setAttribute(
             "value", MyGUI::utility::toString(static_cast<int>(resolution * bookScale * mScalingFactor)));
@@ -345,7 +345,7 @@ namespace Gui
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
         Log(Debug::Info) << "Created journal font texture size=" << font->getTextureFont()->getWidth() << 'x'
                          << font->getTextureFont()->getHeight() << 'x' << font->getTextureFont()->getNumElemBytes()
-                         << ", fontHeight=" << mFontHeight << ", resolution=" << resolutionNode->findAttribute("value");
+                         << ", fontSize=" << Settings::gui().mFontSize << ", resolution=" << resolutionNode->findAttribute("value");
 
         dataManager->setResourcePath(oldDataPath);
 

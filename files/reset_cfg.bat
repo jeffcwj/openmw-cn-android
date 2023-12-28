@@ -17,8 +17,8 @@ if not exist Morrowind.bsa (
 set CFGLINE=data="%cd%"
 cd %CURPATH%
 
-for /f "tokens=3" %%a in ('"reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v Personal"') do set DOCPATH=%%a
-set CFGPATH=%DOCPATH%\My Games\OpenMW
+for /f tokens^=* %%a in ('"reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v Personal"') do set DOCPATH=%%a
+call set CFGPATH=%DOCPATH:~29%\My Games\OpenMW
 
 set TIP=0
 set FILE=%CFGPATH%\launcher.cfg

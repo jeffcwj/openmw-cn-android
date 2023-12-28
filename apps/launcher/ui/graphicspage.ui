@@ -350,17 +350,17 @@
           <widget class="QComboBox" name="shadowComputeSceneBoundsComboBox">
            <item>
             <property name="text">
-             <string>形状边缘</string>
+             <string>bounds</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>原始</string>
+             <string>primitives</string>
             </property>
            </item>
            <item>
             <property name="text">
-             <string>无</string>
+             <string>none</string>
             </property>
            </item>
           </widget>

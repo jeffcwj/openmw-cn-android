@@ -10,6 +10,8 @@
 
 #ifdef WIN32
 #include <windows.h>
+#else
+#include <clocale>
 #endif
 
 /* This file contains the code to translate from WINDOWS-1252 (native

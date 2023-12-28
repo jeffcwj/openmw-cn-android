@@ -28,7 +28,7 @@ monthInGenitive10: "霜降月"
 monthInGenitive11: "日暮月"
 monthInGenitive12: "夜星月"
 
-dateFormat: "day {day} of {monthInGenitive} {year}"
+dateFormat: "{year, number, :: group-off}年 {monthInGenitive} {day}日"
 
 weekday1: "周日"
 weekday2: "周一"

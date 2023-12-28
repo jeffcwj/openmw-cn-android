@@ -3,6 +3,7 @@
 
 #include <algorithm> // std::reverse
 #include <cctype>
+#include <set>
 #include <map>
 #include <stdexcept>
 #include <vector>

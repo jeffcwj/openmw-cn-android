@@ -15,17 +15,17 @@ OpenMW原版官方网站: https://openmw.org/
    如果提示"无法定位程序输入点..."则需要安装, 安装包的官方下载地址: https://aka.ms/vs/17/release/vc_redist.x64.exe
    如果有个窗口一闪而过则说明已经装好.
 4. 启动 openmw-launcher, 如果提示"Could not create directory ...", 则需要再次启动一次, 或者以管理员权限再次启动.
-   如果提示"Run Installation Wizard", 则点击进入设置向导, 依次点击: Next -> Existing Installation, Next -> Browse,
+   如果提示"运行安装向导", 则点击进入设置向导, 依次点击: Next -> Existing Installation, Next -> Browse,
    找到游戏本体中的"Morrowind.esm", Next -> 选"Chinese(GBK)", Next -> 3个"Import..."都选上, Next -> Finish
 5. 进入 OpenMW Launcher 主界面, 确保以下几个设置:
-   (1) Settings页面的首个下拉列表选择了"Chinese(GBK)".
-   (2) Data Files/Content Files页面中如果列表框是空的, 点击右上角的"Refresh Data Files", 在左上角下拉列表选择"Morrowind.esm",
+   (1) "数据文件->主文件与插件"页面的右上角下拉列表选择了"Chinese(GBK)".
+   (2) 左上角下拉列表选择"Morrowind.esm", 如果找不到可以点击右上角的刷新按钮(如果还找不到则需要修改"游戏目录"页面中的资源目录),
        下面的列表框就会出现一些esm和esp文件, 通常必选"Tribunal.esm"和"Bloodmoon.esm"两个官方资料片,
-       如果有汉化插件(如"tes3cn.esp")则也选上.
-   (3) Data Files/Archive Files页面中选中"Morrowind.bsa","Tribunal.bsa","Bloodmoon.bsa"三个官方资源包.
-   (4) Graphics页面中可设置游戏分辨率(Resolution).
-   (5) Advanced/Interface页面中的"GUI scaling factor"可调大一些, 尤其是高分辨率模式下, "Font size"也可以调大.
-   (6) 最后点下方的"Close"保存设置并退出.
+       如果有汉化插件(如"tes3cn_XXXX.esp")则也选上.
+   (3) "数据文件->资源文件"页面中选中"Morrowind.bsa","Tribunal.bsa","Bloodmoon.bsa"三个官方资源包.
+   (4) "图像"页面中可设置游戏分辨率(Resolution).
+   (5) "设置->界面设置"页面中的"UI大小设置"可调大一些, 尤其是高分辨率模式下, "字体大小"也可以调大.
+   (6) 最后点下方的"关闭"保存设置并退出.
 6. 打开"文档"文件夹, 找到"My Games\OpenMW\openmw.cfg"文件, 用记事本打开,如果没有这行则手动加上: fallback=Fonts_Font_0,zh_CN
 7. 以上都设置好后, 以后每次开启游戏都只需启动 openmw 即可.
 8. 首次进入游戏, 先进入"Options", 确保以下几个设置:
@@ -40,9 +40,16 @@ OpenMW原版官方网站: https://openmw.org/
 1. 需要准备 7z.exe, 安装 Python3, Git for Windows, Visual Studio 2022 (include CMake)
 2. 在 Git Bash 下进入 openmw 根目录, 执行: CI/before_script.msvc.sh -k -p Win64 -v 2022
 3. 用 Visual Studio 2022 打开 MSVC2022_64\OpenMW.sln 并执行编译
-4. 如果需要编译 MyGUI, 需要先下载编译FreeType, 然后使用命令: cmake -DMYGUI_RENDERSYSTEM=1 -DFREETYPE_INCLUDE_DIRS=... -DFREETYPE_LIBRARY=...
+4. 如果需要编译 MyGUI, 需要先下载编译FreeType, 然后使用命令: cmake -DMYGUI_DONT_USE_OBSOLETE -DMYGUI_RENDERSYSTEM=1 -DFREETYPE_INCLUDE_DIRS=... -DFREETYPE_LIBRARY=...
 
 ■ 汉化版的ChangeLog:
+
+● 2023-12-?? v9
+1. scripts: 更新topic译文
+2. files/data/fonts: 更新默认的中文字体 LXGWWenKaiGB-Regular.ttf 到1.011版本
+3. files: 修正获取我的文档路径
+4. openmw: 原版不再用clock_cast了,撤销v4版的修正
+5. files: 随原版更新MyGUI修正版到3.4.3
 
 ● 2023-03-24 v8
 1. files: 根据原版调整和补充i10n里的zh_CN.yaml文件

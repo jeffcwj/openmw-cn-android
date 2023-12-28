@@ -26,7 +26,7 @@ monthInGenitive10: "十月"
 monthInGenitive11: "十一月"
 monthInGenitive12: "十二月"
 
-dateFormat: "day {day} of {monthInGenitive} {year}"
+dateFormat: "{year, number, :: group-off}年 {monthInGenitive} {day}日"
 
 weekday1: "周日"
 weekday2: "周一"
@@ -35,3 +35,7 @@ weekday4: "周三"
 weekday5: "周四"
 weekday6: "周五"
 weekday7: "周六"
+
+am: "上午"
+pm: "下午"
+day: "日"
