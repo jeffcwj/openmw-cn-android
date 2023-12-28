@@ -141,6 +141,7 @@ Programmers
     Łukasz Gołębiewski (lukago)
     Lukasz Gromanowski (lgro)
     Mads Sandvei (Foal)
+    Maksim Eremenko (Max Yari)
     Marc Bouvier (CramitDeFrog)
     Marcin Hulist (Gohan)
     Mark Siewert (mark76)

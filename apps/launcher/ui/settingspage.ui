@@ -293,8 +293,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>671</width>
-            <height>774</height>
+            <width>676</width>
+            <height>914</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
@@ -334,7 +334,7 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="1">
+              <item row="2" column="1">
                <widget class="QCheckBox" name="turnToMovementDirectionCheckBox">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;影响左右和斜向的移动。启用这个设置可以使运动更加真实。&lt;/p&gt;&lt;p&gt;如果禁用，那么整个角色的身体就会始终面向镜头的方向。斜向运动也没有特殊的动画，会导致在地上滑行。&lt;/p&gt;&lt;p&gt;如果启用，则角色将下半身转向运动方向。上半身部分转动。头部总是面向镜头的方向。在战斗模式下，它只适用于斜向运动。在非战斗模式下，它也能改变左右运动。在游泳时也会根据运动方向将整个身体向上或向下转动。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -344,8 +344,18 @@
                 </property>
                </widget>
               </item>
+               <item row="1" column="1">
+                 <widget class="QCheckBox" name="smoothAnimTransitionsCheckBox">
+                   <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config .yaml files that can be bundled with the modded animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                   </property>
+                   <property name="text">
+                     <string>Smooth animation transitions</string>
+                   </property>
+                 </widget>
+               </item>
               <item row="2" column="0">
-               <layout class="QVBoxLayout" name="sheathingLayout">
+               <layout class="QVBoxLayout" name="weaponSheathingLayout">
                 <property name="leftMargin">
                  <number>20</number>
                 </property>
@@ -362,22 +372,29 @@
                   </property>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QCheckBox" name="shieldSheathingCheckBox">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;渲染带护套的盾牌，需要额外的mod资源。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>盾牌护套</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="0">
+                <layout class="QVBoxLayout" name="shieldSheathingLayout">
+                <property name="leftMargin">
+                  <number>20</number>
+                </property>
+                  <item>
+                  <widget class="QCheckBox" name="shieldSheathingCheckBox">
+                    <property name="enabled">
+                    <bool>false</bool>
+                    </property>
+                    <property name="toolTip">
+                    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;渲染带护套的盾牌，需要额外的mod资源。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                    <string>盾牌护套</string>
+                    </property>
+                  </widget>
+                  </item>
+                </layout>
+              </item>
+              <item row="3" column="1">
                <widget class="QCheckBox" name="playerMovementIgnoresAnimationCheckBox">
                 <property name="toolTip">
                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In third person, the camera will sway along with the movement animations of the player. Enabling this option disables this swaying by having the player character move independently of its animation. This was the default behavior of OpenMW 0.48 and earlier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

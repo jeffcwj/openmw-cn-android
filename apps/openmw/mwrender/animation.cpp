@@ -16,6 +16,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/resource/animblendrulesmanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -449,6 +450,8 @@ namespace MWRender
         ControllerMap mControllerMap[Animation::sNumBlendMasks];
 
         const SceneUtil::TextKeyMap& getTextKeys() const;
+
+        osg::ref_ptr<const SceneUtil::AnimBlendRules> mAnimBlendRules;
     };
 
     void UpdateVfxCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -604,8 +607,11 @@ namespace MWRender
 
         for (const auto& name : mResourceSystem->getVFS()->getRecursiveDirectoryIterator(animationPath))
         {
+
             if (Misc::getFileExtension(name) == "kf")
+            {
                 addSingleAnimSource(name, baseModel);
+            }
         }
     }
 
@@ -622,17 +628,18 @@ namespace MWRender
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
-    void Animation::addSingleAnimSource(const std::string& kfname, const std::string& baseModel)
+    std::shared_ptr<Animation::AnimSource> Animation::addSingleAnimSource(
+        const std::string& kfname, const std::string& baseModel)
     {
         if (!mResourceSystem->getVFS()->exists(kfname))
-            return;
+            return nullptr;
 
         auto animsrc = std::make_shared<AnimSource>();
         animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty()
             || animsrc->mKeyframes->mKeyframeControllers.empty())
-            return;
+            return nullptr;
 
         const NodeMap& nodeMap = getNodeMap();
         const auto& controllerMap = animsrc->mKeyframes->mKeyframeControllers;
@@ -660,7 +667,7 @@ namespace MWRender
             animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
         }
 
-        mAnimSources.push_back(std::move(animsrc));
+        mAnimSources.push_back(animsrc);
 
         for (const std::string& group : mAnimSources.back()->getTextKeys().getGroups())
             mSupportedAnimations.insert(group);
@@ -692,6 +699,29 @@ namespace MWRender
                     break;
             }
         }
+
+        // Get the blending rules
+        if (Settings::game().mSmoothAnimTransitions)
+        {
+            // Note, even if the actual config is .json - we should send a .yaml path to AnimBlendRulesManager, the
+            // manager will check for .json if it will not find a specified .yaml file.
+            auto yamlpath = kfname;
+            Misc::StringUtils::replaceLast(yamlpath, ".kf", ".yaml");
+
+            // globalBlendConfigPath is only used with actors! Objects have no default blending.
+            std::string globalBlendConfigPath = "animations/animation-config.yaml";
+
+            osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
+            if (mPtr.getClass().isActor())
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(globalBlendConfigPath, yamlpath);
+            else
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(yamlpath);
+
+            // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
+            animsrc->mAnimBlendRules = blendRules;
+        }
+
+        return animsrc;
     }
 
     void Animation::clearAnimSources()
@@ -777,31 +807,40 @@ namespace MWRender
         if (!mObjectRoot || mAnimSources.empty())
             return;
 
+        // Log(Debug::Info) << "Please play: " << groupname << ":" << start << "..." << stop << " mask: " << blendMask;
+
         if (groupname.empty())
         {
             resetActiveGroups();
             return;
         }
 
+        AnimStateMap::iterator foundstateiter = mStates.find(groupname);
+        if (foundstateiter != mStates.end())
+        {
+            foundstateiter->second.mPriority = priority;
+        }
+
         AnimStateMap::iterator stateiter = mStates.begin();
         while (stateiter != mStates.end())
         {
-            if (stateiter->second.mPriority == priority)
+            if (stateiter->second.mPriority == priority && stateiter->first != groupname)
+                // This MIGH be a problem since we want old states to be still running so the AnimBlendingController can
+                // blend them properly
                 mStates.erase(stateiter++);
             else
                 ++stateiter;
         }
 
-        stateiter = mStates.find(groupname);
-        if (stateiter != mStates.end())
+        if (foundstateiter != mStates.end())
         {
-            stateiter->second.mPriority = priority;
             resetActiveGroups();
             return;
         }
 
-        /* Look in reverse; last-inserted source has priority. */
         AnimState state;
+
+        /* Look in reverse; last-inserted source has priority. */
         AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
         for (; iter != mAnimSources.rend(); ++iter)
         {
@@ -815,6 +854,8 @@ namespace MWRender
                 state.mPriority = priority;
                 state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
+                state.mGroupname = groupname;
+                state.mStartKey = start;
                 mStates[std::string{ groupname }] = state;
 
                 if (state.mPlaying)
@@ -961,7 +1002,7 @@ namespace MWRender
             AnimStateMap::const_iterator state = mStates.begin();
             for (; state != mStates.end(); ++state)
             {
-                if (!(state->second.mBlendMask & (1 << blendMask)))
+                if (!state->second.blendMaskContains(blendMask))
                     continue;
 
                 if (active == mStates.end()
@@ -976,6 +1017,7 @@ namespace MWRender
             if (active != mStates.end())
             {
                 std::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                AnimBlendController::AnimStateData stateData = active->second.asAnimStateData();
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin();
                      it != animsrc->mControllerMap[blendMask].end(); ++it)
@@ -983,7 +1025,45 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(
                         it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
-                    osg::Callback* callback = it->second->getAsCallback();
+                    auto mtx = dynamic_cast<NifOsg::MatrixTransform*>(node.get());
+                    osg::Callback* callback;
+
+                    if (mtx && Settings::game().mSmoothAnimTransitions)
+                    {
+                        // Note: AnimBlendController currently works only with nifOsg::MatrixTransform. Due to
+                        // the side-effect of RotationController (and probably RollController) applying undesired
+                        // rotations to the osg::MatrixTransofrm - the AnimBlendController or KeyframeController need
+                        // to have access to mRotation of NifOsg::MatrixTransform (which is unaffected by the
+                        // side-effect) so they can use it to override the undesired rotations.
+                        //
+                        // For now if the node is not a NifOsg::MatrixTransform - animation will fallback
+                        // to KeyframeControllers and won't do any blending
+
+                        // Update an existing animation blending controller or create a new one
+                        osg::ref_ptr<AnimBlendController> animController;
+
+                        if (mAnimBlendControllers.contains(node))
+                        {
+                            animController = mAnimBlendControllers[node];
+                            animController->setKeyframeTrack(it->second, stateData, animsrc->mAnimBlendRules);
+                        }
+                        else
+                        {
+                            animController = osg::ref_ptr<AnimBlendController>(
+                                new AnimBlendController(it->second, stateData, animsrc->mAnimBlendRules));
+
+                            mAnimBlendControllers[node] = animController;
+                        }
+
+                        it->second->mTime = active->second.mTime;
+
+                        callback = animController->getAsCallback();
+                    }
+                    else
+                    {
+                        callback = it->second->getAsCallback();
+                    }
+
                     node->addUpdateCallback(callback);
                     mActiveControllers.emplace_back(node, callback);
 
@@ -1733,13 +1813,14 @@ namespace MWRender
         osg::Callback* cb = node->getUpdateCallback();
         while (cb)
         {
-            if (dynamic_cast<SceneUtil::KeyframeController*>(cb))
+            if (dynamic_cast<AnimBlendController*>(cb) || dynamic_cast<SceneUtil::KeyframeController*>(cb))
             {
                 foundKeyframeCtrl = true;
                 break;
             }
             cb = cb->getNestedCallback();
         }
+        // Note: AnimBlendController also does the reset so if one is present - we should add the rotation node
         // Without KeyframeController the orientation will not be reseted each frame, so
         // RotateController shouldn't be used for such nodes.
         if (!foundKeyframeCtrl)
