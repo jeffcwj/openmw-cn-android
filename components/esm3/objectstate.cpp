@@ -29,18 +29,14 @@ namespace ESM
         mEnabled = 1;
         esm.getHNOT(mEnabled, "ENAB");
 
-        mCount = 1;
-        esm.getHNOT(mCount, "COUN");
-
-        if (esm.isNextSub("POS_"))
+        if (mVersion <= MaxOldCountFormatVersion)
         {
-            std::array<float, 6> pos;
-            esm.getHT(pos);
-            memcpy(mPosition.pos, pos.data(), sizeof(float) * 3);
-            memcpy(mPosition.rot, pos.data() + 3, sizeof(float) * 3);
+            mRef.mCount = 1;
+            esm.getHNOT(mRef.mCount, "COUN");
         }
-        else
-            mPosition = mRef.mPos;
+
+        mPosition = mRef.mPos;
+        esm.getHNOT("POS_", mPosition.pos, mPosition.rot);
 
         mFlags = 0;
         esm.getHNOT(mFlags, "FLAG");
@@ -67,9 +63,6 @@ namespace ESM
         if (!mEnabled && !inInventory)
             esm.writeHNT("ENAB", mEnabled);
 
-        if (mCount != 1)
-            esm.writeHNT("COUN", mCount);
-
         if (!inInventory && mPosition != mRef.mPos)
         {
             std::array<float, 6> pos;
@@ -92,7 +85,6 @@ namespace ESM
         mRef.blank();
         mHasLocals = 0;
         mEnabled = false;
-        mCount = 1;
         for (int i = 0; i < 3; ++i)
         {
             mPosition.pos[i] = 0;

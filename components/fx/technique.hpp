@@ -55,7 +55,7 @@ namespace fx
             osg::ref_ptr<osg::Texture2D> mRenderTexture;
             bool mResolve = false;
             Types::SizeProxy mSize;
-            bool mMipMap;
+            bool mMipMap = false;
 
             SubPass(const SubPass& other, const osg::CopyOp& copyOp = osg::CopyOp::SHALLOW_COPY)
                 : mStateSet(new osg::StateSet(*other.mStateSet, copyOp))
@@ -174,6 +174,9 @@ namespace fx
 
         void setLocked(bool locked) { mLocked = locked; }
         bool getLocked() const { return mLocked; }
+
+        void setInternal(bool internal) { mInternal = internal; }
+        bool getInternal() const { return mInternal; }
 
     private:
         [[noreturn]] void error(const std::string& msg);
@@ -295,6 +298,7 @@ namespace fx
 
         bool mDynamic = false;
         bool mLocked = false;
+        bool mInternal = false;
     };
 
     template <>

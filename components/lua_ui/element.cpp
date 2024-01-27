@@ -38,7 +38,7 @@ namespace LuaUi
                 if (typeField != sol::nil && templateType != type)
                     throw std::logic_error(std::string("Template layout type ") + type
                         + std::string(" doesn't match template type ") + templateType);
-                type = templateType;
+                type = std::move(templateType);
             }
             return type;
         }
@@ -280,6 +280,7 @@ namespace LuaUi
                 auto children = parent->children();
                 auto it = std::find(children.begin(), children.end(), mRoot);
                 mRoot = createWidget(layout(), 0);
+                assert(it != children.end());
                 *it = mRoot;
                 parent->setChildren(children);
                 mRoot->updateCoord();

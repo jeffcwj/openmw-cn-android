@@ -183,16 +183,17 @@ namespace MWClass
         return getClassModel<ESM::Creature>(ptr);
     }
 
-    void Creature::getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const
+    void Creature::getModelsToPreload(const MWWorld::ConstPtr& ptr, std::vector<std::string>& models) const
     {
         std::string model = getModel(ptr);
         if (!model.empty())
             models.push_back(model);
 
-        // FIXME: use const version of InventoryStore functions once they are available
-        if (hasInventoryStore(ptr))
+        const MWWorld::CustomData* customData = ptr.getRefData().getCustomData();
+        if (customData && hasInventoryStore(ptr))
         {
-            const MWWorld::InventoryStore& invStore = getInventoryStore(ptr);
+            const auto& invStore
+                = static_cast<const MWWorld::InventoryStore&>(*customData->asCreatureCustomData().mContainerStore);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
                 MWWorld::ConstContainerStoreIterator equipped = invStore.getSlot(slot);
@@ -284,7 +285,8 @@ namespace MWClass
 
         if (!success)
         {
-            victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false);
+            victim.getClass().onHit(
+                victim, 0.0f, false, MWWorld::Ptr(), ptr, osg::Vec3f(), false, MWMechanics::DamageSourceType::Melee);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
             return;
         }
@@ -338,31 +340,39 @@ namespace MWClass
         MWMechanics::applyElementalShields(ptr, victim);
 
         if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
-        {
             damage = 0;
-            victim.getClass().block(victim);
-        }
 
         MWMechanics::diseaseContact(victim, ptr);
 
-        victim.getClass().onHit(victim, damage, healthdmg, weapon, ptr, hitPosition, true);
+        victim.getClass().onHit(
+            victim, damage, healthdmg, weapon, ptr, hitPosition, true, MWMechanics::DamageSourceType::Melee);
     }
 
     void Creature::onHit(const MWWorld::Ptr& ptr, float damage, bool ishealth, const MWWorld::Ptr& object,
-        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
+        const MWWorld::Ptr& attacker, const osg::Vec3f& hitPosition, bool successful,
+        const MWMechanics::DamageSourceType sourceType) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
 
+        // Self defense
+        bool setOnPcHitMe = true;
+
         // NOTE: 'object' and/or 'attacker' may be empty.
         if (!attacker.isEmpty() && attacker.getClass().isActor() && !stats.getAiSequence().isInCombat(attacker))
+        {
             stats.setAttacked(true);
 
-        // Self defense
-        bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-
-        // No retaliation for totally static creatures (they have no movement or attacks anyway)
-        if (isMobile(ptr) && !attacker.isEmpty())
-            setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            // No retaliation for totally static creatures (they have no movement or attacks anyway)
+            if (isMobile(ptr))
+            {
+                bool complain = sourceType == MWMechanics::DamageSourceType::Melee;
+                bool supportFriendlyFire = sourceType != MWMechanics::DamageSourceType::Ranged;
+                if (supportFriendlyFire && MWMechanics::friendlyHit(attacker, ptr, complain))
+                    setOnPcHitMe = false;
+                else
+                    setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
+            }
+        }
 
         // Attacker and target store each other as hitattemptactor if they have no one stored yet
         if (!attacker.isEmpty() && attacker.getClass().isActor())
@@ -501,7 +511,7 @@ namespace MWClass
             throw std::runtime_error("this creature has no inventory store");
     }
 
-    bool Creature::hasInventoryStore(const MWWorld::Ptr& ptr) const
+    bool Creature::hasInventoryStore(const MWWorld::ConstPtr& ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
@@ -587,7 +597,7 @@ namespace MWClass
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
-        info.text = text;
+        info.text = std::move(text);
 
         return info;
     }
@@ -644,12 +654,10 @@ namespace MWClass
             const std::string model = getModel(ptr);
             if (!model.empty())
             {
-                const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                 for (const ESM::Creature& creature : store.get<ESM::Creature>())
                 {
                     if (creature.mId != ourId && creature.mOriginal != ourId && !creature.mModel.empty()
-                        && Misc::StringUtils::ciEqual(
-                            model, Misc::ResourceHelpers::correctMeshPath(creature.mModel, vfs)))
+                        && Misc::StringUtils::ciEqual(model, Misc::ResourceHelpers::correctMeshPath(creature.mModel)))
                     {
                         const ESM::RefId& fallbackId = !creature.mOriginal.empty() ? creature.mOriginal : creature.mId;
                         sound = store.get<ESM::SoundGenerator>().begin();
@@ -818,7 +826,7 @@ namespace MWClass
         }
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-        if (ptr.getRefData().getCount() <= 0
+        if (ptr.getCellRef().getCount() <= 0
             && (!isFlagBitSet(ptr, ESM::Creature::Respawn) || !customData.mCreatureStats.isDead()))
         {
             state.mHasCustomState = false;
@@ -838,7 +846,7 @@ namespace MWClass
     void Creature::respawn(const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& creatureStats = getCreatureStats(ptr);
-        if (ptr.getRefData().getCount() > 0 && !creatureStats.isDead())
+        if (ptr.getCellRef().getCount() > 0 && !creatureStats.isDead())
             return;
 
         if (!creatureStats.isDeathAnimationFinished())
@@ -850,16 +858,16 @@ namespace MWClass
         static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->mValue.getFloat();
 
         float delay
-            = ptr.getRefData().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
+            = ptr.getCellRef().getCount() == 0 ? fCorpseClearDelay : std::min(fCorpseRespawnDelay, fCorpseClearDelay);
 
         if (isFlagBitSet(ptr, ESM::Creature::Respawn)
             && creatureStats.getTimeOfDeath() + delay <= MWBase::Environment::get().getWorld()->getTimeStamp())
         {
             if (ptr.getCellRef().hasContentFile())
             {
-                if (ptr.getRefData().getCount() == 0)
+                if (ptr.getCellRef().getCount() == 0)
                 {
-                    ptr.getRefData().setCount(1);
+                    ptr.getCellRef().setCount(1);
                     const ESM::RefId& script = getScript(ptr);
                     if (!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);

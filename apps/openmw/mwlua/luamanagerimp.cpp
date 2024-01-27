@@ -21,11 +21,14 @@
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
+#include "../mwrender/bonegroup.hpp"
 #include "../mwrender/postprocessor.hpp"
 
 #include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -140,9 +143,8 @@ namespace MWLua
 
         mObjectLists.update();
 
-        std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
-            return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
-        });
+        std::erase_if(mActiveLocalScripts,
+            [](const LocalScripts* l) { return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().mRef->isDeleted(); });
 
         mGlobalScripts.statsNextFrame();
         for (LocalScripts* scripts : mActiveLocalScripts)
@@ -225,10 +227,12 @@ namespace MWLua
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
+        double frameDuration = MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
+            ? 0.0
+            : MWBase::Environment::get().getFrameDuration();
+        mInputActions.update(frameDuration);
         if (playerScripts)
-            playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
-                    ? 0.0
-                    : MWBase::Environment::get().getFrameDuration());
+            playerScripts->onFrame(frameDuration);
         mProcessingInputEvents = false;
 
         for (const std::string& message : mUIMessages)
@@ -291,6 +295,8 @@ namespace MWLua
         }
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mPlayerStorage.clearTemporaryAndRemoveCallbacks();
+        mInputActions.clear();
+        mInputTriggers.clear();
         for (int i = 0; i < 5; ++i)
             lua_gc(mLua.sol(), LUA_GCCOLLECT, 0);
     }
@@ -355,6 +361,49 @@ namespace MWLua
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(object);
         mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object), force });
+    }
+
+    void LuaManager::animationTextKey(const MWWorld::Ptr& actor, const std::string& key)
+    {
+        auto pos = key.find(": ");
+        if (pos != std::string::npos)
+            mEngineEvents.addToQueue(
+                EngineEvents::OnAnimationTextKey{ getId(actor), key.substr(0, pos), key.substr(pos + 2) });
+    }
+
+    void LuaManager::playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
+        const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+        std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback)
+    {
+        sol::table options = mLua.newTable();
+        options["blendmask"] = blendMask;
+        options["autodisable"] = autodisable;
+        options["speed"] = speedmult;
+        options["startkey"] = start;
+        options["stopkey"] = stop;
+        options["startpoint"] = startpoint;
+        options["loops"] = loops;
+        options["forceloop"] = loopfallback;
+
+        bool priorityAsTable = false;
+        for (uint32_t i = 1; i < MWRender::sNumBlendMasks; i++)
+            if (priority[static_cast<MWRender::BoneGroup>(i)] != priority[static_cast<MWRender::BoneGroup>(0)])
+                priorityAsTable = true;
+        if (priorityAsTable)
+        {
+            sol::table priorityTable = mLua.newTable();
+            for (uint32_t i = 0; i < MWRender::sNumBlendMasks; i++)
+                priorityTable[static_cast<MWRender::BoneGroup>(i)] = priority[static_cast<MWRender::BoneGroup>(i)];
+            options["priority"] = priorityTable;
+        }
+        else
+            options["priority"] = priority[MWRender::BoneGroup_LowerBody];
+
+        // mEngineEvents.addToQueue(event);
+        //  Has to be called immediately, otherwise engine details that depend on animations playing immediately
+        //  break.
+        if (auto* scripts = actor.getRefData().getLuaScripts())
+            scripts->onPlayAnimation(groupname, options);
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
@@ -520,6 +569,8 @@ namespace MWLua
         MWBase::Environment::get().getL10nManager()->dropCache();
         mUiResourceManager.clear();
         mLua.dropScriptCache();
+        mInputActions.clear();
+        mInputTriggers.clear();
         initConfiguration();
 
         { // Reload global scripts

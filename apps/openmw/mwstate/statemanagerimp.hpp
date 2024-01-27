@@ -17,9 +17,12 @@ namespace MWState
         State mState;
         CharacterManager mCharacterManager;
         double mTimePlayed;
+        std::filesystem::path mLastSavegame;
 
     private:
         void cleanup(bool force = false);
+
+        void printSavegameFormatError(const std::string& exceptionText, const std::string& messageBoxText);
 
         bool confirmLoading(const std::vector<std::string_view>& missingFiles) const;
 

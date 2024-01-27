@@ -15,7 +15,6 @@ namespace ESM
     void InventoryState::load(ESMReader& esm)
     {
         // obsolete
-        uint32_t index = 0;
         while (esm.isNextSub("IOBJ"))
         {
             esm.skipHT<int32_t>();
@@ -25,12 +24,10 @@ namespace ESM
             state.mRef.loadId(esm, true);
             state.load(esm);
 
-            if (state.mCount == 0)
+            if (state.mRef.mCount == 0)
                 continue;
 
             mItems.push_back(state);
-
-            ++index;
         }
 
         uint32_t itemsCount = 0;
@@ -46,7 +43,7 @@ namespace ESM
             if (!esm.applyContentFileMapping(state.mRef.mRefNum))
                 state.mRef.mRefNum = FormId(); // content file removed; unset refnum, but keep object.
 
-            if (state.mCount == 0)
+            if (state.mRef.mCount == 0)
                 continue;
 
             mItems.push_back(state);
@@ -77,7 +74,7 @@ namespace ESM
                 esm.getHNT(multiplier, "MULT");
                 params.emplace_back(rand, multiplier);
             }
-            mPermanentMagicEffectMagnitudes[id] = params;
+            mPermanentMagicEffectMagnitudes[id] = std::move(params);
         }
 
         while (esm.isNextSub("EQUI"))
@@ -120,8 +117,8 @@ namespace ESM
             const int count = entry.second;
             for (auto& item : mItems)
             {
-                if (item.mCount == count && id == item.mRef.mRefID)
-                    item.mCount = -count;
+                if (item.mRef.mCount == count && id == item.mRef.mRefID)
+                    item.mRef.mCount = -count;
             }
         }
     }

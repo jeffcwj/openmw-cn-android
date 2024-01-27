@@ -2,6 +2,7 @@
 #define VFS_BSAARCHIVE_HPP_
 
 #include "archive.hpp"
+#include "file.hpp"
 #include "pathutil.hpp"
 
 #include <components/bsa/ba2dx10file.hpp>
@@ -48,7 +49,7 @@ namespace VFS
 
         virtual ~BsaArchive() {}
 
-        void listResources(std::map<std::string, File*>& out) override
+        void listResources(FileMap& out) override
         {
             for (auto& resource : mResources)
             {
@@ -59,7 +60,7 @@ namespace VFS
             }
         }
 
-        bool contains(const std::string& file) const override
+        bool contains(std::string_view file) const override
         {
             for (const auto& it : mResources)
             {

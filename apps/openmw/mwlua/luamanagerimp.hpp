@@ -6,6 +6,7 @@
 #include <osg/Stats>
 #include <set>
 
+#include <components/lua/inputactions.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
 #include <components/lua_ui/resources.hpp>
@@ -78,6 +79,10 @@ namespace MWLua
             mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
         }
         void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) override;
+        void animationTextKey(const MWWorld::Ptr& actor, const std::string& key) override;
+        void playAnimation(const MWWorld::Ptr& actor, const std::string& groupname,
+            const MWRender::AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
+            std::string_view start, std::string_view stop, float startpoint, size_t loops, bool loopfallback) override;
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
@@ -144,6 +149,9 @@ namespace MWLua
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
         std::string formatResourceUsageStats() const override;
 
+        LuaUtil::InputAction::Registry& inputActions() { return mInputActions; }
+        LuaUtil::InputTrigger::Registry& inputTriggers() { return mInputTriggers; }
+
     private:
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
@@ -206,6 +214,9 @@ namespace MWLua
 
         LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
         LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
+
+        LuaUtil::InputAction::Registry mInputActions;
+        LuaUtil::InputTrigger::Registry mInputTriggers;
     };
 
 }

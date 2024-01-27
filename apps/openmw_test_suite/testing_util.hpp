@@ -6,6 +6,7 @@
 
 #include <components/misc/strings/conversion.hpp>
 #include <components/vfs/archive.hpp>
+#include <components/vfs/file.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -57,13 +58,13 @@ namespace TestingOpenMW
         {
         }
 
-        void listResources(std::map<std::string, VFS::File*>& out) override
+        void listResources(VFS::FileMap& out) override
         {
             for (const auto& [key, value] : mFiles)
-                out.emplace(VFS::Path::normalizeFilename(key), value);
+                out.emplace(key, value);
         }
 
-        bool contains(const std::string& file) const override { return mFiles.count(file) != 0; }
+        bool contains(std::string_view file) const override { return mFiles.contains(file); }
 
         std::string getDescription() const override { return "TestData"; }
     };

@@ -29,6 +29,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/recursivedirectoryiterator.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -131,7 +132,7 @@ namespace
     void updateMaxLightsComboBox(MyGUI::ComboBox* box)
     {
         constexpr int min = 8;
-        constexpr int max = 32;
+        constexpr int max = 64;
         constexpr int increment = 8;
         const int maxLights = Settings::shaders().mMaxLights;
         // show increments of 8 in dropdown
@@ -240,7 +241,7 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow()
-        : WindowBase("openmw_settings_window.layout")
+        : WindowModal("openmw_settings_window.layout")
         , mKeyboardMode(true)
         , mCurrentPage(-1)
     {
@@ -450,7 +451,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
+        setVisible(false);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -1041,6 +1042,8 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
+        WindowModal::onOpen();
+
         highlightCurrentResolution();
         updateControlsBox();
         updateLightSettings();

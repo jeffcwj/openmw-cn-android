@@ -389,6 +389,17 @@ namespace MWLua
             auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
+        magicEffectT["particle"]
+            = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view { return rec.mParticle; });
+        magicEffectT["continuousVfx"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> bool {
+            return (rec.mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
+        });
+        magicEffectT["castingStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mCasting.serializeText(); });
+        magicEffectT["hitStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mHit.serializeText(); });
+        magicEffectT["areaStatic"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mArea.serializeText(); });
         magicEffectT["name"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view {
             return MWBase::Environment::get()
                 .getWorld()
@@ -730,7 +741,7 @@ namespace MWLua
                     auto id = sol::make_object(lua, self.mIterator->getId().serializeText());
                     auto params = sol::make_object(lua, ActiveSpell{ self.mActor, *self.mIterator });
                     self.advance();
-                    return { params, params };
+                    return { id, params };
                 }
                 else
                 {
@@ -769,8 +780,13 @@ namespace MWLua
             sol::state_view lua(ts);
             self.reset();
             return sol::as_function([lua, self]() mutable -> std::pair<sol::object, sol::object> {
-                if (!self.isEnd())
+                while (!self.isEnd())
                 {
+                    if (self.mIterator->second.getBase() == 0 && self.mIterator->second.getModifier() == 0.f)
+                    {
+                        self.advance();
+                        continue;
+                    }
                     ActiveEffect effect = ActiveEffect{ self.mIterator->first, self.mIterator->second };
                     auto result = sol::make_object(lua, effect);
 
@@ -778,10 +794,7 @@ namespace MWLua
                     self.advance();
                     return { key, result };
                 }
-                else
-                {
-                    return { sol::lua_nil, sol::lua_nil };
-                }
+                return { sol::lua_nil, sol::lua_nil };
             });
         };
 
@@ -823,7 +836,7 @@ namespace MWLua
             if (auto* store = effects.getStore())
                 if (auto effect = store->get(key))
                     return ActiveEffect{ key, effect.value() };
-            return sol::nullopt;
+            return ActiveEffect{ key, MWMechanics::EffectParam() };
         };
 
         // types.Actor.activeEffects(o):removeEffect(id, ?arg)

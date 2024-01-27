@@ -23,9 +23,11 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "bookpage.hpp"
 #include "textcolours.hpp"
@@ -194,7 +196,7 @@ namespace MWGui
                 std::string topicName
                     = Misc::StringUtils::lowerCase(windowManager->getTranslationDataStorage().topicStandardForm(link));
 
-                std::string displayName = link;
+                std::string displayName = std::move(link);
                 while (displayName[displayName.size() - 1] == '*')
                     displayName.erase(displayName.size() - 1, 1);
 
@@ -246,7 +248,7 @@ namespace MWGui
                 i = match.mEnd;
             }
             if (i != text.end())
-                addTopicLink(typesetter, 0, i - text.begin(), text.size());
+                addTopicLink(std::move(typesetter), 0, i - text.begin(), text.size());
         }
     }
 
@@ -362,9 +364,8 @@ namespace MWGui
         if (mCurrentWindowSize == _sender->getSize())
             return;
 
-        mTopicsList->adjustSize();
+        redrawTopicsList();
         updateHistory();
-        updateTopicFormat();
         mCurrentWindowSize = _sender->getSize();
     }
 
@@ -532,6 +533,14 @@ namespace MWGui
         return true;
     }
 
+    void DialogueWindow::redrawTopicsList()
+    {
+        mTopicsList->adjustSize();
+
+        // The topics list has been regenerated so topic formatting needs to be updated
+        updateTopicFormat();
+    }
+
     void DialogueWindow::updateTopicsPane()
     {
         mTopicsList->clear();
@@ -589,11 +598,9 @@ namespace MWGui
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
             mTopicLinks[topicId] = std::move(t);
         }
-        mTopicsList->adjustSize();
 
+        redrawTopicsList();
         updateHistory();
-        // The topics list has been regenerated so topic formatting needs to be updated
-        updateTopicFormat();
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -736,6 +743,15 @@ namespace MWGui
         bool dispositionVisible = false;
         if (!mPtr.isEmpty() && mPtr.getClass().isNpc())
         {
+            // If actor was a witness to a crime which was payed off,
+            // restore original disposition immediately.
+            MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
+            if (npcStats.getCrimeId() != -1 && npcStats.getCrimeDispositionModifier() != 0)
+            {
+                if (npcStats.getCrimeId() <= MWBase::Environment::get().getWorld()->getPlayer().getCrimeId())
+                    npcStats.setCrimeDispositionModifier(0);
+            }
+
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(
@@ -745,21 +761,12 @@ namespace MWGui
                 + std::string("/100"));
         }
 
-        bool dispositionWasVisible = mDispositionBar->getVisible();
-
-        if (dispositionVisible && !dispositionWasVisible)
+        if (mDispositionBar->getVisible() != dispositionVisible)
         {
-            mDispositionBar->setVisible(true);
-            int offset = mDispositionBar->getHeight() + 5;
+            mDispositionBar->setVisible(dispositionVisible);
+            const int offset = (mDispositionBar->getHeight() + 5) * (dispositionVisible ? 1 : -1);
             mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0, offset, 0, -offset));
-            mTopicsList->adjustSize();
-        }
-        else if (!dispositionVisible && dispositionWasVisible)
-        {
-            mDispositionBar->setVisible(false);
-            int offset = mDispositionBar->getHeight() + 5;
-            mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0, offset, 0, -offset));
-            mTopicsList->adjustSize();
+            redrawTopicsList();
         }
     }
 

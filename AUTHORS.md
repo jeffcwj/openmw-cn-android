@@ -246,6 +246,7 @@ Programmers
     xyzz
     Yohaulticetl
     Yuri Krupenin
+    Yury Stepovikov
     zelurker
 
 Documentation

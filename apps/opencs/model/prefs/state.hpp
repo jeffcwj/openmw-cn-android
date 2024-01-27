@@ -32,6 +32,7 @@ namespace CSMPrefs
     class ModifierSetting;
     class Setting;
     class StringSetting;
+    class EnumSettingValue;
     struct Values;
 
     /// \brief User settings state
@@ -63,20 +64,21 @@ namespace CSMPrefs
 
         void declareCategory(const std::string& key);
 
-        IntSetting& declareInt(const std::string& key, const QString& label, int default_);
-        DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
+        IntSetting& declareInt(Settings::SettingValue<int>& value, const QString& label);
 
-        BoolSetting& declareBool(const std::string& key, const QString& label, bool default_);
+        DoubleSetting& declareDouble(Settings::SettingValue<double>& value, const QString& label);
 
-        EnumSetting& declareEnum(const std::string& key, const QString& label, EnumValue default_);
+        BoolSetting& declareBool(Settings::SettingValue<bool>& value, const QString& label);
 
-        ColourSetting& declareColour(const std::string& key, const QString& label, QColor default_);
+        EnumSetting& declareEnum(EnumSettingValue& value, const QString& label);
 
-        ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
+        ColourSetting& declareColour(Settings::SettingValue<std::string>& value, const QString& label);
 
-        StringSetting& declareString(const std::string& key, const QString& label, const std::string& default_);
+        ShortcutSetting& declareShortcut(Settings::SettingValue<std::string>& value, const QString& label);
 
-        ModifierSetting& declareModifier(const std::string& key, const QString& label, int modifier_);
+        StringSetting& declareString(Settings::SettingValue<std::string>& value, const QString& label);
+
+        ModifierSetting& declareModifier(Settings::SettingValue<std::string>& value, const QString& label);
 
         void declareSubcategory(const QString& label);
 

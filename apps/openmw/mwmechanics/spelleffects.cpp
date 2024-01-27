@@ -285,11 +285,8 @@ namespace
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Absorb"));
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
-        {
-            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-            animation->addEffect(Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel, vfs),
-                ESM::MagicEffect::SpellAbsorption, false);
-        }
+            animation->addEffect(Misc::ResourceHelpers::correctMeshPath(absorbStatic->mModel),
+                ESM::MagicEffect::indexToName(ESM::MagicEffect::SpellAbsorption), false);
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(spellId);
         int spellCost = 0;
         if (spell)
@@ -356,7 +353,8 @@ namespace
         // Notify the target actor they've been hit
         bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
         if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
-            target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
+            target.getClass().onHit(
+                target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true, MWMechanics::DamageSourceType::Magical);
         // Apply resistances
         if (!(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Resistances))
         {
@@ -457,14 +455,11 @@ namespace MWMechanics
                     if (!caster.isEmpty())
                     {
                         MWRender::Animation* anim = world->getAnimation(caster);
-                        anim->removeEffect(effect.mEffectId);
+                        anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
                         const ESM::Static* fx
                             = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_end"));
                         if (fx)
-                        {
-                            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-                            anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel, vfs), -1);
-                        }
+                            anim->addEffect(Misc::ResourceHelpers::correctMeshPath(fx->mModel), "");
                     }
                 }
                 else if (caster == getPlayer())
@@ -495,7 +490,7 @@ namespace MWMechanics
                         if (!caster.isEmpty())
                         {
                             MWRender::Animation* anim = world->getAnimation(caster);
-                            anim->removeEffect(effect.mEffectId);
+                            anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
                         }
                     }
                 }
@@ -1050,7 +1045,7 @@ namespace MWMechanics
             effect.mFlags |= ESM::ActiveEffect::Flag_Remove;
             auto anim = world->getAnimation(target);
             if (anim)
-                anim->removeEffect(effect.mEffectId);
+                anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
         }
         else
             effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
@@ -1292,7 +1287,7 @@ namespace MWMechanics
         {
             auto anim = MWBase::Environment::get().getWorld()->getAnimation(target);
             if (anim)
-                anim->removeEffect(effect.mEffectId);
+                anim->removeEffect(ESM::MagicEffect::indexToName(effect.mEffectId));
         }
     }
 

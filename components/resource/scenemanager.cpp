@@ -649,6 +649,7 @@ namespace Resource
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("specStrength", 1.f));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1, 1, 1, 1)));
                 node->getOrCreateStateSet()->addUniform(new osg::Uniform("useFalloff", false));
+                node->getOrCreateStateSet()->addUniform(new osg::Uniform("distortionStrength", 0.f));
             }
 
             node->setUserValue(Misc::OsgUserValues::sFileHash,
@@ -866,7 +867,7 @@ namespace Resource
         return static_cast<osg::Node*>(mErrorMarker->clone(osg::CopyOp::DEEP_COPY_ALL));
     }
 
-    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string& name, bool compile)
+    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(std::string_view name, bool compile)
     {
         std::string normalized = VFS::Path::normalizeFilename(name);
 
@@ -926,7 +927,7 @@ namespace Resource
         }
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string& name)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(std::string_view name)
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
         return getInstance(scene);
@@ -967,7 +968,7 @@ namespace Resource
         return cloned;
     }
 
-    osg::ref_ptr<osg::Node> SceneManager::getInstance(const std::string& name, osg::Group* parentNode)
+    osg::ref_ptr<osg::Node> SceneManager::getInstance(std::string_view name, osg::Group* parentNode)
     {
         osg::ref_ptr<osg::Node> cloned = getInstance(name);
         attachTo(cloned, parentNode);

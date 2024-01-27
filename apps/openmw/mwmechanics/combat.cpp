@@ -10,6 +10,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadsoun.hpp>
 
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -134,6 +135,15 @@ namespace MWMechanics
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         if (Misc::Rng::roll0to99(prng) < x)
         {
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            const ESM::RefId skill = shield->getClass().getEquipmentSkill(*shield);
+            if (skill == ESM::Skill::LightArmor)
+                sndMgr->playSound3D(blocker, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
+            else if (skill == ESM::Skill::MediumArmor)
+                sndMgr->playSound3D(blocker, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
+            else if (skill == ESM::Skill::HeavyArmor)
+                sndMgr->playSound3D(blocker, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
+
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
 
@@ -230,7 +240,8 @@ namespace MWMechanics
 
             if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
-                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false);
+                victim.getClass().onHit(victim, damage, false, projectile, attacker, osg::Vec3f(), false,
+                    MWMechanics::DamageSourceType::Ranged);
                 MWMechanics::reduceWeaponCondition(damage, false, weapon, attacker);
                 return;
             }
@@ -286,7 +297,8 @@ namespace MWMechanics
                     victim.getClass().getContainerStore(victim).add(projectile, 1);
             }
 
-            victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
+            victim.getClass().onHit(
+                victim, damage, true, projectile, attacker, hitPosition, true, MWMechanics::DamageSourceType::Ranged);
         }
     }
 
@@ -649,4 +661,26 @@ namespace MWMechanics
 
         return std::make_pair(result, hitPos);
     }
+
+    bool friendlyHit(const MWWorld::Ptr& attacker, const MWWorld::Ptr& target, bool complain)
+    {
+        const MWWorld::Ptr& player = getPlayer();
+        if (attacker != player)
+            return false;
+
+        std::set<MWWorld::Ptr> followersAttacker;
+        MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(attacker, followersAttacker);
+        if (followersAttacker.find(target) == followersAttacker.end())
+            return false;
+
+        MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
+        statsTarget.friendlyHit();
+        if (statsTarget.getFriendlyHits() >= 4)
+            return false;
+
+        if (complain)
+            MWBase::Environment::get().getDialogueManager()->say(target, ESM::RefId::stringRefId("hit"));
+        return true;
+    }
+
 }

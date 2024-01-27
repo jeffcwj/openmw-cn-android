@@ -1382,17 +1382,7 @@ namespace NifOsg
             if (!niGeometry->mSkin.empty())
             {
                 const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
-                const Nif::NiSkinData* data = nullptr;
-                const Nif::NiSkinPartition* partitions = nullptr;
-                if (!skin->mData.empty())
-                {
-                    data = skin->mData.getPtr();
-                    if (!data->mPartitions.empty())
-                        partitions = data->mPartitions.getPtr();
-                }
-                if (!partitions && !skin->mPartitions.empty())
-                    partitions = skin->mPartitions.getPtr();
-
+                const Nif::NiSkinPartition* partitions = skin->getPartitions();
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
                 {
@@ -1670,7 +1660,7 @@ namespace NifOsg
                 && bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
             {
                 osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
-                rig->setSourceGeometry(geometry);
+                rig->setSourceGeometry(std::move(geometry));
 
                 const Nif::BSSkinInstance* skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
                 const Nif::BSSkinBoneData* data = skin->mData.getPtr();
@@ -2381,6 +2371,8 @@ namespace NifOsg
                             textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefraction.mStrength);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2438,6 +2430,8 @@ namespace NifOsg
                     if (texprop->treeAnim())
                         stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
+                    if (texprop->refraction())
+                        SceneUtil::setupDistortion(*node, texprop->mRefractionStrength);
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:
@@ -2605,7 +2599,10 @@ namespace NifOsg
                         emissiveMult = matprop->mEmissiveMult;
 
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->mGlossiness);
+                        // NIFs may provide specular exponents way above OpenGL's limit.
+                        // They can't be used properly, but we don't need OSG to constantly harass us about it.
+                        float glossiness = std::clamp(matprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
 
                         if (!matprop->mController.empty())
                         {
@@ -2720,7 +2717,8 @@ namespace NifOsg
                         mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderprop->mAlpha);
                         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mEmissive, 1.f));
                         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mSpecular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
+                        float glossiness = std::clamp(shaderprop->mGlossiness, 0.f, 128.f);
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, glossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
                         specEnabled = shaderprop->specular();

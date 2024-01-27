@@ -210,14 +210,14 @@
 -- end
 -- @usage -- Check for a specific effect
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Telekinesis)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Telekinesis effect')
 -- end
 -- @usage -- Check for a specific effect targeting a specific attribute.
 -- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
--- if effect then
+-- if effect.magnitude ~= 0 then
 --     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
 -- else
 --     print('No Fortify Luck effect')
@@ -229,7 +229,7 @@
 -- @param self
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
--- @return openmw.core#ActiveEffect if such an effect is active, nil otherwise
+-- @return openmw.core#ActiveEffect
 
 ---
 -- Completely removes the active effect from the actor.
@@ -718,6 +718,11 @@
 -- @return #CreatureRecord
 
 ---
+-- @type CreatureAttack
+-- @field #number minDamage Minimum attack damage.
+-- @field #number maxDamage Maximum attack damage.
+
+---
 -- @type CreatureRecord
 -- @field #string id The record ID of the creature
 -- @field #string name
@@ -727,6 +732,10 @@
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
 -- @field #number baseGold The base barter gold of the creature
+-- @field #number combatSkill The base combat skill of the creature. This is the skill value used for all skills with a 'combat' specialization
+-- @field #number magicSkill The base magic skill of the creature. This is the skill value used for all skills with a 'magic' specialization
+-- @field #number stealthSkill The base stealth skill of the creature. This is the skill value used for all skills with a 'stealth' specialization
+-- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
 
 

@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include "../misc/algorithm.hpp"
+
 namespace ESM
 {
     void SavedGame::load(ESMReader& esm)
@@ -17,7 +19,7 @@ namespace ESM
             mPlayerCellName = esm.getHNRefId("PLCE").toString();
         else
             mPlayerCellName = esm.getHNString("PLCE");
-        esm.getHNTSized<16>(mInGameTime, "TSTM");
+        esm.getHNT("TSTM", mInGameTime.mGameHour, mInGameTime.mDay, mInGameTime.mMonth, mInGameTime.mYear);
         esm.getHNT(mTimePlayed, "TIME");
         mDescription = esm.getHNString("DESC");
 
@@ -67,7 +69,9 @@ namespace ESM
         std::vector<std::string_view> missingFiles;
         for (const std::string& contentFile : mContentFiles)
         {
-            if (std::find(allContentFiles.begin(), allContentFiles.end(), contentFile) == allContentFiles.end())
+            auto it = std::find_if(allContentFiles.begin(), allContentFiles.end(),
+                [&](const std::string& file) { return Misc::StringUtils::ciEqual(file, contentFile); });
+            if (it == allContentFiles.end())
             {
                 missingFiles.emplace_back(contentFile);
             }

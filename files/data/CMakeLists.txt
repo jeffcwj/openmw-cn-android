@@ -79,6 +79,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
+    scripts/omw/mechanics/animationcontroller.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/playercontrols.lua
     scripts/omw/settings/player.lua
@@ -96,10 +97,13 @@ set(BUILTIN_DATA_FILES
     scripts/omw/ui.lua
     scripts/omw/usehandlers.lua
     scripts/omw/worldeventhandlers.lua
+    scripts/omw/input/actionbindings.lua
+    scripts/omw/input/smoothmovement.lua
 
     shaders/adjustments.omwfx
     shaders/bloomlinear.omwfx
     shaders/debug.omwfx
+    shaders/internal_distortion.omwfx
 
     mygui/core.skin
     mygui/core.xml

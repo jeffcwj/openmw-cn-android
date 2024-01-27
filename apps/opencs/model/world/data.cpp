@@ -149,7 +149,8 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mResourcesManager.setVFS(mVFS.get());
 
     constexpr double expiryDelay = 0;
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay);
+    mResourceSystem
+        = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay, &mEncoder.getStatelessEncoder());
 
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -587,7 +588,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     mRefs.addColumn(new FactionIndexColumn<CellRef>);
     mRefs.addColumn(new ChargesColumn<CellRef>);
     mRefs.addColumn(new EnchantmentChargesColumn<CellRef>);
-    mRefs.addColumn(new GoldValueColumn<CellRef>);
+    mRefs.addColumn(new StackSizeColumn<CellRef>);
     mRefs.addColumn(new TeleportColumn<CellRef>);
     mRefs.addColumn(new TeleportCellColumn<CellRef>);
     mRefs.addColumn(new PosColumn<CellRef>(&CellRef::mDoorDest, 0, true));
@@ -619,6 +620,11 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
         new FlagColumn2<ESM::DebugProfile>(Columns::ColumnId_GlobalProfile, ESM::DebugProfile::Flag_Global));
     mDebugProfiles.addColumn(new DescriptionColumn<ESM::DebugProfile>);
     mDebugProfiles.addColumn(new ScriptColumn<ESM::DebugProfile>(ScriptColumn<ESM::DebugProfile>::Type_Lines));
+
+    mSelectionGroups.addColumn(new StringIdColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new RecordStateColumn<ESM::SelectionGroup>);
+    mSelectionGroups.addColumn(new FixedRecordTypeColumn<ESM::SelectionGroup>(UniversalId::Type_SelectionGroup));
+    mSelectionGroups.addColumn(new SelectionGroupColumn);
 
     mMetaData.appendBlankRecord(ESM::RefId::stringRefId("sys::meta"));
 
@@ -664,6 +670,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Textures)), UniversalId::Type_Texture);
     addModel(new ResourceTable(&mResourcesManager.get(UniversalId::Type_Videos)), UniversalId::Type_Video);
     addModel(new IdTable(&mMetaData), UniversalId::Type_MetaData);
+    addModel(new IdTable(&mSelectionGroups), UniversalId::Type_SelectionGroup);
 
     mActorAdapter = std::make_unique<ActorAdapter>(*this);
 
@@ -908,6 +915,16 @@ CSMWorld::IdCollection<ESM::DebugProfile>& CSMWorld::Data::getDebugProfiles()
     return mDebugProfiles;
 }
 
+CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups()
+{
+    return mSelectionGroups;
+}
+
+const CSMWorld::IdCollection<ESM::SelectionGroup>& CSMWorld::Data::getSelectionGroups() const
+{
+    return mSelectionGroups;
+}
+
 const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
 {
     return mLand;
@@ -1091,7 +1108,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Static);
         }
@@ -1107,7 +1124,7 @@ void CSMWorld::Data::loadFallbackEntries()
             newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
-            record->mBase = newMarker;
+            record->mBase = std::move(newMarker);
             record->mState = CSMWorld::RecordBase::State_BaseOnly;
             mReferenceables.appendRecord(std::move(record), CSMWorld::UniversalId::Type_Door);
         }
@@ -1367,6 +1384,17 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             }
 
             mDebugProfiles.load(*mReader, mBase);
+            break;
+
+        case ESM::REC_SELG:
+
+            if (!mProject)
+            {
+                unhandledRecord = true;
+                break;
+            }
+
+            mSelectionGroups.load(*mReader, mBase);
             break;
 
         default:

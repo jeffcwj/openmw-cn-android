@@ -242,6 +242,10 @@ namespace MWRender
             if (mTextureNormals)
                 node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_Normals, mTextureNormals);
 
+            if (mTextureDistortion)
+                node.mRootStateSet->setTextureAttribute(
+                    PostProcessor::TextureUnits::Unit_Distortion, mTextureDistortion);
+
             state.pushStateSet(node.mRootStateSet);
             state.apply();
 
@@ -283,6 +287,8 @@ namespace MWRender
                         osg::Texture2D* texture = const_cast<osg::Texture2D*>(dynamic_cast<const osg::Texture2D*>(
                             pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
                                 .getTexture()));
+
+                        assert(texture != nullptr);
 
                         texture->setTextureSize(w, h);
                         texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());

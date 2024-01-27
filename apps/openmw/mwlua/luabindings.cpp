@@ -21,6 +21,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/datetimemanager.hpp"
@@ -34,6 +35,7 @@
 #include "mwscriptbindings.hpp"
 #include "objectlists.hpp"
 
+#include "animationbindings.hpp"
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
 #include "debugbindings.hpp"
@@ -86,6 +88,7 @@ namespace MWLua
         api["getRealTime"] = []() {
             return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
         };
+        api["getRealFrameDuration"] = []() { return MWBase::Environment::get().getFrameDuration(); };
 
         if (!global)
             return;
@@ -145,6 +148,7 @@ namespace MWLua
         };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["sound"] = initCoreSoundBindings(context);
+        api["vfx"] = initCoreVfxBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -328,6 +332,7 @@ namespace MWLua
         sol::state_view lua = context.mLua->sol();
         MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
+            { "openmw.animation", initAnimationPackage(context) },
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
                     lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },
