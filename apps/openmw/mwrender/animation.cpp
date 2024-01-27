@@ -710,13 +710,13 @@ namespace MWRender
             Misc::StringUtils::replaceLast(yamlpath, ".kf", ".yaml");
 
             // globalBlendConfigPath is only used with actors! Objects have no default blending.
-            std::string globalBlendConfigPath = "animations/animation-config.yaml";
+            std::string_view globalBlendConfigPath = "animations/animation-config.yaml";
 
             osg::ref_ptr<const SceneUtil::AnimBlendRules> blendRules;
             if (mPtr.getClass().isActor())
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(globalBlendConfigPath, yamlpath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(globalBlendConfigPath, yamlpath);
             else
-                blendRules = mResourceSystem->getAnimBlendRulesManager()->getInstance(yamlpath);
+                blendRules = mResourceSystem->getAnimBlendRulesManager()->getRules(yamlpath);
 
             // At this point blendRules will either be nullptr or an AnimBlendRules instance with > 0 rules inside.
             animsrc->mAnimBlendRules = blendRules;

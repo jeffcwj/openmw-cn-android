@@ -4,6 +4,7 @@
 #include <map>
 
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/format.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -12,6 +13,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
 
+#include <stdexcept>
 #include <yaml-cpp/yaml.h>
 
 namespace SceneUtil
@@ -46,29 +48,28 @@ namespace SceneUtil
     using BlendRule = AnimBlendRules::BlendRule;
 
     AnimBlendRules::AnimBlendRules(const AnimBlendRules& copy, const osg::CopyOp& copyop)
-        : mConfigPath(copy.mConfigPath)
-        , mRules(copy.mRules)
+        : mRules(copy.mRules)
     {
     }
 
-    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string yamlpath)
-        : mConfigPath(yamlpath)
+    AnimBlendRules::AnimBlendRules(const VFS::Manager* vfs, std::string_view yamlpath)
     {
-        Log(Debug::Info) << "Attempting to load animation blending config '" << yamlpath << "'";
+        std::string configPath(yamlpath);
+        Log(Debug::Verbose) << "Attempting to load animation blending config '" << configPath << "'";
 
-        if (yamlpath.find(".yaml") == std::string::npos)
-            return;
-
-        if (!vfs->exists(yamlpath))
+        if (!vfs->exists(configPath))
         {
-            Misc::StringUtils::replaceLast(yamlpath, ".yaml", ".json");
+            Misc::StringUtils::replaceLast(configPath, ".yaml", ".json");
+            if (!vfs->exists(configPath))
+            {
+                Log(Debug::Warning) << "Animation blending files was not found '" << yamlpath << "'";
+                return;
+            }
         }
-        if (!vfs->exists(yamlpath))
-            return;
 
         // Retrieving and parsing animation rules
-        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(yamlpath)), {});
-        auto rules = parseYaml(rawYaml, yamlpath);
+        std::string rawYaml(std::istreambuf_iterator<char>(*vfs->get(configPath)), {});
+        auto rules = parseYaml(rawYaml, configPath);
 
         mRules = rules;
     }
@@ -80,7 +81,7 @@ namespace SceneUtil
         mRules.insert(mRules.end(), rules.begin(), rules.end());
     }
 
-    std::vector<BlendRule> AnimBlendRules::parseYaml(const std::string& rawYaml, const std::string& path)
+    std::vector<BlendRule> AnimBlendRules::parseYaml(const std::string& rawYaml, std::string_view path)
     {
 
         std::vector<BlendRule> rules;
@@ -89,9 +90,8 @@ namespace SceneUtil
 
         if (!root.IsDefined() || root.IsNull() || root.IsScalar())
         {
-            Log(Debug::Warning) << "Warning: Can't parse YAML/JSON file '" << path
-                                << "'. Check that it's a valid YAML/JSON file.";
-            return rules;
+            throw std::domain_error(
+                Misc::StringUtils::format("Can't parse file '%s'. Check that it's a valid YAML/JSON file.", path));
         }
 
         if (root["blending_rules"])
@@ -125,7 +125,7 @@ namespace SceneUtil
         }
         else
         {
-            Log(Debug::Warning) << "Warning: 'blending_rules' object not found in '" << path << "' file!";
+            throw std::domain_error(Misc::StringUtils::format("'blending_rules' object not found in '%s' file!", path));
         }
 
         return rules;

@@ -30,11 +30,11 @@ namespace Resource
     {
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::getInstance(
-        const std::string& path, const std::string& overridePath)
+    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::getRules(
+        std::string_view path, std::string_view overridePath)
     {
         // Note: Providing a non-existing path but an existing overridePath is not supported!
-        auto tmpl = get(path);
+        auto tmpl = loadRules(path);
         if (!tmpl)
             return nullptr;
 
@@ -45,7 +45,7 @@ namespace Resource
 
         if (!overridePath.empty())
         {
-            auto blendRuleOverrides = get(overridePath);
+            auto blendRuleOverrides = loadRules(overridePath);
             if (blendRuleOverrides)
             {
                 blendRules->addOverrideRules(*blendRuleOverrides);
@@ -56,7 +56,7 @@ namespace Resource
         return blendRules;
     }
 
-    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::get(const std::string& path)
+    osg::ref_ptr<const AnimBlendRules> AnimBlendRulesManager::loadRules(std::string_view path)
     {
         const std::string normalized = VFS::Path::normalizeFilename(path);
 
