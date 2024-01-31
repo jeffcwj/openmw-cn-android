@@ -48,7 +48,7 @@
      <item>
       <widget class="QPushButton" name="browseButton">
        <property name="text">
-        <string>Browse...</string>
+        <string>浏览...</string>
        </property>
        <property name="icon">
         <iconset theme="folder">

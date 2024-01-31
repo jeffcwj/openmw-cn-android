@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>OpenMW Launcher</string>
+   <string>OpenMW 启动器</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../files/launcher/launcher.qrc">
@@ -40,7 +40,7 @@
       <item>
        <widget class="QLabel" name="versionLabel">
         <property name="text">
-         <string>OpenMW version</string>
+         <string>OpenMW 版本</string>
         </property>
        </widget>
       </item>
@@ -124,10 +124,10 @@ QToolButton {
      <normaloff>:/images/openmw-plugin.png</normaloff>:/images/openmw-plugin.png</iconset>
    </property>
    <property name="text">
-    <string>Data Files</string>
+    <string>数据文件</string>
    </property>
    <property name="toolTip">
-    <string>Allows to setup data files and directories</string>
+    <string>可以安装数据文件和目录</string>
    </property>
    <property name="statusTip">
     <string/>
@@ -145,10 +145,10 @@ QToolButton {
      <normaloff>:/images/preferences-video.png</normaloff>:/images/preferences-video.png</iconset>
    </property>
    <property name="text">
-    <string>Display</string>
+    <string>显示</string>
    </property>
    <property name="toolTip">
-    <string>Allows to change graphics settings</string>
+    <string>可以改变图像设置</string>
    </property>
   </action>
   <action name="settingsAction">
@@ -160,10 +160,10 @@ QToolButton {
      <normaloff>:/images/preferences.png</normaloff>:/images/preferences.png</iconset>
    </property>
    <property name="text">
-    <string>Settings</string>
+    <string>设置</string>
    </property>
    <property name="toolTip">
-    <string>Allows to tweak engine settings</string>
+    <string>可以调节引擎设置</string>
    </property>
   </action>
   <action name="importAction">
@@ -175,10 +175,10 @@ QToolButton {
      <normaloff>:/images/preferences-advanced.png</normaloff>:/images/preferences-advanced.png</iconset>
    </property>
    <property name="text">
-    <string>Import</string>
+    <string>导入</string>
    </property>
    <property name="toolTip">
-    <string>Allows to import data from original engine</string>
+    <string>可以从原版引擎导入数据</string>
    </property>
   </action>
  </widget>
