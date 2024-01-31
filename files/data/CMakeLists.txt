@@ -23,6 +23,10 @@ set(BUILTIN_DATA_FILES
     fonts/zh_CN.omwfont
     fonts/LXGWWenKaiGB-Regular.ttf
 
+    # Default animation blending config
+    animations/animation-config.yaml
+    meshes/xbase_anim.1st.yaml
+
     # Month names and date formatting
     l10n/Calendar/en.yaml
     l10n/Calendar/zh_CN.yaml

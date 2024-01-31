@@ -11,7 +11,10 @@ namespace osg
 
 namespace SceneUtil
 {
-
+    // IMPORTANT: While inheriting your controller from this class you have to be ABSOLUTELY SURE that when
+    // you bind you controller to a node via node->addUpdateCallback() an actual type of node will match (or be a child
+    // of) NodeType provided to this class. Otherwise an unsafe cast of node to incompatible NodeType done here will
+    // result in everything imploding on itself in an unpredictable and confusing fashion.
     template <class Derived, typename NodeType = osg::Node*, typename VisitorType = osg::NodeVisitor*>
     class NodeCallback : public osg::Callback
     {
