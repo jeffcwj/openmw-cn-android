@@ -1,4 +1,4 @@
-#include "datafilespage.hpp"
+﻿#include "datafilespage.hpp"
 #include "maindialog.hpp"
 
 #include <QDebug>
@@ -147,15 +147,15 @@ Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, C
 
     QVector<std::pair<QString, QString>> languages = { { "English", tr("English") }, { "French", tr("French") },
         { "German", tr("German") }, { "Italian", tr("Italian") }, { "Polish", tr("Polish") },
-        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") } };
+        { "Russian", tr("Russian") }, { "Spanish", tr("Spanish") }, { "Chinese(GBK)", tr("Chinese(GBK)") }, { "UTF-8", tr("UTF-8") } };
 
     for (auto lang : languages)
     {
         mSelector->languageBox()->addItem(lang.second, lang.first);
     }
 
-    mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
-    mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
+    mNewProfileDialog = new TextInputDialog(tr("新内容列表"), tr("内容列表名:"), this);
+    mCloneProfileDialog = new TextInputDialog(tr("克隆内容列表"), tr("内容列表名:"), this);
 
     connect(mNewProfileDialog->lineEdit(), &LineEdit::textChanged, this, &DataFilesPage::updateNewProfileOkButton);
     connect(mCloneProfileDialog->lineEdit(), &LineEdit::textChanged, this, &DataFilesPage::updateCloneProfileOkButton);
@@ -185,13 +185,13 @@ void Launcher::DataFilesPage::buildView()
     QToolButton* refreshButton = mSelector->refreshButton();
 
     // tool buttons
-    ui.newProfileButton->setToolTip("Create a new Content List");
-    ui.cloneProfileButton->setToolTip("Clone the current Content List");
-    ui.deleteProfileButton->setToolTip("Delete an existing Content List");
+    ui.newProfileButton->setToolTip("创建一个内容列表");
+    ui.cloneProfileButton->setToolTip("克隆当前的内容列表");
+    ui.deleteProfileButton->setToolTip("删除已存在的内容列表");
 
     // combo box
     ui.profilesComboBox->addItem(mDefaultContentListName);
-    ui.profilesComboBox->setPlaceholderText(QString("Select a Content List..."));
+    ui.profilesComboBox->setPlaceholderText(QString("选择一个内容列表..."));
     ui.profilesComboBox->setCurrentIndex(ui.profilesComboBox->findText(QLatin1String(mDefaultContentListName)));
 
     // Add the actions to the toolbuttons
@@ -308,7 +308,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         // Display new content with custom formatting
         if (mNewDataDirs.contains(canonicalDirPath))
         {
-            tooltip += tr("Will be added to the current profile");
+            tooltip += tr("将会加入当前配置");
             QFont font = item->font();
             font.setBold(true);
             font.setItalic(true);
@@ -329,7 +329,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
             if (!tooltip.isEmpty())
                 tooltip += "\n";
 
-            tooltip += tr("Contains content file(s)");
+            tooltip += tr("包含内容文件");
         }
         else
         {
@@ -403,6 +403,14 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
     else if (language == QLatin1String("Russian"))
     {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+    }
+    else if (language == QLatin1String("Chinese(GBK)"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("gbk"));
+    }
+    else if (language == QLatin1String("UTF-8"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("utf8"));
     }
     else
     {
@@ -841,12 +849,12 @@ void Launcher::DataFilesPage::checkForDefaultProfile()
 bool Launcher::DataFilesPage::showDeleteMessageBox(const QString& text)
 {
     QMessageBox msgBox(this);
-    msgBox.setWindowTitle(tr("Delete Content List"));
+    msgBox.setWindowTitle(tr("删除内容列表"));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("Are you sure you want to delete <b>%1</b>?").arg(text));
+    msgBox.setText(tr("你确定要删除 <b>%1</b>?").arg(text));
 
-    QAbstractButton* deleteButton = msgBox.addButton(tr("Delete"), QMessageBox::ActionRole);
+    QAbstractButton* deleteButton = msgBox.addButton(tr("删除"), QMessageBox::ActionRole);
 
     msgBox.exec();
 

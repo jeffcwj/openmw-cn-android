@@ -1,4 +1,4 @@
-#include "settingspage.hpp"
+﻿#include "settingspage.hpp"
 
 #include <array>
 #include <cmath>
@@ -110,7 +110,7 @@ void Launcher::SettingsPage::on_skipMenuCheckBox_stateChanged(int state)
 void Launcher::SettingsPage::on_runScriptAfterStartupBrowseButton_clicked()
 {
     QString scriptFile = QFileDialog::getOpenFileName(
-        this, QObject::tr("Select script file"), QDir::currentPath(), QString(tr("Text file (*.txt)")));
+        this, QObject::tr("请选择脚本文件"), QDir::currentPath(), QString(tr("文本文件 (*.txt)")));
 
     if (scriptFile.isEmpty())
         return;

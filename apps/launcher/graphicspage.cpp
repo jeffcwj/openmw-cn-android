@@ -1,4 +1,4 @@
-#include "graphicspage.hpp"
+﻿#include "graphicspage.hpp"
 
 #include "sdlinit.hpp"
 
@@ -49,11 +49,11 @@ bool Launcher::GraphicsPage::setupSDL()
     if (displays < 0)
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error receiving number of screens"));
+        msgBox.setWindowTitle(tr("获取屏幕数出错"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<br><b>SDL_GetNumVideoDisplays failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
+            tr("<br><b>SDL_GetNumVideoDisplays 失败:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return false;
     }
@@ -63,7 +63,7 @@ bool Launcher::GraphicsPage::setupSDL()
     for (int i = 0; i < displays; i++)
     {
         mResolutionsPerScreen.append(getAvailableResolutions(i));
-        screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
+        screenComboBox->addItem(QString(tr("屏幕 ")) + QString::number(i + 1));
     }
     screenChanged(0);
 
@@ -178,11 +178,11 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
     if (modes < 0)
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error receiving resolutions"));
+        msgBox.setWindowTitle(tr("获取分辨率出错"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
+            tr("<br><b>SDL_GetNumDisplayModes 失败:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return result;
     }
@@ -192,11 +192,11 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
         {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error receiving resolutions"));
+            msgBox.setWindowTitle(tr("获取分辨率出错"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
+                tr("<br><b>SDL_GetDisplayMode 失败:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
             msgBox.exec();
             return result;
         }

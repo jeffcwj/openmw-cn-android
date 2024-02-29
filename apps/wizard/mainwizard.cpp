@@ -1,4 +1,4 @@
-#include "mainwizard.hpp"
+﻿#include "mainwizard.hpp"
 
 #include <QDateTime>
 #include <QDebug>
@@ -38,7 +38,7 @@ Wizard::MainWizard::MainWizard(QWidget* parent)
     setWizardStyle(QWizard::ClassicStyle);
 #endif
 
-    setWindowTitle(tr("OpenMW Wizard"));
+    setWindowTitle(tr("OpenMW 向导"));
     setWindowIcon(QIcon(QLatin1String(":/images/openmw-wizard.png")));
     setMinimumWidth(550);
 
@@ -55,9 +55,9 @@ Wizard::MainWizard::MainWizard(QWidget* parent)
         &MainWizard::importerFinished);
 
     mLogError = tr(
-        "<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-        "<p>Please make sure you have the right permissions "
-        "and try again.</p></body></html>");
+        "<html><head/><body><p><b>无法写入 %1</b></p>"
+        "<p>请确认你有相关权限"
+        "并再次尝试。</p></body></html>");
 
     std::filesystem::create_directories(mCfgMgr.getUserConfigPath());
     std::filesystem::create_directories(mCfgMgr.getUserDataPath());
@@ -91,7 +91,7 @@ void Wizard::MainWizard::setupLog()
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
+        msgBox.setWindowTitle(tr("无法打开向导日志文件"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(mLogError.arg(file.fileName()));
@@ -115,7 +115,7 @@ void Wizard::MainWizard::addLogText(const QString& text)
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening Wizard log file"));
+        msgBox.setWindowTitle(tr("无法打开向导日志文件"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(mLogError.arg(file.fileName()));
@@ -139,9 +139,9 @@ void Wizard::MainWizard::addLogText(const QString& text)
 void Wizard::MainWizard::setupGameSettings()
 {
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
-           "<p>Please make sure you have the right permissions "
-           "and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>无法读取 %1</b></p>"
+           "<p>请确认你有相关权限"
+           "并再次尝试。</p></body></html>"));
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
@@ -155,7 +155,7 @@ void Wizard::MainWizard::setupGameSettings()
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setWindowTitle(tr("打开 OpenMW 配置文件出错"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(message.arg(file.fileName()));
@@ -187,7 +187,7 @@ void Wizard::MainWizard::setupGameSettings()
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
                 QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+                msgBox.setWindowTitle(tr("打开 OpenMW 配置文件出错"));
                 msgBox.setIcon(QMessageBox::Critical);
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.setText(message.arg(file.fileName()));
@@ -210,9 +210,9 @@ void Wizard::MainWizard::setupLauncherSettings()
     path.append(QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
 
     QString message(
-        tr("<html><head/><body><p><b>Could not open %1 for reading</b></p>"
-           "<p>Please make sure you have the right permissions "
-           "and try again.</p></body></html>"));
+        tr("<html><head/><body><p><b>无法读取 %1</b></p>"
+           "<p>请确认你有相关权限"
+           "并再次尝试。</p></body></html>"));
 
     QFile file(path);
 
@@ -223,7 +223,7 @@ void Wizard::MainWizard::setupLauncherSettings()
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
+            msgBox.setWindowTitle(tr("打开 OpenMW 配置文件出错"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(message.arg(file.fileName()));
@@ -278,6 +278,14 @@ void Wizard::MainWizard::runSettingsImporter()
     else if (language == QLatin1String("Russian"))
     {
         arguments.append(QLatin1String("win1251"));
+    }
+    else if (language == QLatin1String("Chinese(GBK)"))
+    {
+        arguments.append(QLatin1String("gbk"));
+    }
+    else if (language == QLatin1String("UTF-8"))
+    {
+        arguments.append(QLatin1String("utf8"));
     }
     else
     {
@@ -377,10 +385,10 @@ void Wizard::MainWizard::accept()
 void Wizard::MainWizard::reject()
 {
     QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("Quit Wizard"));
+    msgBox.setWindowTitle(tr("退出向导"));
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setText(tr("Are you sure you want to exit the Wizard?"));
+    msgBox.setText(tr("你确认退出向导吗？"));
 
     if (msgBox.exec() == QMessageBox::Yes)
     {
@@ -402,6 +410,14 @@ void Wizard::MainWizard::writeSettings()
     {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
     }
+    else if (language == QLatin1String("Chinese(GBK)"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("gbk"));
+    }
+    else if (language == QLatin1String("UTF-8"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("utf8"));
+    }
     else
     {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
@@ -422,13 +438,13 @@ void Wizard::MainWizard::writeSettings()
         if (!dir.mkpath(userPath))
         {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
+            msgBox.setWindowTitle(tr("创建 OpenMW 配置目录出错"));
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setText(
-                tr("<html><head/><body><p><b>Could not create %1</b></p>"
-                   "<p>Please make sure you have the right permissions "
-                   "and try again.</p></body></html>")
+                tr("<html><head/><body><p><b>无法创建 %1</b></p>"
+                   "<p>请确认你有相关权限"
+                   "并再次尝试。</p></body></html>")
                     .arg(userPath));
             connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
             msgBox.exec();
@@ -443,13 +459,13 @@ void Wizard::MainWizard::writeSettings()
     {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+        msgBox.setWindowTitle(tr("写入 OpenMW 配置文件出错"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-               "<p>Please make sure you have the right permissions "
-               "and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>无法写入 %1</b></p>"
+               "<p>请确认你有相关权限"
+               "并再次尝试。</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();
@@ -470,13 +486,13 @@ void Wizard::MainWizard::writeSettings()
     {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
+        msgBox.setWindowTitle(tr("写入 OpenMW 配置文件出错"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Could not open %1 for writing</b></p>"
-               "<p>Please make sure you have the right permissions "
-               "and try again.</p></body></html>")
+            tr("<html><head/><body><p><b>无法写入 %1</b></p>"
+               "<p>请确认你有相关权限"
+               "并再次尝试。</p></body></html>")
                 .arg(file.fileName()));
         connect(&msgBox, &QDialog::finished, qApp, &QApplication::quit, Qt::QueuedConnection);
         msgBox.exec();

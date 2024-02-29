@@ -1,4 +1,4 @@
-#include "maindialog.hpp"
+﻿#include "maindialog.hpp"
 
 #include <QCloseEvent>
 #include <QDir>
@@ -49,9 +49,9 @@ Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configuratio
     connect(mWizardInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &MainDialog::wizardFinished);
 
-    buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
-    buttonBox->button(QDialogButtonBox::Ok)->setText(tr(" Launch OpenMW "));
-    buttonBox->button(QDialogButtonBox::Help)->setText(tr("Help"));
+    buttonBox->button(QDialogButtonBox::Close)->setText(tr("关闭"));
+    buttonBox->button(QDialogButtonBox::Ok)->setText(tr(" 启动 OpenMW "));
+    buttonBox->button(QDialogButtonBox::Help)->setText(tr("帮助"));
 
     // Order of buttons can be different on different setups,
     // so make sure that the Play button has a focus by default.
@@ -121,8 +121,8 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         std::error_code ec;
         if (!create_directories(userConfigDir, ec))
         {
-            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
-                tr("<br><b>Could not create directory %0</b><br><br>"
+            cfgError(tr("创建 OpenMW 配置目录出错: 错误码 %0").arg(ec.value()),
+                tr("<br><b>无法创建目录 %0</b><br><br>"
                    "%1<br>")
                     .arg(Files::pathToQString(userConfigDir))
                     .arg(QString(ec.message().c_str())));
@@ -133,18 +133,18 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
     if (mLauncherSettings.isFirstRun())
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("First run"));
+        msgBox.setWindowTitle(tr("首次运行"));
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(
-            tr("<html><head/><body><p><b>Welcome to OpenMW!</b></p>"
-               "<p>It is recommended to run the Installation Wizard.</p>"
-               "<p>The Wizard will let you select an existing Morrowind installation, "
-               "or install Morrowind for OpenMW to use.</p></body></html>"));
+            tr("<html><head/><body><p><b>欢迎使用 OpenMW！</b></p>"
+               "<p>推荐运行安装向导。</p>"
+               "<p>向导会让你选择已安装的晨风，"
+               "或现安装晨风给 OpenMW 使用。</p></body></html>"));
 
         QAbstractButton* wizardButton
-            = msgBox.addButton(tr("Run &Installation Wizard"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
-        QAbstractButton* skipButton = msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+            = msgBox.addButton(tr("运行安装向导(&I)"), QMessageBox::AcceptRole); // ActionRole doesn't work?!
+        QAbstractButton* skipButton = msgBox.addButton(tr("跳过"), QMessageBox::RejectRole);
 
         msgBox.exec();
 
@@ -178,14 +178,14 @@ void Launcher::MainDialog::setVersionLabel()
     versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     if (!Version::getVersion().empty() && (revision.isEmpty() || revision == tag))
         versionLabel->setText(
-            tr("OpenMW %1 release").arg(QString::fromUtf8(Version::getVersion().data(), Version::getVersion().size())));
+            tr("OpenMW %1 发布版").arg(QString::fromUtf8(Version::getVersion().data(), Version::getVersion().size())));
     else
-        versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
+        versionLabel->setText(tr("OpenMW 开发版 (%1)").arg(revision.left(10)));
 
     // Add the compile date and time
     auto compileDate = QLocale(QLocale::C).toDate(QString(__DATE__).simplified(), QLatin1String("MMM d yyyy"));
     auto compileTime = QLocale(QLocale::C).toTime(QString(__TIME__).simplified(), QLatin1String("hh:mm:ss"));
-    versionLabel->setToolTip(tr("Compiled on %1 %2")
+    versionLabel->setToolTip(tr("编译于 %1 %2")
                                  .arg(QLocale::system().toString(compileDate, QLocale::LongFormat),
                                      QLocale::system().toString(compileTime, QLocale::ShortFormat)));
 }
@@ -297,10 +297,10 @@ bool Launcher::MainDialog::setupLauncherSettings()
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        cfgError(tr("Error opening OpenMW configuration file"),
-            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br>"
-               "Please make sure you have the right permissions "
-               "and try again.<br>")
+        cfgError(tr("打开 OpenMW 配置文件出错"),
+            tr("<br><b>无法读取 %0:</b><br><br>%1<br><br>"
+               "请确认你有相关权限"
+               "并再次尝试。<br>")
                 .arg(file.fileName())
                 .arg(file.errorString()));
         return false;
@@ -327,10 +327,10 @@ bool Launcher::MainDialog::setupGameSettings()
         {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             {
-                cfgError(tr("Error opening OpenMW configuration file"),
-                    tr("<br><b>Could not open %0 for reading</b><br><br>"
-                       "Please make sure you have the right permissions "
-                       "and try again.<br>")
+                cfgError(tr("打开 OpenMW 配置文件出错"),
+                    tr("<br><b>无法读取 %0</b><br><br>"
+                       "请确认你有相关权限"
+                       "并再次尝试。<br>")
                         .arg(file.fileName()));
                 return {};
             }
@@ -385,15 +385,15 @@ bool Launcher::MainDialog::setupGameData()
     if (dataDirs.isEmpty())
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
+        msgBox.setWindowTitle(tr("晨风安装的检测出错"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(
-            tr("<br><b>Could not find the Data Files location</b><br><br>"
-               "The directory containing the data files was not found."));
+            tr("<br><b>无法找到 Data Files 的位置</b><br><br>"
+               "含有数据文件的目录无法找到。"));
 
-        QAbstractButton* wizardButton = msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
-        QAbstractButton* skipButton = msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+        QAbstractButton* wizardButton = msgBox.addButton(tr("运行安装向导(&I)..."), QMessageBox::ActionRole);
+        QAbstractButton* skipButton = msgBox.addButton(tr("跳过"), QMessageBox::RejectRole);
 
         Q_UNUSED(skipButton); // Suppress compiler unused warning
 
@@ -419,9 +419,9 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     }
     catch (std::exception& e)
     {
-        cfgError(tr("Error reading OpenMW configuration files"),
-            tr("<br>The problem may be due to an incomplete installation of OpenMW.<br>"
-               "Reinstalling OpenMW may resolve the problem.<br>")
+        cfgError(tr("读取 OpenMW 配置文件出错"),
+            tr("<br>问题可能由于 OpenMW 的安装不完整。<br>"
+               "重新安装 OpenMW 可能解决这个问题。<br>")
                 + e.what());
         return false;
     }
@@ -461,8 +461,8 @@ bool Launcher::MainDialog::writeSettings()
         std::error_code ec;
         if (!create_directories(userPath, ec))
         {
-            cfgError(tr("Error creating OpenMW configuration directory: code %0").arg(ec.value()),
-                tr("<br><b>Could not create directory %0</b><br><br>"
+            cfgError(tr("创建 OpenMW 配置目录出错: 错误码 %0").arg(ec.value()),
+                tr("<br><b>无法创建目录 %0</b><br><br>"
                    "%1<br>")
                     .arg(Files::pathToQString(userPath))
                     .arg(QString(ec.message().c_str())));
@@ -480,10 +480,10 @@ bool Launcher::MainDialog::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
         // File cannot be opened or created
-        cfgError(tr("Error writing OpenMW configuration file"),
-            tr("<br><b>Could not open or create %0 for writing</b><br><br>"
-               "Please make sure you have the right permissions "
-               "and try again.<br>")
+        cfgError(tr("写入 OpenMW 配置文件出错"),
+            tr("<br><b>无法创建或写入 %0</b><br><br>"
+               "请确认你有相关权限"
+               "并再次尝试。<br>")
                 .arg(file.fileName()));
         return false;
     }
@@ -499,9 +499,9 @@ bool Launcher::MainDialog::writeSettings()
     }
     catch (std::exception& e)
     {
-        std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" + Files::pathToUnicodeString(settingsPath)
+        std::string msg = "<br><b>写入 settings.cfg 出错</b><br><br>" + Files::pathToUnicodeString(settingsPath)
             + "<br><br>" + e.what();
-        cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
+        cfgError(tr("写入用户设置文件出错"), tr(msg.c_str()));
         return false;
     }
 
@@ -511,10 +511,10 @@ bool Launcher::MainDialog::writeSettings()
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
         // File cannot be opened or created
-        cfgError(tr("Error writing Launcher configuration file"),
-            tr("<br><b>Could not open or create %0 for writing</b><br><br>"
-               "Please make sure you have the right permissions "
-               "and try again.<br>")
+        cfgError(tr("写入启动器配置文件出错"),
+            tr("<br><b>无法创建或写入 %0</b><br><br>"
+               "请确认你有相关权限"
+               "并再次尝试。<br>")
                 .arg(file.fileName()));
         return false;
     }
@@ -560,12 +560,12 @@ void Launcher::MainDialog::play()
     if (!mGameSettings.hasMaster())
     {
         QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("No game file selected"));
+        msgBox.setWindowTitle(tr("没选择游戏文件"));
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(
-            tr("<br><b>You do not have a game file selected.</b><br><br>"
-               "OpenMW will not start without a game file selected.<br>"));
+            tr("<br><b>你没选择游戏文件。</b><br><br>"
+               "不选择游戏文件就无法启动 OpenMW。<br>"));
         msgBox.exec();
         return;
     }
