@@ -414,11 +414,11 @@ void Wizard::MainWizard::writeSettings()
     }
     else if (language == QLatin1String("Chinese(GBK)"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("gbk"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "gbk" });
     }
     else if (language == QLatin1String("UTF-8"))
     {
-        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("utf8"));
+        mGameSettings.setValue(QLatin1String("encoding"), { "utf8" });
     }
     else
     {
