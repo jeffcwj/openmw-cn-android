@@ -540,6 +540,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 case ESM::REC_ENAB:
                 case ESM::REC_LEVC:
                 case ESM::REC_LEVI:
+                case ESM::REC_LIGH:
                 case ESM::REC_CREA:
                 case ESM::REC_CONT:
                 case ESM::REC_RAND:
@@ -624,7 +625,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
             Log(Debug::Warning) << "Player character's cell no longer exists, changing to the default cell";
             ESM::ExteriorCellLocation cellIndex(0, 0, ESM::Cell::sDefaultWorldspaceId);
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
-            osg::Vec2 posFromIndex = ESM::indexToPosition(cellIndex, false);
+            const osg::Vec2f posFromIndex = ESM::indexToPosition(cellIndex, false);
             ESM::Position pos;
             pos.pos[0] = posFromIndex.x();
             pos.pos[1] = posFromIndex.y();

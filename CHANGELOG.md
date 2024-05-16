@@ -12,7 +12,7 @@
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
     Bug #4683: Disposition decrease when player commits crime is not implemented properly
     Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
-    Bug #4743: PlayGroup doesn't play non-looping animations correctly 
+    Bug #4743: PlayGroup doesn't play non-looping animations correctly
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #4822: Non-weapon equipment and body parts can't inherit time from parent animation
@@ -172,6 +172,8 @@
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
     Bug #7908: Key bindings names in the settings menu are layout-specific
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
+    Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
+    Bug #7980: Paralyzed NPCs' lips move
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -233,6 +235,7 @@
     Feature #7932: Support two-channel normal maps
     Feature #7936: Scalable icons in Qt applications
     Feature #7953: Allow to change SVG icons colors depending on color scheme
+    Feature #7964: Add Lua read access to MW Dialogue records
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION

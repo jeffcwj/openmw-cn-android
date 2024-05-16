@@ -315,7 +315,7 @@
 -- @param #any spellOrId A @{openmw.core#Spell} or string record id.
 
 ---
--- Remove an active spell based on active spell ID (see @{openmw.core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw.core#ActiveSpell.temporary}).
+-- Remove an active spell based on active spell ID (see @{openmw_core#ActiveSpell.activeSpellId}). Can only be used in global scripts or on self. Can only be used to remove spells with the temporary flag set (see @{openmw_core#ActiveSpell.temporary}).
 -- @function [parent=#ActorActiveSpells] remove
 -- @param self
 -- @param #any id Active spell ID.
@@ -1318,7 +1318,7 @@
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Armor.createRecordDraft(armorTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
--- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
+-- world.createObject(newRecord.id):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 
 --- @{#Book} functions
@@ -1457,7 +1457,7 @@
 --  --This is the new record we want to create, with a record provided as a template.
 -- local recordDraft = types.Clothing.createRecordDraft(clothingTable)--Need to convert the table into the record draft
 -- local newRecord = world.createRecord(recordDraft)--This creates the actual record
--- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
+-- world.createObject(newRecord.id):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 ---
 -- @type ClothingRecord
@@ -1590,6 +1590,13 @@
 -- @return #boolean
 
 ---
+-- Creates a @{#LightRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Light] createRecordDraft
+-- @param #LightRecord light A Lua table with the fields of a LightRecord, with an optional field `template` that accepts a @{#LightRecord} as a base.
+-- @return #LightRecord A strongly typed Light record.
+
+---
 -- Returns the read-only @{#LightRecord} of a Light
 -- @function [parent=#Light] record
 -- @param #any objectOrRecordId
@@ -1608,7 +1615,15 @@
 -- @field #number duration
 -- @field #number radius
 -- @field #number color
--- @field #boolean isCarriable
+-- @field #boolean isCarriable True if the light can be carried by actors and appears up in their inventory.
+-- @field #boolean isDynamic If true, the light will apply to actors and other moving objects
+-- @field #boolean isFire True if the light acts like a fire.
+-- @field #boolean isFlicker
+-- @field #boolean isFlickerSlow
+-- @field #boolean isNegative If true, the light will reduce light instead of increasing it.
+-- @field #boolean isOffByDefault If true, the light will not emit any light or sound while placed in the world. It will still work in the inventory.
+-- @field #boolean isPulse
+-- @field #boolean isPulseSlow
 
 
 
@@ -2245,6 +2260,9 @@
 
 --- Functions for @{#ESM4Static} objects
 -- @field [parent=#types] #ESM4Static ESM4Static
+
+--- Functions for @{#ESM4StaticCollection} objects
+-- @field [parent=#types] #ESM4StaticCollection ESM4StaticCollection
 
 --- Functions for @{#ESM4Weapon} objects
 -- @field [parent=#types] #ESM4Weapon ESM4Weapon
