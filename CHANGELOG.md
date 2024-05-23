@@ -37,6 +37,7 @@
     Bug #6156: 1ft Charm or Sound magic effect vfx doesn't work properly
     Bug #6190: Unintuitive sun specularity time of day dependence
     Bug #6222: global map cell size can crash openmw if set to too high a value
+    Bug #6240: State sharing sometimes prevents the use of the same texture file for different purposes in shaders
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6402: The sound of a thunderstorm does not stop playing after entering the premises
     Bug #6427: Enemy health bar disappears before damaging effect ends
@@ -167,6 +168,7 @@
     Bug #7872: Region sounds use wrong odds
     Bug #7886: Equip and unequip animations can't share the animation track section
     Bug #7887: Editor: Mismatched reported script data size and actual data size causes a crash during save
+    Bug #7896: Editor: Loading cellrefs incorrectly transforms Refnums, causing load failures
     Bug #7898: Editor: Invalid reference scales are allowed
     Bug #7899: Editor: Doors can't be unlocked
     Bug #7901: Editor: Teleport-related fields shouldn't be editable if a ref does not teleport
@@ -174,6 +176,7 @@
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
     Bug #7980: Paralyzed NPCs' lips move
+    Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
     Feature #5173: Support for NiFogProperty
@@ -236,6 +239,8 @@
     Feature #7936: Scalable icons in Qt applications
     Feature #7953: Allow to change SVG icons colors depending on color scheme
     Feature #7964: Add Lua read access to MW Dialogue records
+    Feature #7971: Make save's Time Played value display hours instead of days
+    Feature #7985: Support dark mode on Windows
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
