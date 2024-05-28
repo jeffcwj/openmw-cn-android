@@ -20,12 +20,15 @@ set(BUILTIN_DATA_FILES
     fonts/MysticCards.ttf
     fonts/MysticCards.omwfont
     fonts/MysticCardsFontLicense.txt
+    fonts/zh_CN.omwfont
+    fonts/LXGWWenKaiGB-Regular.ttf
 
     # Month names and date formatting
     l10n/Calendar/de.yaml
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
+    l10n/Calendar/zh_CN.yaml
 
     # Generic UI messages that can be reused by mods
     l10n/Interface/de.yaml
@@ -33,6 +36,7 @@ set(BUILTIN_DATA_FILES
     l10n/Interface/ru.yaml
     l10n/Interface/sv.yaml
     l10n/Interface/fr.yaml
+    l10n/Interface/zh_CN.yaml
 
     # L10n for scripts/omw
     l10n/OMWCamera/de.yaml
@@ -40,11 +44,14 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/ru.yaml
     l10n/OMWCamera/sv.yaml
     l10n/OMWCamera/fr.yaml
+    l10n/OMWCamera/zh_CN.yaml
+
     l10n/OMWControls/de.yaml
     l10n/OMWControls/en.yaml
     l10n/OMWControls/fr.yaml
     l10n/OMWControls/ru.yaml
     l10n/OMWControls/sv.yaml
+    l10n/OMWControls/zh_CN.yaml
 
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/de.yaml
@@ -52,6 +59,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWEngine/ru.yaml
     l10n/OMWEngine/sv.yaml
     l10n/OMWEngine/fr.yaml
+    l10n/OMWEngine/zh_CN.yaml
 
     # L10n for music system
     l10n/OMWMusic/de.yaml
@@ -66,6 +74,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWShaders/ru.yaml
     l10n/OMWShaders/sv.yaml
     l10n/OMWShaders/fr.yaml
+    l10n/OMWShaders/zh_CN.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua
