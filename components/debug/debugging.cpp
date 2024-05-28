@@ -435,7 +435,9 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
 #endif
 
     int ret = 0;
+#if defined(NDEBUG)
     try
+#endif
     {
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER");
             env == nullptr || Misc::StringUtils::toNumeric<int>(env, 0) == 0)
@@ -461,6 +463,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
         else
             ret = innerApplication(argc, argv);
     }
+#if defined(NDEBUG)
     catch (const std::exception& e)
     {
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
@@ -472,6 +475,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
 
         ret = 1;
     }
+#endif
 
     // Restore cout and cerr
     std::cout.rdbuf(rawStdout->rdbuf());
