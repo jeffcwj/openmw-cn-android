@@ -44,7 +44,9 @@ OpenMW原版官方网站: https://openmw.org/
 
 ■ 汉化版的ChangeLog:
 
-● 2024-04-?? v10
+● 2024-06-?? v11
+
+● 2024-05-31 v10
 1. openmw: 窗口化可以显示输入法提示框
 2. files/lang: 增加QT中文翻译资源汉化QT界面文字,不再需要修改.ui和.cpp文件中的界面文字
 
