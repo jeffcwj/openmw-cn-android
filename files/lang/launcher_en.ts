@@ -448,7 +448,7 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation></translation>
     </message>
     <message>
-        <source> Launch OpenMW </source>
+        <source>Launch OpenMW</source>
         <translation></translation>
     </message>
     <message>
@@ -1197,29 +1197,9 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
         <translation></translation>
     </message>
     <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum distance at which lights will appear (measured in units).&lt;/p&gt;&lt;p&gt;Set this to 0 to use an unlimited distance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Maximum Light Distance</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of lights per object.&lt;/p&gt;&lt;p&gt;A low number near default will cause light popping similar to what you would see with legacy lighting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Max Lights</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fraction of maximum distance at which lights will start to fade.&lt;/p&gt;&lt;p&gt;Set this to a low value for slower transitions or a high value for quicker transitions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the internal handling of light sources.&lt;/p&gt;
-&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object and provides a lighting closest to an original game.&lt;/p&gt;
-&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover and a configurable light fade. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
+&lt;p&gt; &quot;Legacy&quot; always uses 8 lights per object. It provides results most similar to Morrowind&apos;s lighting.&lt;/p&gt;
+&lt;p&gt;&quot;Shaders (compatibility)&quot; removes the 8 light limit. This mode also enables lighting on groundcover. It is recommended to use this with older hardware and a light limit closer to 8.&lt;/p&gt;
 &lt;p&gt; &quot;Shaders&quot; carries all of the benefits that &quot;Shaders (compatibility)&quot; does, but uses a modern approach that allows for a higher max lights count with little to no performance penalties on modern hardware.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation></translation>
     </message>
@@ -1233,22 +1213,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>Shaders (compatibility)</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Multipler for bounding sphere of lights.&lt;/p&gt;&lt;p&gt;Higher numbers allows for smooth falloff but require an increase in number of max lights.&lt;/p&gt;&lt;p&gt;Does not effect the illumination or strength of lights.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Bounding Sphere Multiplier</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum ambient interior brightness.&lt;/p&gt;&lt;p&gt;Increase this if you feel interiors are too dark.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Minimum Interior Brightness</source>
         <translation></translation>
     </message>
     <message>
@@ -1473,14 +1437,6 @@ to default Morrowind fonts. Check this box if you still prefer original fonts ov
     </message>
     <message>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Force the use of per pixel lighting. By default, only bump and normal mapped objects use per-pixel lighting. Only affects objects drawn with shaders. Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended. Note that groundcover shaders and particle effects ignore this setting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Force Per-Pixel Lighting</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled - makes transitions between different animations/poses much smoother. Also allows to load animation blending config YAML files that can be bundled with animations in order to customise blending styles.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation></translation>
     </message>
     <message>

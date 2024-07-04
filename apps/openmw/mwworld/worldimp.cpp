@@ -426,8 +426,6 @@ namespace MWWorld
         if (mPlayer)
         {
             mPlayer->clear();
-            mPlayer->setCell(nullptr);
-            mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player")));
         }
 
@@ -2385,11 +2383,6 @@ namespace MWWorld
         mRendering->screenshot(image, w, h);
     }
 
-    bool World::screenshot360(osg::Image* image)
-    {
-        return mRendering->screenshot360(image);
-    }
-
     void World::activateDoor(const MWWorld::Ptr& door)
     {
         auto state = door.getClass().getDoorState(door);
@@ -3363,9 +3356,10 @@ namespace MWWorld
                                     return true;
                                 }
                             }
-                            catch (const std::exception&)
+                            catch (const std::exception& e)
                             {
-                                // Ignore invalid item id
+                                Log(Debug::Warning)
+                                    << "Failed to process container item " << containerItem.mItem << ": " << e.what();
                             }
                         }
                     }
@@ -3692,19 +3686,23 @@ namespace MWWorld
         return (targetPos - weaponPos);
     }
 
-    void preload(MWWorld::Scene* scene, const ESMStore& store, const ESM::RefId& obj)
+    namespace
     {
-        if (obj.empty())
-            return;
-        try
+        void preload(MWWorld::Scene* scene, const ESMStore& store, const ESM::RefId& obj)
         {
-            MWWorld::ManualRef ref(store, obj);
-            std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
-            if (!model.empty())
-                scene->preload(model, ref.getPtr().getClass().useAnim());
-        }
-        catch (std::exception&)
-        {
+            if (obj.empty())
+                return;
+            try
+            {
+                MWWorld::ManualRef ref(store, obj);
+                std::string model = ref.getPtr().getClass().getCorrectedModel(ref.getPtr());
+                if (!model.empty())
+                    scene->preload(model, ref.getPtr().getClass().useAnim());
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Warning) << "Failed to preload scene object " << obj << ": " << e.what();
+            }
         }
     }
 

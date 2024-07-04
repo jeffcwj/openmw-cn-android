@@ -33,7 +33,6 @@ namespace MWRender
         void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
 
     protected:
-
         bool mEnabled;
         osg::Vec3f mOffset;
         osg::Quat mRotate;

@@ -25,7 +25,7 @@ opencs_units (model/world
 opencs_units (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    pathgrid land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
 
@@ -42,7 +42,7 @@ opencs_units (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck
+    mergestages gmstcheck topicinfocheck journalcheck enchantmentcheck effectlistcheck
     )
 
 opencs_hdrs (model/tools
@@ -70,7 +70,7 @@ opencs_units (view/world
     cellcreator pathgridcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
-    bodypartcreator landtexturecreator landcreator tableheadermouseeventhandler
+    bodypartcreator landcreator tableheadermouseeventhandler
     )
 
 opencs_units (view/world
@@ -196,8 +196,8 @@ if(BUILD_OPENCS)
     target_link_libraries(openmw-cs openmw-cs-lib)
 
     if (BUILD_WITH_CODE_COVERAGE)
-        target_compile_options(openmw-cs-lib PRIVATE --coverage)
-        target_link_libraries(openmw-cs-lib gcov)
+        target_compile_options(openmw-cs PRIVATE --coverage)
+        target_link_libraries(openmw-cs gcov)
     endif()
 endif()
 

@@ -61,6 +61,8 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "nameorid.hpp"
+
 namespace
 {
     struct NpcParts
@@ -541,10 +543,7 @@ namespace MWClass
             return store.find("sWerewolfPopup")->mValue.getString();
         }
 
-        const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-        const std::string& name = ref->mBase->mName;
-
-        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
+        return getNameOrId<ESM::NPC>(ptr);
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats(const MWWorld::Ptr& ptr) const
@@ -984,8 +983,7 @@ namespace MWClass
         // TODO: This function is called several times per frame for each NPC.
         // It would be better to calculate it only once per frame for each NPC and save the result in CreatureStats.
         const MWMechanics::NpcStats& stats = getNpcStats(ptr);
-        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
         const MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -1034,8 +1032,7 @@ namespace MWClass
             return 0.f;
 
         const MWMechanics::NpcStats& stats = getNpcStats(ptr);
-        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
-        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
+        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
         const GMST& gmst = getGmst();

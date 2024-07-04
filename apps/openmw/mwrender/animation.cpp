@@ -2092,7 +2092,8 @@ namespace MWRender
             mObjectRoot->accept(visitor);
         }
 
-        if (ptr.getRefData().getCustomData() != nullptr && ObjectAnimation::canBeHarvested())
+        if (Settings::game().mGraphicHerbalism && ptr.getRefData().getCustomData() != nullptr
+            && ObjectAnimation::canBeHarvested())
         {
             const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             if (!store.hasVisibleItems())

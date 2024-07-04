@@ -44,6 +44,7 @@
     Bug #6550: Cloned body parts don't inherit texture effects
     Bug #6574: Crash at far away from world origin coordinates
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
+    Bug #6665: The kobolds in the skyrim: home of the nords mod are oversized
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6716: mwscript comparison operator handling is too restrictive
@@ -141,6 +142,7 @@
     Bug #7676: Incorrect magic effect order in alchemy
     Bug #7679: Scene luminance value flashes when toggling shaders
     Bug #7685: Corky sometimes doesn't follow Llovyn Andus
+    Bug #7707: (OpenCS): New landscape records do not contain appropriate flags
     Bug #7712: Casting doesn't support spells and enchantments with no effects
     Bug #7721: CS: Special Chars Not Allowed in IDs
     Bug #7723: Assaulting vampires and werewolves shouldn't be a crime
@@ -176,6 +178,12 @@
     Bug #7943: Using "addSoulGem" and "dropSoulGem" commands to creatures works only with "Weapon & Shield" flagged ones
     Bug #7970: Difference of GetPCSleep (?) behavior between vanilla and OpenMW
     Bug #7980: Paralyzed NPCs' lips move
+    Bug #7993: Cannot load Bloodmoon without Tribunal
+    Bug #7997: Can toggle perspective when paralyzed
+    Bug #8002: Portable light sources held by creatures do not emit lighting
+    Bug #8005: F3 stats bars are sorted not according to their place in the timeline
+    Bug #8018: Potion effects should never explode and always apply on self
+    Bug #8021: Player's scale doesn't reset when starting a new game
     Feature #1415: Infinite fall failsafe
     Feature #2566: Handle NAM9 records for manual cell references
     Feature #3537: Shader-based water ripples
@@ -241,15 +249,18 @@
     Feature #7964: Add Lua read access to MW Dialogue records
     Feature #7971: Make save's Time Played value display hours instead of days
     Feature #7985: Support dark mode on Windows
+    Feature #8034: (Lua) Containers should have respawning/organic flags
     Task #5896: Do not use deprecated MyGUI properties
     Task #6085: Replace boost::filesystem with std::filesystem
     Task #6149: Dehardcode Lua API_REVISION
+    Task #6505: UTF-8 support in Lua scripts
     Task #6624: Drop support for saves made prior to 0.45
     Task #7048: Get rid of std::bind
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
     Task #7394: Drop support for --fs-strict
+    Task #7720: Drop 360-degree screenshot support
 
 0.48.0
 ------

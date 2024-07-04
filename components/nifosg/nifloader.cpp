@@ -741,7 +741,11 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiCollisionSwitch && !nifNode->collisionActive())
+            {
                 node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // Don't let the optimizer mess with this node
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
@@ -2177,14 +2181,14 @@ namespace NifOsg
         }
 
         void handleShaderMaterialNodeProperties(
-            Bgsm::MaterialFilePtr material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
+            const Bgsm::MaterialFile* material, osg::StateSet* stateset, std::vector<unsigned int>& boundTextures)
         {
             const unsigned int uvSet = 0;
             const bool wrapS = material->wrapS();
             const bool wrapT = material->wrapT();
             if (material->mShaderType == Bgsm::ShaderType::Lighting)
             {
-                const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material.get());
+                const Bgsm::BGSMFile* bgsm = static_cast<const Bgsm::BGSMFile*>(material);
 
                 if (!bgsm->mDiffuseMap.empty())
                     attachExternalTexture(
@@ -2201,7 +2205,7 @@ namespace NifOsg
             }
             else if (material->mShaderType == Bgsm::ShaderType::Effect)
             {
-                const Bgsm::BGEMFile* bgem = static_cast<const Bgsm::BGEMFile*>(material.get());
+                const Bgsm::BGEMFile* bgem = static_cast<const Bgsm::BGEMFile*>(material);
 
                 if (!bgem->mBaseMap.empty())
                     attachExternalTexture("diffuseMap", bgem->mBaseMap, wrapS, wrapT, uvSet, stateset, boundTextures);
@@ -2284,7 +2288,7 @@ namespace NifOsg
         }
 
         void handleShaderMaterialDrawableProperties(
-            Bgsm::MaterialFilePtr shaderMat, osg::ref_ptr<osg::Material> mat, osg::Node& node, bool& hasSortAlpha)
+            const Bgsm::MaterialFile* shaderMat, osg::ref_ptr<osg::Material> mat, osg::Node& node, bool& hasSortAlpha)
         {
             mat->setAlpha(osg::Material::FRONT_AND_BACK, shaderMat->mTransparency);
             handleAlphaTesting(shaderMat->mAlphaTest, osg::AlphaFunc::GREATER, shaderMat->mAlphaTestThreshold, node);
@@ -2293,13 +2297,13 @@ namespace NifOsg
             handleDecal(shaderMat->mDecal, hasSortAlpha, node);
             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
             {
-                auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
+                auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat);
                 mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mEmittanceColor, 1.f));
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgsm->mSpecularColor, 1.f));
             }
             else if (shaderMat->mShaderType == Bgsm::ShaderType::Effect)
             {
-                auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat.get());
+                auto bgem = static_cast<const Bgsm::BGEMFile*>(shaderMat);
                 mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(bgem->mEmittanceColor, 1.f));
                 if (bgem->mSoft)
                     SceneUtil::setupSoftEffect(node, bgem->mSoftDepth, true, bgem->mSoftDepth);
@@ -2533,7 +2537,7 @@ namespace NifOsg
                     clearBoundTextures(stateset, boundTextures);
                     if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
                     {
-                        handleShaderMaterialNodeProperties(material, stateset, boundTextures);
+                        handleShaderMaterialNodeProperties(material.get(), stateset, boundTextures);
                         break;
                     }
                     if (!texprop->mTextureSet.empty())
@@ -2560,7 +2564,7 @@ namespace NifOsg
                     clearBoundTextures(stateset, boundTextures);
                     if (Bgsm::MaterialFilePtr material = getShaderMaterial(texprop->mName, mMaterialManager))
                     {
-                        handleShaderMaterialNodeProperties(material, stateset, boundTextures);
+                        handleShaderMaterialNodeProperties(material.get(), stateset, boundTextures);
                         break;
                     }
                     if (!texprop->mSourceTexture.empty())
@@ -2779,7 +2783,7 @@ namespace NifOsg
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
                         if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
                         {
-                            handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
+                            handleShaderMaterialDrawableProperties(shaderMat.get(), mat, *node, hasSortAlpha);
                             if (shaderMat->mShaderType == Bgsm::ShaderType::Lighting)
                             {
                                 auto bgsm = static_cast<const Bgsm::BGSMFile*>(shaderMat.get());
@@ -2805,7 +2809,7 @@ namespace NifOsg
                         auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
                         if (Bgsm::MaterialFilePtr shaderMat = getShaderMaterial(shaderprop->mName, mMaterialManager))
                         {
-                            handleShaderMaterialDrawableProperties(shaderMat, mat, *node, hasSortAlpha);
+                            handleShaderMaterialDrawableProperties(shaderMat.get(), mat, *node, hasSortAlpha);
                             break;
                         }
                         handleDecal(shaderprop->decal(), hasSortAlpha, *node);

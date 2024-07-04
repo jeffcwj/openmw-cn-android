@@ -1,5 +1,6 @@
 #include "uibindings.hpp"
 
+#include <components/lua/util.hpp>
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/element.hpp>
@@ -34,16 +35,6 @@ namespace MWLua
                 element->mRoot = nullptr;
                 throw;
             }
-        }
-
-        // Lua arrays index from 1
-        inline size_t fromLuaIndex(size_t i)
-        {
-            return i - 1;
-        }
-        inline size_t toLuaIndex(size_t i)
-        {
-            return i + 1;
         }
 
         const std::unordered_map<MWGui::GuiMode, std::string_view> modeToName{
@@ -99,7 +90,21 @@ namespace MWLua
         };
         api["_isHudVisible"] = []() -> bool { return MWBase::Environment::get().getWindowManager()->isHudVisible(); };
         api["showMessage"]
-            = [luaManager = context.mLuaManager](std::string_view message) { luaManager->addUIMessage(message); };
+            = [luaManager = context.mLuaManager](std::string_view message, const sol::optional<sol::table>& options) {
+                  MWGui::ShowInDialogueMode mode = MWGui::ShowInDialogueMode_IfPossible;
+                  if (options.has_value())
+                  {
+                      auto showInDialogue = options->get<sol::optional<bool>>("showInDialogue");
+                      if (showInDialogue.has_value())
+                      {
+                          if (*showInDialogue)
+                              mode = MWGui::ShowInDialogueMode_Only;
+                          else
+                              mode = MWGui::ShowInDialogueMode_Never;
+                      }
+                  }
+                  luaManager->addUIMessage(message, mode);
+              };
         api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
             { "Default", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Default.substr(1)) },
             { "Error", Misc::Color::fromHex(MWBase::WindowManager::sConsoleColor_Error.substr(1)) },
@@ -149,7 +154,7 @@ namespace MWLua
             if (index == LuaUi::Layer::count())
                 return sol::nullopt;
             else
-                return toLuaIndex(index);
+                return LuaUtil::toLuaIndex(index);
         };
         layersTable["insertAfter"] = [context](
                                          std::string_view afterName, std::string_view name, const sol::object& opt) {
@@ -175,7 +180,7 @@ namespace MWLua
         layersMeta[sol::meta_function::length] = []() { return LuaUi::Layer::count(); };
         layersMeta[sol::meta_function::index] = sol::overload(
             [](const sol::object& self, size_t index) {
-                index = fromLuaIndex(index);
+                index = LuaUtil::fromLuaIndex(index);
                 return LuaUi::Layer(index);
             },
             [layersTable](
@@ -242,7 +247,7 @@ namespace MWLua
             = [windowManager, luaManager = context.mLuaManager](sol::table modes, sol::optional<LObject> arg) {
                   std::vector<MWGui::GuiMode> newStack(modes.size());
                   for (unsigned i = 0; i < newStack.size(); ++i)
-                      newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[i + 1]));
+                      newStack[i] = nameToMode.at(LuaUtil::cast<std::string_view>(modes[LuaUtil::toLuaIndex(i)]));
                   luaManager->addAction(
                       [windowManager, newStack = std::move(newStack), arg = std::move(arg)]() {
                           MWWorld::Ptr ptr;

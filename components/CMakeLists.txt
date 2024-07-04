@@ -103,7 +103,6 @@ add_component_dir (settings
     settingvalue
     shadermanager
     values
-    screenshotsettings
     windowmode
     )
 
@@ -512,6 +511,11 @@ else ()
         file.stdio
         )
 endif()
+
+add_component_dir(testing
+    expecterror
+    util
+)
 
 set (ESM_UI ${CMAKE_CURRENT_SOURCE_DIR}/contentselector/contentselector.ui
     )

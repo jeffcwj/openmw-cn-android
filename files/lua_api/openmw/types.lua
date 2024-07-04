@@ -844,6 +844,7 @@
 -- @field #number stealthSkill The base stealth skill of the creature. This is the skill value used for all skills with a 'stealth' specialization
 -- @field #list<#number> attack A table of the 3 randomly selected attacks used by creatures that do not carry weapons. The table consists of 6 numbers split into groups of 2 values corresponding to minimum and maximum damage in that order.
 -- @field #map<#string, #boolean> servicesOffered The services of the creature, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this creature.
 
 
 --- @{#NPC} functions
@@ -1004,6 +1005,27 @@
 -- @return #number
 
 ---
+-- Returns the current base disposition of the provided NPC. This is their base disposition, before modifiers such as personality and faction relations are taken into account.
+-- @function [parent=#NPC] getBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to check the disposition for.
+-- @return #number
+
+---
+-- Set the base disposition of the provided NPC (only in global scripts or on self).
+-- @function [parent=#NPC] setBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to set the disposition for.
+-- @param #number value Base disposition is set to this value
+
+---
+-- Modify the base disposition of the provided NPC by a certain amount (only in global scripts or on self).
+-- @function [parent=#NPC] modifyBaseDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to modify the disposition for.
+-- @param #number value Base disposition modification value
+
+---
 -- Get the total weight that the actor can carry.
 -- @function [parent=#NPC] getCapacity
 -- @param openmw.core#GameObject actor
@@ -1100,7 +1122,13 @@
 -- @field #number baseDisposition NPC's starting disposition
 -- @field #bool isMale The gender setting of the NPC
 -- @field #map<#string, #boolean> servicesOffered The services of the NPC, in a table. Value is if the service is provided or not, and they are indexed by: Spells, Spellmaking, Enchanting, Training, Repair, Barter, Weapon, Armor, Clothing, Books, Ingredients, Picks, Probes, Lights, Apparatus, RepairItems, Misc, Potions, MagicItems, Travel.
+-- @field #list<#TravelDestination> travelDestinations A list of @{#TravelDestination}s for this NPC.
 
+---
+-- @type TravelDestination
+-- @field #string cellId ID of the Destination cell for this TravelDestination, Can be used with @{openmw_world#(world).getCellById}.
+-- @field openmw.util#Vector3 position Destination position for this TravelDestination.
+-- @field openmw.util#Transform rotation Destination rotation for this TravelDestination.
 
 --------------------------------------------------------------------------------
 -- @{#Player} functions
@@ -1516,6 +1544,12 @@
 
 --- @{#Lockable} functions
 -- @field [parent=#types] #Lockable Lockable
+
+---
+-- Whether the object is a Lockable.
+-- @function [parent=#Lockable] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
 
 ---
 -- Returns the key record of a lockable object(door, container)
@@ -2075,7 +2109,8 @@
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this container (can be empty)
 -- @field #number weight capacity of this container
-
+-- @field #boolean isOrganic Whether items can be placed in the container
+-- @field #boolean isRespawning Whether the container respawns its contents
 
 --------------------------------------------------------------------------------
 -- @{#Door} functions
