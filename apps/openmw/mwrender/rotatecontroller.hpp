@@ -20,14 +20,23 @@ namespace MWRender
     public:
         RotateController(osg::Node* relativeTo);
 
+        osg::Quat getWorldOrientation(osg::Node* node);
+
         void setEnabled(bool enabled);
         void setOffset(const osg::Vec3f& offset);
         void setRotate(const osg::Quat& rotate);
 
+        const osg::Vec3f getOffset() const {
+            return mOffset;
+        }
+
+        const osg::Quat getRotate() const {
+            return mRotate;
+        }
+
         void operator()(osg::MatrixTransform* node, osg::NodeVisitor* nv);
 
     protected:
-        osg::Quat getWorldOrientation(osg::Node* node);
 
         bool mEnabled;
         osg::Vec3f mOffset;
