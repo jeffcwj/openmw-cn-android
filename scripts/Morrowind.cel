@@ -247,7 +247,6 @@ Bamz-Amschend, King's Walk	巴姆兹-阿姆申德，国王大道
 Bamz-Amschend, Passage of the Walker	巴姆兹-阿姆申德，行者通道
 Bamz-Amschend, Passage of Whispers	巴姆兹-阿姆申德，耳语通道
 Bamz-Amschend, Radac's Forge	巴姆兹-阿姆申德，拉达克的熔炉
-Bamz-Amschend, Radac's Forge	姆兹-阿姆申德，拉达克的熔炉
 Bamz-Amschend, Skybreak Gallery	巴姆兹-阿姆申德，天碎之廊
 Band Egg Mine	班德卵矿场
 Baram Ancestral Tomb	巴拉姆先祖墓穴
@@ -288,8 +287,8 @@ Caldera, Nedhelas' House	卡尔德拉，内德拉斯的房子
 Caldera, North Guard Towers	卡尔德拉，北卫兵塔
 Caldera, Odairan Ashummi-Ammus' House	卡尔德拉，奥黛兰·阿修米-阿姆斯的房子
 Caldera, Shenk's Shovel	卡尔德拉，申克的铁锹
-Caldera, Slave Shack One	卡尔德拉，奴隶小屋   一
-Caldera, Slave Shack Two	卡尔德拉，奴隶小屋    二
+Caldera, Slave Shack One	卡尔德拉，奴隶小屋之一
+Caldera, Slave Shack Two	卡尔德拉，奴隶小屋之二
 Caldera, South Guard Towers	卡尔德拉，南卫兵塔
 Caldera, Surane Leoriane's House	卡尔德拉，苏拉妮·利奥里亚娜的房子
 Caldera, Valvius Mevureius' House	卡尔德拉，瓦尔维斯·梅夫赖乌斯的房子
@@ -370,7 +369,6 @@ Ebonheart, East Empire Company Hall	黑檀心，东帝国公司大厅
 Ebonheart, East Empire North Warehouse	黑檀心，东帝国公司北部仓库
 Ebonheart, East Empire South Warehouse	黑檀心，东帝国公司南部仓库
 Ebonheart, Grand Council Chambers Tower	黑檀心，总议会厅塔楼
-Ebonheart, Grand Council Chambers	黑檀心，恢宏理事议会
 Ebonheart, Grand Council Chambers	黑檀心，总议会厅
 Ebonheart, Hawkmoth Legion Garrison	黑檀心，鹰蛾军团驻军地
 Ebonheart, Hawkmoth Towers	黑檀心，鹰蛾卫塔
@@ -428,7 +426,7 @@ Fort Frostmoth, Armory	霜蛾要塞，军械库
 Fort Frostmoth, Carius' Chambers	霜蛾要塞，卡利尤斯的房间
 Fort Frostmoth, Curtain Wall	霜蛾要塞，幕墙
 Fort Frostmoth, General Quarters	霜蛾要塞，指挥官住所
-Fort Frostmoth, General Quarters, Upper Level	霜蛾要塞，指挥官住所 ，上层
+Fort Frostmoth, General Quarters, Upper Level	霜蛾要塞，指挥官住所，上层
 Fort Frostmoth, Imperial Cult Shrine	霜蛾要塞，帝国教团圣祠
 Fort Frostmoth, Prison	霜蛾要塞，监狱
 Fort Frostmoth, Supply Room	霜蛾要塞，库房
@@ -822,7 +820,6 @@ Raven Rock, Abandoned Mine Shaft	鸦石镇，废弃的矿井
 Raven Rock, Afer Flaccus' House	鸦石镇，阿弗尔·弗拉库斯的房子
 Raven Rock, Bar	鸦石镇，酒吧
 Raven Rock, Factor's Estate	鸦石镇，代理商府邸
-Raven Rock, Factor's Estate	鸦石镇，东帝国公司董事府邸
 Raven Rock, Garnas Uvalen's House	鸦石镇，加纳斯·尤瓦伦的房子
 Raven Rock, Gidar Verothan's House	鸦石镇，吉达尔·维罗坦的房子
 Raven Rock, Gratian Caerellius' House	鸦石镇，格拉蒂安·卡雷利乌斯的房子
@@ -830,8 +827,7 @@ Raven Rock, Mine Entrance	鸦石镇，矿场入口
 Raven Rock, Mine	鸦石镇，矿场
 Raven Rock, North Storehouse	鸦石镇，北仓库
 Raven Rock, Sabinus Oranius' House	鸦石镇，萨比努斯·奥拉纽斯的房子
-Raven Rock, Sados Relothan's House	鸦石镇，塞多斯·雷多斯的房子
-Raven Rock, Sados Relothan's House	鸦石镇，塞多斯·雷洛斯的房子
+Raven Rock, Sados Relothan's House	鸦石镇，塞多斯·雷洛冉的房子
 Raven Rock, Seler Favelnim's House	鸦石镇，塞勒·法维尼姆的房子
 Raven Rock, Smith	鸦石镇，铁匠铺
 Raven Rock, South Storehouse	鸦石镇，南仓库
@@ -843,8 +839,8 @@ Raven Rock, Vacant House	鸦石镇，空置房屋
 Raviro Ancestral Tomb	拉维罗先祖墓穴
 Rayna Drolan's Shack	蕾娜·卓兰的小屋
 Redas Ancestral Tomb	瑞达斯先祖坟墓
-Redoran interior	瑞多然  内部
-Redoran interior2	瑞多然  内部2
+Redoran interior	瑞多然内部
+Redoran interior2	瑞多然内部2
 Releth Ancestral Tomb	瑞莱斯先祖墓穴
 Reloth Ancestral Tomb	雷洛斯先祖墓穴
 Remote Shipwreck, Cabin	偏僻沉船，船舱
@@ -1015,7 +1011,6 @@ Solstheim, Graring's House	索瑟海姆，加拉林的房子
 Solstheim, Gronn	索瑟海姆，格隆
 Solstheim, Gyldenhul Barrow Entrance	索瑟海姆，吉尔登胡尔古坟入口
 Solstheim, Gyldenhul Barrow	索瑟海姆，吉尔登胡尔古坟
-Solstheim, Gyldenhul Barrow	索瑟海姆，吉尔登胡尔古冢
 Solstheim, Halls of Penumbra	索瑟海姆，半影大厅
 Solstheim, Himmelhost Barrow	索瑟海姆，天堂之主古冢
 Solstheim, Hrothmund's Bane	索瑟海姆，霍斯蒙德之灾
@@ -1315,9 +1310,9 @@ Vivec, St. Delyn Canal South-One	维威克城，圣·德林河道南部第一间
 Vivec, St. Delyn Canal South-Three	维威克城，圣·德林河道南部第三间
 Vivec, St. Delyn Canal South-Two	维威克城，圣·德林河道南部第二间
 Vivec, St. Delyn Canalworks	维威克城，圣·德林河道工作区
-Vivec, St. Delyn Glassworker's Hall	维威克城，圣·德林 玻璃工的大厅
+Vivec, St. Delyn Glassworker's Hall	维威克城，圣·德林玻璃工的大厅
 Vivec, St. Delyn Plaza	维威克城，圣·德林广场
-Vivec, St. Delyn Potter's Hall	维威克城，圣·德林 陶工的大厅
+Vivec, St. Delyn Potter's Hall	维威克城，圣·德林陶工的大厅
 Vivec, St. Delyn Storage	维威克城，圣·德林储存室
 Vivec, St. Delyn Underworks	维威克城，圣·德林区下水道
 Vivec, St. Delyn Waist North-One	维威克城，圣·德林中层北部第一间
@@ -1326,7 +1321,7 @@ Vivec, St. Delyn Waist South-One	维威克城，圣·德林中层南部第一间
 Vivec, St. Delyn Waist South-Two	维威克城，圣·德林中层南部第二间
 Vivec, St. Delyn Waistworks	维威克城，圣·德林中层工作区
 Vivec, St. Delyn	维威克城，圣·德林区
-Vivec, St. Olms Brewers and Fishmongers Hall	维威克城，圣·奥姆斯 酿酒商和鱼贩的大厅
+Vivec, St. Olms Brewers and Fishmongers Hall	维威克城，圣·奥姆斯酿酒商和鱼贩的大厅
 Vivec, St. Olms Canal North-One	维威克城，圣·奥姆斯河道北部第一间
 Vivec, St. Olms Canal North-Three	维威克城，圣·奥姆斯河道北部第三间
 Vivec, St. Olms Canal North-Two	维威克城，圣·奥姆斯河道北部第二间
@@ -1334,12 +1329,12 @@ Vivec, St. Olms Canal South-One	维威克城，圣·奥姆斯河道南部第一间
 Vivec, St. Olms Canal South-Three	维威克城，圣·奥姆斯河道南部第三间
 Vivec, St. Olms Canal South-Two	维威克城，圣·奥姆斯河道南部第二间
 Vivec, St. Olms Canalworks	维威克城，圣·奥姆斯河道工作区
-Vivec, St. Olms Farmers and Laborers Hall	维威克城，圣·奥姆斯 农人和劳工的大厅
+Vivec, St. Olms Farmers and Laborers Hall	维威克城，圣·奥姆斯农人和劳工的大厅
 Vivec, St. Olms Haunted Manor	维威克城，圣·奥姆斯闹鬼庄园
 Vivec, St. Olms Plaza	维威克城，圣·奥姆斯广场
 Vivec, St. Olms Storage	维威克城，圣·奥姆斯储存室
-Vivec, St. Olms Tailors and Dyers Hall	维威克城，圣·奥姆斯 裁缝和染色师的大厅
-Vivec, St. Olms Tanners and Miners Hall	维威克城，圣·奥姆斯 制革工和矿工的大厅
+Vivec, St. Olms Tailors and Dyers Hall	维威克城，圣·奥姆斯裁缝和染色师的大厅
+Vivec, St. Olms Tanners and Miners Hall	维威克城，圣·奥姆斯制革工和矿工的大厅
 Vivec, St. Olms Temple	维威克城，圣·奥姆斯神殿
 Vivec, St. Olms Underworks	维威克城，圣·奥姆斯区下水道
 Vivec, St. Olms Upper North-One	维威克城，圣·奥姆斯上层北部第一间
