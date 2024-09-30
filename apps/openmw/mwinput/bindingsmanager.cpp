@@ -555,13 +555,13 @@ namespace MWInput
             switch (wheel)
             {
                 case ICS::InputControlSystem::MouseWheelClick::UP:
-                    return "Mouse Wheel Up";
+                    return "鼠标滚轮向上";
                 case ICS::InputControlSystem::MouseWheelClick::DOWN:
-                    return "Mouse Wheel Down";
+                    return "鼠标滚轮向下";
                 case ICS::InputControlSystem::MouseWheelClick::RIGHT:
-                    return "Mouse Wheel Right";
+                    return "鼠标滚轮向右";
                 case ICS::InputControlSystem::MouseWheelClick::LEFT:
-                    return "Mouse Wheel Left";
+                    return "鼠标滚轮向左";
                 default:
                     return "#{Interface:None}";
             }
