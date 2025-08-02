@@ -57,6 +57,8 @@ list(APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${OSG_PLUGIN_CHECKER_CPP_FILE}
 
 # source files
 
+add_subdirectory(Encoding)
+
 add_component_dir (lua
     luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
     shapes/box inputactions yamlloader scripttracker luastateptr
@@ -604,6 +606,8 @@ target_link_libraries(components
     smhasher
     ${ICU_LIBRARIES}
     ZLIB::ZLIB
+
+    Encoding
     )
 
 if(yaml-cpp_VERSION VERSION_GREATER_EQUAL 0.8.0)

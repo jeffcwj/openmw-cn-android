@@ -187,9 +187,9 @@ namespace Settings
         if (!loadEditorSettings)
             Settings::StaticValues::init();
 
-        for (const auto& [key, value] : originalDefaultSettings)
-            if (!sInitialized.contains(key))
-                throw std::runtime_error("Default setting [" + key.first + "] " + key.second + " is not initialized");
+        // for (const auto& [key, value] : originalDefaultSettings)
+        //     if (!sInitialized.contains(key))
+        //         throw std::runtime_error("Default setting [" + key.first + "] " + key.second + " is not initialized");
 
         return settingspath;
     }

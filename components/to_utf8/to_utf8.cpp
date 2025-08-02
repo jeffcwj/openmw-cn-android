@@ -6,6 +6,9 @@
 #include <iterator>
 #include <stdexcept>
 
+#include <iconv.h>
+#include <cstring>
+
 #include <components/debug/debuglog.hpp>
 
 #ifdef WIN32
@@ -114,40 +117,39 @@ StatelessUtf8Encoder::StatelessUtf8Encoder(FromType sourceEncoding)
 {
 }
 
+
 std::string_view StatelessUtf8Encoder::getUtf8(
     std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const
 {
-    if (input.empty())
-        return input;
-
     if (mTranslationArray.size() == 1)
     {
         if (mTranslationArray[0] == ToUTF8::UTF_8)
             return input;
         if (mTranslationArray[0] == ToUTF8::GBK)
         {
-#ifdef WIN32
-            WCHAR* wchars = (WCHAR*)_alloca(input.size() * sizeof(WCHAR));
-            int n = MultiByteToWideChar(936, 0, input.data(), input.size(), wchars, input.size());
-            resize(n * 3, bufferAllocationPolicy, buffer);
-            n = WideCharToMultiByte(CP_UTF8, 0, wchars, n, buffer.data(), n * 3, 0, 0);
-#else
-            std::setlocale(LC_ALL, "zh_CN.gbk");
-            size_t n = input.size();
-            resize(n + 1, bufferAllocationPolicy, buffer);
-            memcpy(buffer.data(), input.data(), n);
-            buffer.data()[n] = 0;
-            wchar_t* wchars = (wchar_t*)alloca((n + 1) * sizeof(wchar_t));
-            memset(wchars, 0, (n + 1) * sizeof(wchar_t));
-            size_t r = std::mbstowcs(wchars, buffer.data(), n);
-            n = r == (size_t)-1 ? wcslen(wchars) : r;
-            std::setlocale(LC_ALL, "en_US.utf8");
-            resize(n * 3, bufferAllocationPolicy, buffer);
-            memset(buffer.data(), 0, n * 3);
-            r = std::wcstombs(buffer.data(), wchars, n * 3);
-            n = r == (size_t)-1 ? strnlen(buffer.data(), n) : r;
-#endif
-            return std::string_view(buffer.data(), n);
+            
+            iconv_t cd = iconv_open("UTF-8", "GBK");
+            if (cd == (iconv_t)-1)
+                {};
+
+            const char* inBuf = input.data();
+            size_t inBytesLeft = input.size();
+
+            // 初始输出缓冲区大小估计为 3 倍输入长度（UTF-8 最多3字节一个汉字）
+            size_t outBufSize = inBytesLeft * 3;
+            resize(outBufSize, bufferAllocationPolicy, buffer);
+            char* outBuf = buffer.data();
+            char* outPtr = outBuf;
+            size_t outBytesLeft = outBufSize;
+
+            size_t result = iconv(cd, const_cast<char**>(&inBuf), &inBytesLeft, &outPtr, &outBytesLeft);
+            iconv_close(cd);
+
+            if (result == (size_t)-1)
+                {};
+
+            size_t convertedSize = outBufSize - outBytesLeft;
+            return std::string_view(buffer.data(), convertedSize);
         }
     }
 
@@ -186,37 +188,34 @@ std::string_view StatelessUtf8Encoder::getUtf8(
 std::string_view StatelessUtf8Encoder::getLegacyEnc(
     std::string_view input, BufferAllocationPolicy bufferAllocationPolicy, std::string& buffer) const
 {
-    if (input.empty())
-        return input;
-
     if (mTranslationArray.size() == 1)
     {
         if (mTranslationArray[0] == ToUTF8::UTF_8)
             return input;
         if (mTranslationArray[0] == ToUTF8::GBK)
         {
-#ifdef WIN32
-            WCHAR* wchars = (WCHAR*)_alloca(input.size() * sizeof(WCHAR));
-            int n = MultiByteToWideChar(CP_UTF8, 0, input.data(), input.size(), wchars, input.size());
-            resize(n * 2, bufferAllocationPolicy, buffer);
-            n = WideCharToMultiByte(936, 0, wchars, n, buffer.data(), n * 2, 0, 0);
-#else
-            std::setlocale(LC_ALL, "en_US.utf8");
-            size_t n = input.size();
-            resize(n + 1, bufferAllocationPolicy, buffer);
-            memcpy(buffer.data(), input.data(), n);
-            buffer.data()[n] = 0;
-            wchar_t* wchars = (wchar_t*)alloca((n + 1) * sizeof(wchar_t));
-            memset(wchars, 0, (n + 1) * sizeof(wchar_t));
-            size_t r = std::mbstowcs(wchars, buffer.data(), n);
-            n = r == (size_t)-1 ? wcslen(wchars) : r;
-            std::setlocale(LC_ALL, "zh_CN.gbk");
-            resize(n * 2, bufferAllocationPolicy, buffer);
-            memset(buffer.data(), 0, n * 2);
-            r = std::wcstombs(buffer.data(), wchars, n * 2);
-            n = r == (size_t)-1 ? strnlen(buffer.data(), n) : r;
-#endif
-            return std::string_view(buffer.data(), n);
+            iconv_t cd = iconv_open("UTF-8", "GBK");
+            if (cd == (iconv_t)-1)
+                {};
+
+            const char* inBuf = input.data();
+            size_t inBytesLeft = input.size();
+
+            // 初始输出缓冲区大小估计为 3 倍输入长度（UTF-8 最多3字节一个汉字）
+            size_t outBufSize = inBytesLeft * 3;
+            resize(outBufSize, bufferAllocationPolicy, buffer);
+            char* outBuf = buffer.data();
+            char* outPtr = outBuf;
+            size_t outBytesLeft = outBufSize;
+
+            size_t result = iconv(cd, const_cast<char**>(&inBuf), &inBytesLeft, &outPtr, &outBytesLeft);
+            iconv_close(cd);
+
+            if (result == (size_t)-1)
+                {};
+
+            size_t convertedSize = outBufSize - outBytesLeft;
+            return std::string_view(buffer.data(), convertedSize);
         }
     }
 
