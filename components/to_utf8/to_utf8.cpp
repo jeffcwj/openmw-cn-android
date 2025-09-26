@@ -130,13 +130,13 @@ std::string_view StatelessUtf8Encoder::getUtf8(
             
             iconv_t cd = iconv_open("UTF-8", "GBK");
             if (cd == (iconv_t)-1)
-                {};
+                return {};
 
             const char* inBuf = input.data();
             size_t inBytesLeft = input.size();
 
             // 初始输出缓冲区大小估计为 3 倍输入长度（UTF-8 最多3字节一个汉字）
-            size_t outBufSize = inBytesLeft * 3;
+            size_t outBufSize = inBytesLeft * 4;
             resize(outBufSize, bufferAllocationPolicy, buffer);
             char* outBuf = buffer.data();
             char* outPtr = outBuf;
@@ -146,7 +146,7 @@ std::string_view StatelessUtf8Encoder::getUtf8(
             iconv_close(cd);
 
             if (result == (size_t)-1)
-                {};
+                return {};
 
             size_t convertedSize = outBufSize - outBytesLeft;
             return std::string_view(buffer.data(), convertedSize);
@@ -196,13 +196,13 @@ std::string_view StatelessUtf8Encoder::getLegacyEnc(
         {
             iconv_t cd = iconv_open("UTF-8", "GBK");
             if (cd == (iconv_t)-1)
-                {};
+                return {};
 
             const char* inBuf = input.data();
             size_t inBytesLeft = input.size();
 
             // 初始输出缓冲区大小估计为 3 倍输入长度（UTF-8 最多3字节一个汉字）
-            size_t outBufSize = inBytesLeft * 3;
+            size_t outBufSize = inBytesLeft * 4;
             resize(outBufSize, bufferAllocationPolicy, buffer);
             char* outBuf = buffer.data();
             char* outPtr = outBuf;
@@ -212,7 +212,7 @@ std::string_view StatelessUtf8Encoder::getLegacyEnc(
             iconv_close(cd);
 
             if (result == (size_t)-1)
-                {};
+                return {};
 
             size_t convertedSize = outBufSize - outBytesLeft;
             return std::string_view(buffer.data(), convertedSize);
