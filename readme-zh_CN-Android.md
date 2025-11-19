@@ -1,5 +1,4 @@
 # OpenMW 安卓版：GBK 转码修复 + Alpha3 启动器界面优化  
-**By Deep打车（DeepDC）**
 
 ## 致谢
 特别感谢以下开发者与团队的贡献，使安卓端的《上古卷轴3：晨风》体验得以不断完善：
@@ -7,9 +6,9 @@
 - **驮鼠汉化组**：提供高质量的中文汉化  
 - **[@dwing4g](https://github.com/dwing4g/openmw)**：开源安卓 OpenMW 汉化版  
 - **[@huhao1987](https://github.com/dwing4g/openmw/issues/3)**：让我得知 OpenMW 安卓端仍有大佬维护  
-- **[@duron27](https://gitlab.com/cavebros/openmw-android-docker)**：制作并持续更新 Alpha3 加强版启动器（功能非常多）  
+- **[@duron27](https://gitlab.com/cavebros/openmw-android-docker)**：制作并持续更新 Alpha3 加强版启动器（功能更丰富）  
 
-> Alpha3 启动器仍属于早期阶段，如遇问题欢迎前往上方仓库反馈 issue，也欢迎找我协助修复。
+> Alpha3 启动器仍属于早期阶段，如遇问题欢迎前往上方仓库反馈 issue。
 
 ---
 
@@ -28,7 +27,7 @@
 ---
 
 ## 2. 解压汉化内容  
-将压缩包中的 **Data Files** 文件夹解压并 **覆盖** 到游戏目录下的 Data Files。
+将压缩包中的 **Data Files** 文件夹解压并 **覆盖** 到游戏目录下的 `Data Files`。
 
 ---
 
@@ -94,11 +93,11 @@
 
 ---
 
-# 👍 本教程对应的修复内容
+# 👍 更新内容
 - 修复安卓端 OpenMW **GBK 中文乱码问题**  
-- Alpha3 启动器界面 **完整中文汉化**  
-- 文件路径识别改进  
-- 各类兼容性与稳定性优化  
+- Alpha3 启动器界面 **中文汉化**  
+- 文件路径识别改进和模组排序修复
+- 各类兼容性与稳定性优化
 
 ---
 
