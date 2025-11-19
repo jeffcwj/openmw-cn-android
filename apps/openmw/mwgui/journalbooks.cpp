@@ -1,5 +1,7 @@
 #include "journalbooks.hpp"
 
+#include <spdlog/spdlog.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -207,18 +209,33 @@ namespace MWGui
 
     book JournalBooks::createTopicBook(uintptr_t topicId)
     {
-        BookTypesetter::Ptr typesetter = createTypesetter();
+        spdlog::info("[JournalBooks] createTopicBook called with topicId={}", topicId);
+        
+        try
+        {
+            BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+            BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+            BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
-        mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
+            mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
 
-        intptr_t contentId = typesetter->addContent(to_utf8_span(": \""));
+            intptr_t contentId = typesetter->addContent(to_utf8_span(": \""));
 
-        mModel->visitTopicEntries(topicId, AddTopicEntry(typesetter, body, header, contentId));
+            mModel->visitTopicEntries(topicId, AddTopicEntry(typesetter, body, header, contentId));
 
-        return typesetter->complete();
+            return typesetter->complete();
+        }
+        catch (const std::exception& e)
+        {
+            spdlog::error("[JournalBooks] Exception in createTopicBook: {}", e.what());
+            
+            // Return an empty book on error
+            BookTypesetter::Ptr typesetter = createTypesetter();
+            BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+            typesetter->addContent(to_utf8_span("Error: Topic not found"));
+            return typesetter->complete();
+        }
     }
 
     book JournalBooks::createQuestBook(std::string_view questName)

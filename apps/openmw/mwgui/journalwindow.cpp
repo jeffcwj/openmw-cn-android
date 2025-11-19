@@ -5,6 +5,8 @@
 #include <string>
 #include <utility>
 
+#include <spdlog/spdlog.h>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_TextBox.h>
@@ -392,28 +394,47 @@ namespace
 
         void notifyTopicClicked(intptr_t linkId)
         {
-            if (linkId < 0)
+            spdlog::info("[JournalWindow] notifyTopicClicked called with linkId={}", linkId);
+            
+            // First, try to identify if this is a Topic or Quest by checking caches
+            // Topic IDs can be positive or negative (if pointer address > INT64_MAX)
+            // Quest IDs are stored as negative (-quest_ptr)
+            
+            // Check Topic cache first (works for both positive and negative IDs)
+            std::string topicRefId = mModel->getTopicRefIdFromId(linkId);
+            if (!topicRefId.empty())
             {
-                const auto* quest = reinterpret_cast<const MWDialogue::Quest*>(-linkId);
-                notifyQuestClicked(std::string(quest->getName()), 0);
+                spdlog::info("[JournalWindow] linkId={} found in Topic cache (RefId: '{}'), treating as Topic", linkId, topicRefId);
+                
+                Book topicBook = createTopicBook(linkId);
+
+                if (mStates.size() > 1)
+                    replaceBook(topicBook, 0);
+                else
+                    pushBook(topicBook, 0);
+
+                setVisible(OptionsOverlay, false);
+                setVisible(OptionsBTN, true);
+                setVisible(JournalBTN, true);
+
+                mOptionsMode = false;
+                mTopicsMode = false;
+
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
                 return;
             }
-
-            Book topicBook = createTopicBook(linkId);
-
-            if (mStates.size() > 1)
-                replaceBook(topicBook, 0);
-            else
-                pushBook(topicBook, 0);
-
-            setVisible(OptionsOverlay, false);
-            setVisible(OptionsBTN, true);
-            setVisible(JournalBTN, true);
-
-            mOptionsMode = false;
-            mTopicsMode = false;
-
-            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
+            
+            // Not in Topic cache, check Quest cache
+            std::string questName = mModel->getQuestNameFromId(linkId);
+            if (!questName.empty())
+            {
+                spdlog::info("[JournalWindow] linkId={} found in Quest cache: '{}', treating as Quest", linkId, questName);
+                notifyQuestClicked(questName, 0);
+                return;
+            }
+            
+            // Not found in either cache - this shouldn't happen for valid links
+            spdlog::error("[JournalWindow] linkId={} not found in Topic or Quest cache - invalid link?", linkId);
         }
 
         void notifyTopicSelected(const std::string& topicIdString, int id)

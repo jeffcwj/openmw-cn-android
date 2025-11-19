@@ -94,6 +94,12 @@ namespace MWGui
 
         /// walks over the topic entries for the topic specified by its identifier
         virtual void visitTopicEntries(TopicId topicId, std::function<void(TopicEntry const&)> visitor) const = 0;
+        
+        /// retrieves quest name from quest ID (for handling invalidated pointers)
+        virtual std::string getQuestNameFromId(intptr_t questId) const = 0;
+        
+        /// retrieves topic RefId from topic ID (for distinguishing Topic from Quest)
+        virtual std::string getTopicRefIdFromId(intptr_t topicId) const = 0;
 
         // create an instance of the default journal view model implementation
         static Ptr create();

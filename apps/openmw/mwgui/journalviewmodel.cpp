@@ -6,6 +6,7 @@
 
 #include <components/misc/strings/algorithm.hpp>
 #include <components/translation/translation.hpp>
+#include <spdlog/spdlog.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/journal.hpp"
@@ -26,6 +27,12 @@ namespace MWGui
 
         mutable bool mKeywordSearchLoaded;
         mutable KeywordSearchT mKeywordSearch;
+        
+        // Cache to map topicId to topic name - survives journal reloads
+        mutable std::map<intptr_t, std::string> mTopicIdToNameCache;
+        
+        // Cache to map quest ID to quest name
+        mutable std::map<intptr_t, std::string> mQuestIdToNameCache;
 
         JournalViewModelImpl() { mKeywordSearchLoaded = false; }
 
@@ -42,23 +49,85 @@ namespace MWGui
             return Utf8Span(point, point + str.size());
         }
 
-        void load() override {}
+        void load() override 
+        {
+            MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+
+            spdlog::info("[JournalViewModel] load() called - Building quest cache");
+            
+            // Clear quest cache before rebuilding
+            mQuestIdToNameCache.clear();
+
+            for (MWBase::Journal::TQuestIter i = journal->questBegin(); i != journal->questEnd(); ++i)
+            {
+                // Cache quest: store both positive and negative IDs
+                intptr_t questPtr = reinterpret_cast<intptr_t>(&i->second);
+                intptr_t negativeQuestId = -questPtr;
+                
+                std::string questName = std::string(i->second.getName());
+                mQuestIdToNameCache[questPtr] = questName;
+                mQuestIdToNameCache[negativeQuestId] = questName;
+                
+                spdlog::debug("[JournalViewModel] Cached quest '{}': ptr={}, -ptr={}", 
+                              questName, questPtr, negativeQuestId);
+            }
+
+            spdlog::info("[JournalViewModel] Quest cache built: {} entries", mQuestIdToNameCache.size());
+        }
 
         void unload() override
         {
+            spdlog::info("[JournalViewModel] unload() called - Clearing caches");
+            
             mKeywordSearch.clear();
             mKeywordSearchLoaded = false;
+            
+            mTopicIdToNameCache.clear();
+            mQuestIdToNameCache.clear();
         }
 
         void ensureKeyWordSearchLoaded() const
         {
             if (!mKeywordSearchLoaded)
             {
+                spdlog::info("[JournalViewModel] ensureKeyWordSearchLoaded() - Building topic cache");
+                
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
+                // Cache Topics
                 for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
-                    mKeywordSearch.seed(i->second.getName(), intptr_t(&i->second));
+                {
+                    intptr_t topicId = intptr_t(&i->second);
+                    mKeywordSearch.seed(i->second.getName(), topicId);
+                    
+                    // Cache topic ID to name mapping - store the RefId as string for lookup
+                    std::string topicRefId = i->first.toDebugString();
+                    mTopicIdToNameCache[topicId] = topicRefId;
+                    
+                    spdlog::debug("[JournalViewModel] Cached topic '{}' ({}): id={}", 
+                                  std::string(i->second.getName()), topicRefId, topicId);
+                }
+                
+                // Also cache Quests in keyword search (for hyperlinks in journal entries)
+                for (MWBase::Journal::TQuestIter i = journal->questBegin(); i != journal->questEnd(); ++i)
+                {
+                    intptr_t questPtr = reinterpret_cast<intptr_t>(&i->second);
+                    intptr_t negativeQuestId = -questPtr;
+                    
+                    // Add quest name as keyword with negative ID
+                    mKeywordSearch.seed(i->second.getName(), negativeQuestId);
+                    
+                    // Update quest cache with current addresses
+                    std::string questName = std::string(i->second.getName());
+                    mQuestIdToNameCache[questPtr] = questName;
+                    mQuestIdToNameCache[negativeQuestId] = questName;
+                    
+                    spdlog::debug("[JournalViewModel] Cached quest keyword '{}': ptr={}, -ptr={}", 
+                                  questName, questPtr, negativeQuestId);
+                }
 
+                spdlog::info("[JournalViewModel] Topic cache built: {} entries", mTopicIdToNameCache.size());
+                spdlog::info("[JournalViewModel] Quest cache updated: {} entries", mQuestIdToNameCache.size());
                 mKeywordSearchLoaded = true;
             }
         }
@@ -283,7 +352,20 @@ namespace MWGui
                      ++questIt)
                 {
                     if (questName.empty() || Misc::StringUtils::ciEqual(questIt->second.getName(), questName))
-                        quests.push_back(&questIt->second);
+                    {
+                        MWDialogue::Quest const* questPtr = &questIt->second;
+                        quests.push_back(questPtr);
+                        
+                        // Update cache with current pointer addresses
+                        intptr_t questId = reinterpret_cast<intptr_t>(questPtr);
+                        intptr_t negativeQuestId = -questId;
+                        std::string qName = std::string(questIt->second.getName());
+                        mQuestIdToNameCache[questId] = qName;
+                        mQuestIdToNameCache[negativeQuestId] = qName;
+                        
+                        spdlog::debug("[JournalViewModel] Updated quest cache for '{}': ptr={}, -ptr={}", 
+                                      qName, questId, negativeQuestId);
+                    }
                 }
 
                 for (MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end(); ++i)
@@ -316,8 +398,42 @@ namespace MWGui
 
         void visitTopicName(TopicId topicId, std::function<void(Utf8Span)> visitor) const override
         {
-            MWDialogue::Topic const& topic = *reinterpret_cast<MWDialogue::Topic const*>(topicId);
-            visitor(toUtf8Span(topic.getName()));
+            spdlog::debug("[JournalViewModel] visitTopicName called with topicId={}", topicId);
+            
+            // Try using the pointer directly first
+            MWDialogue::Topic const* topic = reinterpret_cast<MWDialogue::Topic const*>(topicId);
+            
+            // Validate: Check if this topicId exists in our cache
+            auto cacheIt = mTopicIdToNameCache.find(topicId);
+            if (cacheIt != mTopicIdToNameCache.end())
+            {
+                // Found in cache - use cached RefId for safe lookup
+                spdlog::debug("[JournalViewModel] Topic found in cache: RefId='{}'", cacheIt->second);
+                
+                // Find the current valid pointer by RefId
+                MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+                ESM::RefId cachedRefId = ESM::RefId::deserializeText(cacheIt->second);
+                
+                for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
+                {
+                    if (i->first == cachedRefId)
+                    {
+                        spdlog::debug("[JournalViewModel] Found current topic by RefId: '{}'", 
+                                      std::string(i->second.getName()));
+                        visitor(toUtf8Span(i->second.getName()));
+                        return;
+                    }
+                }
+                
+                spdlog::warn("[JournalViewModel] Cached topic RefId '{}' not found in current journal!", cacheIt->second);
+            }
+            else
+            {
+                spdlog::warn("[JournalViewModel] topicId={} not found in cache - using direct pointer (may be wild)", topicId);
+            }
+            
+            // Fallback: try using the pointer directly (may crash if wild)
+            visitor(toUtf8Span(topic->getName()));
         }
 
         void visitTopicNamesStartingWith(
@@ -355,10 +471,74 @@ namespace MWGui
         {
             typedef MWDialogue::Topic::TEntryIter iterator_t;
 
+            spdlog::debug("[JournalViewModel] visitTopicEntries called with topicId={}", topicId);
+            
+            // Validate: Check if this topicId exists in our cache
+            auto cacheIt = mTopicIdToNameCache.find(topicId);
+            if (cacheIt != mTopicIdToNameCache.end())
+            {
+                // Found in cache - use cached RefId for safe lookup
+                spdlog::debug("[JournalViewModel] Topic found in cache: RefId='{}'", cacheIt->second);
+                
+                // Find the current valid pointer by RefId
+                MWBase::Journal* journal = MWBase::Environment::get().getJournal();
+                ESM::RefId cachedRefId = ESM::RefId::deserializeText(cacheIt->second);
+                
+                for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
+                {
+                    if (i->first == cachedRefId)
+                    {
+                        spdlog::debug("[JournalViewModel] Found current topic by RefId: '{}', visiting {} entries",
+                                      std::string(i->second.getName()), 
+                                      std::distance(i->second.begin(), i->second.end()));
+                        
+                        for (iterator_t j = i->second.begin(); j != i->second.end(); ++j)
+                            visitor(TopicEntryImpl(this, i->second, j));
+                        return;
+                    }
+                }
+                
+                spdlog::warn("[JournalViewModel] Cached topic RefId '{}' not found in current journal!", cacheIt->second);
+            }
+            else
+            {
+                spdlog::warn("[JournalViewModel] topicId={} not found in cache - using direct pointer (may be wild)", topicId);
+            }
+            
+            // Fallback: try using the pointer directly (may crash if wild)
             MWDialogue::Topic const& topic = *reinterpret_cast<MWDialogue::Topic const*>(topicId);
-
             for (iterator_t i = topic.begin(); i != topic.end(); ++i)
                 visitor(TopicEntryImpl(this, topic, i));
+        }
+        
+        std::string getQuestNameFromId(intptr_t questId) const override
+        {
+            spdlog::debug("[JournalViewModel] getQuestNameFromId called with questId={}", questId);
+            
+            auto it = mQuestIdToNameCache.find(questId);
+            if (it != mQuestIdToNameCache.end())
+            {
+                spdlog::debug("[JournalViewModel] Found quest in cache: '{}'", it->second);
+                return it->second;
+            }
+            
+            spdlog::warn("[JournalViewModel] Quest ID {} not found in cache", questId);
+            return "";
+        }
+        
+        std::string getTopicRefIdFromId(intptr_t topicId) const override
+        {
+            spdlog::debug("[JournalViewModel] getTopicRefIdFromId called with topicId={}", topicId);
+            
+            auto it = mTopicIdToNameCache.find(topicId);
+            if (it != mTopicIdToNameCache.end())
+            {
+                spdlog::debug("[JournalViewModel] Found topic in cache: RefId='{}'", it->second);
+                return it->second;
+            }
+            
+            spdlog::debug("[JournalViewModel] Topic ID {} not found in cache", topicId);
+            return "";
         }
     };
 

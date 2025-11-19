@@ -113,7 +113,7 @@ add_openmw_dir (mwstate
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager statemanager luamanager
+    inputmanager windowmanager statemanager luamanager journallogger
     )
 
 # Main executable
@@ -173,6 +173,7 @@ target_link_libraries(openmw-lib
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    spdlog::spdlog
 )
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)

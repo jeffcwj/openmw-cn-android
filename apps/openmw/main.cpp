@@ -9,6 +9,10 @@
 
 #include "mwgui/debugwindow.hpp"
 
+#ifdef ANDROID
+#include "mwbase/journallogger.hpp"
+#endif
+
 #include "engine.hpp"
 #include "options.hpp"
 
@@ -212,6 +216,11 @@ namespace
 int runApplication(int argc, char* argv[])
 {
     Platform::init();
+
+#ifdef ANDROID
+    // Initialize journal logger for Android
+    MWBase::JournalLogger::init();
+#endif
 
 #ifdef __APPLE__
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
