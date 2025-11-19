@@ -1,9 +1,10 @@
 # OpenMW 安卓版：GBK 转码修复 + Alpha3 启动器界面优化  
+[点击进入下载页面](https://github.com/jeffcwj/openmw-cn-android/releases/)
 
 ## 致谢
 特别感谢以下开发者与团队的贡献，使安卓端的《上古卷轴3：晨风》体验得以不断完善：
 
-- **驮鼠汉化组**：提供高质量的中文汉化  
+- **[@驮鼠汉化组](https://space.bilibili.com/3493131083319328)**：提供高质量的中文汉化  
 - **[@dwing4g](https://github.com/dwing4g/openmw)**：开源安卓 OpenMW 汉化版  
 - **[@huhao1987](https://github.com/dwing4g/openmw/issues/3)**：让我得知 OpenMW 安卓端仍有大佬维护  
 - **[@duron27](https://gitlab.com/cavebros/openmw-android-docker)**：持续维护OpenMW安卓版本，制作并持续更新 Alpha3 加强版启动器（功能更丰富）  
