@@ -6,7 +6,7 @@
 - **驮鼠汉化组**：提供高质量的中文汉化  
 - **[@dwing4g](https://github.com/dwing4g/openmw)**：开源安卓 OpenMW 汉化版  
 - **[@huhao1987](https://github.com/dwing4g/openmw/issues/3)**：让我得知 OpenMW 安卓端仍有大佬维护  
-- **[@duron27](https://gitlab.com/cavebros/openmw-android-docker)**：制作并持续更新 Alpha3 加强版启动器（功能更丰富）  
+- **[@duron27](https://gitlab.com/cavebros/openmw-android-docker)**：持续维护OpenMW安卓版本，制作并持续更新 Alpha3 加强版启动器（功能更丰富）  
 
 > Alpha3 启动器仍属于早期阶段，如遇问题欢迎前往上方仓库反馈 issue。
 
