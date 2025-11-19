@@ -28,6 +28,8 @@
 ---
 
 ## 2. 解压汉化内容  
+驮鼠汉化教程发布视频地址 [点击查看](https://www.bilibili.com/video/BV1VpkZYaE3S)
+
 将压缩包中的 **Data Files** 文件夹解压并 **覆盖** 到游戏目录下的 `Data Files`。
 
 ---
