@@ -2,16 +2,11 @@
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/files/configurationmanager.hpp>
-#include <components/misc/osgpluginchecker.hpp>
 #include <components/misc/rng.hpp>
 #include <components/platform/platform.hpp>
 #include <components/version/version.hpp>
 
 #include "mwgui/debugwindow.hpp"
-
-#ifdef ANDROID
-#include "mwbase/journallogger.hpp"
-#endif
 
 #include "engine.hpp"
 #include "options.hpp"
@@ -19,7 +14,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #if defined(_WIN32)
-#include <components/misc/windows.hpp>
+#include <components/windows.hpp>
 // makes __argc and __argv available on windows
 #include <cstdlib>
 
@@ -31,6 +26,8 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
 #include <unistd.h>
 #endif
+
+using namespace Fallback;
 
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
@@ -55,26 +52,35 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     if (variables.count("help"))
     {
-        Debug::getRawStdout() << desc << std::endl;
+        getRawStdout() << desc << std::endl;
         return false;
     }
 
     if (variables.count("version"))
     {
-        Debug::getRawStdout() << Version::getOpenmwVersionDescription() << std::endl;
+        cfgMgr.readConfiguration(variables, desc, true);
+
+        Version::Version v
+            = Version::getOpenmwVersion(variables["resources"]
+                                            .as<Files::MaybeQuotedPath>()
+                                            .u8string()); // This call to u8string is redundant, but required to build
+                                                          // on MSVC 14.26 due to implementation bugs.
+        getRawStdout() << v.describe() << std::endl;
         return false;
     }
 
-    cfgMgr.processPaths(variables, std::filesystem::current_path());
-
     cfgMgr.readConfiguration(variables, desc);
-
-    Debug::setupLogging(cfgMgr.getLogPath(), "OpenMW");
-    Log(Debug::Info) << Version::getOpenmwVersionDescription();
-
     Settings::Manager::load(cfgMgr);
 
+    setupLogging(cfgMgr.getLogPath(), "OpenMW");
     MWGui::DebugWindow::startLogRecording();
+
+    Version::Version v
+        = Version::getOpenmwVersion(variables["resources"]
+                                        .as<Files::MaybeQuotedPath>()
+                                        .u8string()); // This call to u8string is redundant, but required to build on
+                                                      // MSVC 14.26 due to implementation bugs.
+    Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
@@ -82,6 +88,9 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     std::string encoding(variables["encoding"].as<std::string>());
     Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
+
+    // directory settings
+    engine.enableFSStrict(variables["fs-strict"].as<bool>());
 
     Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>()));
 
@@ -113,8 +122,7 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
         Log(Debug::Error) << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting...";
         return false;
     }
-    engine.addContentFile("builtin.omwscripts");
-    std::set<std::string> contentDedupe{ "builtin.omwscripts" };
+    std::set<std::string> contentDedupe;
     for (const auto& contentFile : content)
     {
         if (!contentDedupe.insert(contentFile).second)
@@ -153,13 +161,20 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     engine.setScriptConsoleMode(variables["script-console"].as<bool>());
     engine.setStartupScript(variables["script-run"].as<std::string>());
     engine.setWarningsMode(variables["script-warn"].as<int>());
+    std::vector<ESM::RefId> scriptBlacklist;
+    auto& scriptBlacklistString = variables["script-blacklist"].as<StringsVector>();
+    for (const auto& blacklistString : scriptBlacklistString)
+    {
+        scriptBlacklist.push_back(ESM::RefId::stringRefId(blacklistString));
+    }
+    engine.setScriptBlacklist(scriptBlacklist);
+    engine.setScriptBlacklistUse(variables["script-blacklist-use"].as<bool>());
     engine.setSaveGameFile(variables["load-savegame"].as<Files::MaybeQuotedPath>().u8string());
 
     // other settings
-    Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
+    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
     engine.setActivationDistanceOverride(variables["activate-dist"].as<int>());
-    engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());
 
     return true;
@@ -217,12 +232,9 @@ int runApplication(int argc, char* argv[])
 {
     Platform::init();
 
-#ifdef ANDROID
-    // Initialize journal logger for Android
-    MWBase::JournalLogger::init();
-#endif
-
 #ifdef __APPLE__
+    std::filesystem::path binary_path = std::filesystem::absolute(std::filesystem::path(argv[0]));
+    std::filesystem::current_path(binary_path.parent_path());
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 
@@ -230,13 +242,8 @@ int runApplication(int argc, char* argv[])
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
 
-    engine->setRecastMaxLogLevel(Debug::getRecastMaxLogLevel());
-
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {
-        if (!Misc::checkRequiredOSGPluginsArePresent())
-            return 1;
-
         engine->go();
     }
 
@@ -249,7 +256,7 @@ extern "C" int SDL_main(int argc, char** argv)
 int main(int argc, char** argv)
 #endif
 {
-    return Debug::wrapApplication(&runApplication, argc, argv, "OpenMW");
+    return wrapApplication(&runApplication, argc, argv, "OpenMW", false);
 }
 
 // Platform specific for Windows when there is no console built into the executable.

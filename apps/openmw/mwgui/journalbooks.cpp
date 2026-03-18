@@ -1,16 +1,11 @@
 #include "journalbooks.hpp"
 
-#include <spdlog/spdlog.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include <components/misc/utf8stream.hpp>
-#include <components/settings/values.hpp>
 
 #include "textcolours.hpp"
-
-#include "../mwdialogue/quest.hpp"
 
 namespace
 {
@@ -20,7 +15,7 @@ namespace
         MWGui::BookTypesetter::Style* mBodyStyle;
 
         AddContent(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : mTypesetter(std::move(typesetter))
+            : mTypesetter(typesetter)
             , mBodyStyle(body_style)
         {
         }
@@ -29,7 +24,7 @@ namespace
     struct AddSpan : AddContent
     {
         AddSpan(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : AddContent(std::move(typesetter), body_style)
+            : AddContent(typesetter, body_style)
         {
         }
 
@@ -52,14 +47,16 @@ namespace
         MWGui::BookTypesetter::Style* mBodyStyle;
 
         AddEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : mTypesetter(std::move(typesetter))
+            : mTypesetter(typesetter)
             , mBodyStyle(body_style)
         {
         }
 
         void operator()(MWGui::JournalViewModel::Entry const& entry)
         {
-            entry.visitSpans(mTypesetter, AddSpan(mTypesetter, mBodyStyle));
+            mTypesetter->addContent(entry.body());
+
+            entry.visitSpans(AddSpan(mTypesetter, mBodyStyle));
         }
     };
 
@@ -70,13 +67,13 @@ namespace
 
         AddJournalEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
             MWGui::BookTypesetter::Style* header_style, bool add_header)
-            : AddEntry(std::move(typesetter), body_style)
+            : AddEntry(typesetter, body_style)
             , mAddHeader(add_header)
             , mHeaderStyle(header_style)
         {
         }
 
-        void operator()(MWGui::JournalViewModel::JournalEntry const& entry, const MWDialogue::Quest* quest)
+        void operator()(MWGui::JournalViewModel::JournalEntry const& entry)
         {
             if (mAddHeader)
             {
@@ -84,22 +81,9 @@ namespace
                 mTypesetter->lineBreak();
             }
 
-            if (quest)
-            {
-                auto questName = quest->getName();
-                if (!questName.empty())
-                {
-                    intptr_t id = -reinterpret_cast<intptr_t>(quest);
-                    auto style = mTypesetter->createHotStyle(mBodyStyle, MyGUI::Colour(0.60f, 0.00f, 0.00f),
-                        MyGUI::Colour(0.70f, 0.10f, 0.10f), MyGUI::Colour(0.80f, 0.20f, 0.20f), id);
-                    mTypesetter->write(style, MWGui::to_utf8_span(questName)); // mHeaderStyle
-                    mTypesetter->lineBreak();
-                }
-            }
-
             AddEntry::operator()(entry);
 
-            mTypesetter->sectionBreak(10);
+            mTypesetter->sectionBreak(30);
         }
     };
 
@@ -110,7 +94,7 @@ namespace
 
         AddTopicEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
             MWGui::BookTypesetter::Style* header_style, intptr_t contentId)
-            : AddEntry(std::move(typesetter), body_style)
+            : AddEntry(typesetter, body_style)
             , mContentId(contentId)
             , mHeaderStyle(header_style)
         {
@@ -126,35 +110,35 @@ namespace
             mTypesetter->selectContent(mContentId);
             mTypesetter->write(mBodyStyle, 2, 3); // end quote
 
-            mTypesetter->sectionBreak(10);
+            mTypesetter->sectionBreak(30);
         }
     };
 
     struct AddTopicName : AddContent
     {
         AddTopicName(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style)
-            : AddContent(std::move(typesetter), style)
+            : AddContent(typesetter, style)
         {
         }
 
         void operator()(MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write(mBodyStyle, topicName);
-            mTypesetter->sectionBreak(10);
+            mTypesetter->sectionBreak();
         }
     };
 
     struct AddQuestName : AddContent
     {
         AddQuestName(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style)
-            : AddContent(std::move(typesetter), style)
+            : AddContent(typesetter, style)
         {
         }
 
         void operator()(MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write(mBodyStyle, topicName);
-            mTypesetter->sectionBreak(10);
+            mTypesetter->sectionBreak();
         }
     };
 }
@@ -174,7 +158,7 @@ namespace MWGui
     typedef TypesetBook::Ptr book;
 
     JournalBooks::JournalBooks(JournalViewModel::Ptr model, ToUTF8::FromType encoding)
-        : mModel(std::move(model))
+        : mModel(model)
         , mEncoding(encoding)
         , mIndexPagesCount(0)
     {
@@ -184,8 +168,8 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
 
         typesetter->write(header, to_utf8_span("You have no journal entries!"));
         typesetter->lineBreak();
@@ -199,51 +183,36 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
 
-        mModel->visitJournalEntries({}, AddJournalEntry(typesetter, body, header, true));
+        mModel->visitJournalEntries("", AddJournalEntry(typesetter, body, header, true));
 
         return typesetter->complete();
     }
 
     book JournalBooks::createTopicBook(uintptr_t topicId)
     {
-        spdlog::info("[JournalBooks] createTopicBook called with topicId={}", topicId);
-        
-        try
-        {
-            BookTypesetter::Ptr typesetter = createTypesetter();
+        BookTypesetter::Ptr typesetter = createTypesetter();
 
-            BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
-            BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
 
-            mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
+        mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
 
-            intptr_t contentId = typesetter->addContent(to_utf8_span(": \""));
+        intptr_t contentId = typesetter->addContent(to_utf8_span(", \""));
 
-            mModel->visitTopicEntries(topicId, AddTopicEntry(typesetter, body, header, contentId));
+        mModel->visitTopicEntries(topicId, AddTopicEntry(typesetter, body, header, contentId));
 
-            return typesetter->complete();
-        }
-        catch (const std::exception& e)
-        {
-            spdlog::error("[JournalBooks] Exception in createTopicBook: {}", e.what());
-            
-            // Return an empty book on error
-            BookTypesetter::Ptr typesetter = createTypesetter();
-            BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
-            typesetter->addContent(to_utf8_span("Error: Topic not found"));
-            return typesetter->complete();
-        }
+        return typesetter->complete();
     }
 
     book JournalBooks::createQuestBook(std::string_view questName)
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
 
         AddQuestName addName(typesetter, header);
         addName(to_utf8_span(questName));
@@ -274,7 +243,7 @@ namespace MWGui
         char ch = 'A';
         std::string buffer;
 
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
         for (int i = 0; i < 26; ++i)
         {
             buffer = "( ";
@@ -303,13 +272,15 @@ namespace MWGui
 
         typesetter->setSectionAlignment(BookTypesetter::AlignCenter);
 
-        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+
+        int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
 
         // for small font size split alphabet to two columns (2x15 characers), for big font size split it to three
         // colums (3x10 characters).
         int sectionBreak = 10;
         mIndexPagesCount = 3;
-        if (Settings::gui().mFontSize < 18)
+        if (fontHeight < 18)
         {
             sectionBreak = 15;
             mIndexPagesCount = 2;
@@ -326,7 +297,7 @@ namespace MWGui
             buffer += ch[1];
             buffer += " )";
 
-            Utf8Stream stream(ch, ch + 2);
+            Utf8Stream stream((char*)ch);
             Utf8Stream::UnicodeChar first = stream.peek();
 
             const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();

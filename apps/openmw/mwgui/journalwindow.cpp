@@ -5,8 +5,6 @@
 #include <string>
 #include <utility>
 
-#include <spdlog/spdlog.h>
-
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_TextBox.h>
@@ -26,26 +24,26 @@
 
 namespace
 {
-    static constexpr std::string_view OptionsOverlay = "OptionsOverlay";
-    static constexpr std::string_view OptionsBTN = "OptionsBTN";
-    static constexpr std::string_view PrevPageBTN = "PrevPageBTN";
-    static constexpr std::string_view NextPageBTN = "NextPageBTN";
-    static constexpr std::string_view CloseBTN = "CloseBTN";
-    static constexpr std::string_view JournalBTN = "JournalBTN";
-    static constexpr std::string_view TopicsBTN = "TopicsBTN";
-    static constexpr std::string_view QuestsBTN = "QuestsBTN";
-    static constexpr std::string_view CancelBTN = "CancelBTN";
-    static constexpr std::string_view ShowAllBTN = "ShowAllBTN";
-    static constexpr std::string_view ShowActiveBTN = "ShowActiveBTN";
-    static constexpr std::string_view PageOneNum = "PageOneNum";
-    static constexpr std::string_view PageTwoNum = "PageTwoNum";
-    static constexpr std::string_view TopicsList = "TopicsList";
-    static constexpr std::string_view QuestsList = "QuestsList";
-    static constexpr std::string_view LeftBookPage = "LeftBookPage";
-    static constexpr std::string_view RightBookPage = "RightBookPage";
-    static constexpr std::string_view LeftTopicIndex = "LeftTopicIndex";
-    static constexpr std::string_view CenterTopicIndex = "CenterTopicIndex";
-    static constexpr std::string_view RightTopicIndex = "RightTopicIndex";
+    static char const OptionsOverlay[] = "OptionsOverlay";
+    static char const OptionsBTN[] = "OptionsBTN";
+    static char const PrevPageBTN[] = "PrevPageBTN";
+    static char const NextPageBTN[] = "NextPageBTN";
+    static char const CloseBTN[] = "CloseBTN";
+    static char const JournalBTN[] = "JournalBTN";
+    static char const TopicsBTN[] = "TopicsBTN";
+    static char const QuestsBTN[] = "QuestsBTN";
+    static char const CancelBTN[] = "CancelBTN";
+    static char const ShowAllBTN[] = "ShowAllBTN";
+    static char const ShowActiveBTN[] = "ShowActiveBTN";
+    static char const PageOneNum[] = "PageOneNum";
+    static char const PageTwoNum[] = "PageTwoNum";
+    static char const TopicsList[] = "TopicsList";
+    static char const QuestsList[] = "QuestsList";
+    static char const LeftBookPage[] = "LeftBookPage";
+    static char const RightBookPage[] = "RightBookPage";
+    static char const LeftTopicIndex[] = "LeftTopicIndex";
+    static char const CenterTopicIndex[] = "CenterTopicIndex";
+    static char const RightTopicIndex[] = "RightTopicIndex";
 
     struct JournalWindowImpl : MWGui::JournalBooks, MWGui::JournalWindow
     {
@@ -65,7 +63,7 @@ namespace
         bool mAllQuests;
 
         template <typename T>
-        T* getWidget(std::string_view name)
+        T* getWidget(char const* name)
         {
             T* widget;
             WindowBase::getWidget(widget, name);
@@ -73,28 +71,28 @@ namespace
         }
 
         template <typename value_type>
-        void setText(std::string_view name, value_type const& value)
+        void setText(char const* name, value_type const& value)
         {
             getWidget<MyGUI::TextBox>(name)->setCaption(MyGUI::utility::toString(value));
         }
 
-        void setVisible(std::string_view name, bool visible) { getWidget<MyGUI::Widget>(name)->setVisible(visible); }
+        void setVisible(char const* name, bool visible) { getWidget<MyGUI::Widget>(name)->setVisible(visible); }
 
-        void adviseButtonClick(std::string_view name, void (JournalWindowImpl::*handler)(MyGUI::Widget*))
+        void adviseButtonClick(char const* name, void (JournalWindowImpl::*handler)(MyGUI::Widget*))
         {
             getWidget<MyGUI::Widget>(name)->eventMouseButtonClick += newDelegate(this, handler);
         }
 
         void adviseKeyPress(
-            std::string_view name, void (JournalWindowImpl::*handler)(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char))
+            char const* name, void (JournalWindowImpl::*handler)(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char))
         {
             getWidget<MyGUI::Widget>(name)->eventKeyButtonPressed += newDelegate(this, handler);
         }
 
-        MWGui::BookPage* getPage(std::string_view name) { return getWidget<MWGui::BookPage>(name); }
+        MWGui::BookPage* getPage(char const* name) { return getWidget<MWGui::BookPage>(name); }
 
-        JournalWindowImpl(MWGui::JournalViewModel::Ptr model, bool questList, ToUTF8::FromType encoding)
-            : JournalBooks(std::move(model), encoding)
+        JournalWindowImpl(MWGui::JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
+            : JournalBooks(Model, encoding)
             , JournalWindow()
         {
             center();
@@ -125,10 +123,12 @@ namespace
             topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
 
             {
-                MWGui::BookPage::ClickCallback callback = [this](intptr_t linkId) { notifyTopicClicked(linkId); };
+                MWGui::BookPage::ClickCallback callback;
+
+                callback = std::bind(&JournalWindowImpl::notifyTopicClicked, this, std::placeholders::_1);
 
                 getPage(LeftBookPage)->adviseLinkClicked(callback);
-                getPage(RightBookPage)->adviseLinkClicked(std::move(callback));
+                getPage(RightBookPage)->adviseLinkClicked(callback);
 
                 getPage(LeftBookPage)->eventMouseWheel
                     += MyGUI::newDelegate(this, &JournalWindowImpl::notifyMouseWheel);
@@ -137,12 +137,13 @@ namespace
             }
 
             {
-                MWGui::BookPage::ClickCallback callback
-                    = [this](MWGui::TypesetBook::InteractiveId index) { notifyIndexLinkClicked(index); };
+                MWGui::BookPage::ClickCallback callback;
+
+                callback = std::bind(&JournalWindowImpl::notifyIndexLinkClicked, this, std::placeholders::_1);
 
                 getPage(LeftTopicIndex)->adviseLinkClicked(callback);
                 getPage(CenterTopicIndex)->adviseLinkClicked(callback);
-                getPage(RightTopicIndex)->adviseLinkClicked(std::move(callback));
+                getPage(RightTopicIndex)->adviseLinkClicked(callback);
             }
 
             adjustButton(PrevPageBTN);
@@ -228,6 +229,10 @@ namespace
 
         void onOpen() override
         {
+            if (!MWBase::Environment::get().getWindowManager()->getJournalAllowed())
+            {
+                MWBase::Environment::get().getWindowManager()->popGuiMode();
+            }
             mModel->load();
 
             setBookMode();
@@ -311,7 +316,7 @@ namespace
                 notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
         }
 
-        void pushBook(Book& book, unsigned int page)
+        void pushBook(Book book, unsigned int page)
         {
             DisplayState bs;
             bs.mPage = page;
@@ -321,7 +326,7 @@ namespace
             updateCloseJournalButton();
         }
 
-        void replaceBook(Book& book, unsigned int page)
+        void replaceBook(Book book, unsigned int page)
         {
             assert(!mStates.empty());
             mStates.top().mBook = book;
@@ -378,7 +383,7 @@ namespace
             setVisible(PageTwoNum, relPages > 1);
 
             getPage(LeftBookPage)->showPage((relPages > 0) ? book : Book(), page + 0);
-            getPage(RightBookPage)->showPage((relPages > 0) ? std::move(book) : Book(), page + 1);
+            getPage(RightBookPage)->showPage((relPages > 0) ? book : Book(), page + 1);
 
             setText(PageOneNum, page + 1);
             setText(PageTwoNum, page + 2);
@@ -394,47 +399,21 @@ namespace
 
         void notifyTopicClicked(intptr_t linkId)
         {
-            spdlog::info("[JournalWindow] notifyTopicClicked called with linkId={}", linkId);
-            
-            // First, try to identify if this is a Topic or Quest by checking caches
-            // Topic IDs can be positive or negative (if pointer address > INT64_MAX)
-            // Quest IDs are stored as negative (-quest_ptr)
-            
-            // Check Topic cache first (works for both positive and negative IDs)
-            std::string topicRefId = mModel->getTopicRefIdFromId(linkId);
-            if (!topicRefId.empty())
-            {
-                spdlog::info("[JournalWindow] linkId={} found in Topic cache (RefId: '{}'), treating as Topic", linkId, topicRefId);
-                
-                Book topicBook = createTopicBook(linkId);
+            Book topicBook = createTopicBook(linkId);
 
-                if (mStates.size() > 1)
-                    replaceBook(topicBook, 0);
-                else
-                    pushBook(topicBook, 0);
+            if (mStates.size() > 1)
+                replaceBook(topicBook, 0);
+            else
+                pushBook(topicBook, 0);
 
-                setVisible(OptionsOverlay, false);
-                setVisible(OptionsBTN, true);
-                setVisible(JournalBTN, true);
+            setVisible(OptionsOverlay, false);
+            setVisible(OptionsBTN, true);
+            setVisible(JournalBTN, true);
 
-                mOptionsMode = false;
-                mTopicsMode = false;
+            mOptionsMode = false;
+            mTopicsMode = false;
 
-                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
-                return;
-            }
-            
-            // Not in Topic cache, check Quest cache
-            std::string questName = mModel->getQuestNameFromId(linkId);
-            if (!questName.empty())
-            {
-                spdlog::info("[JournalWindow] linkId={} found in Quest cache: '{}', treating as Quest", linkId, questName);
-                notifyQuestClicked(questName, 0);
-                return;
-            }
-            
-            // Not found in either cache - this shouldn't happen for valid links
-            spdlog::error("[JournalWindow] linkId={} not found in Topic or Quest cache - invalid link?", linkId);
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         void notifyTopicSelected(const std::string& topicIdString, int id)
