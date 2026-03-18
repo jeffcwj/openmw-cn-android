@@ -7,11 +7,13 @@ OpenMW is a C++20 open-source reimplementation of the Morrowind game engine. It 
 - `apps/` — Application targets (openmw, opencs, launcher, tools, tests, benchmarks)
 - `components/` — Shared library code (ESM loading, rendering, navigation, scripting, etc.)
 - `extern/` — Vendored third-party code (do NOT modify or reformat)
-- 
-## 语言规范
 
-- **语言**：文档、注释、回答均用中文
-- **新文件**：优先 Kotlin 而非 Java
+## 必读事项
+
+- 文档、注释、回答均用中文
+- 写代码优先修复问题而不是写兜底代码（if!=null之类的），写兜底代码无法解决问题
+- 写入超过2000字符时，请分段写入，否则可能永远卡住
+- 有阶段性成果时提交 git、更新AGENTS.md、docs里相关文档（技术性文档、PRD或教程等）和相关README.md
 
 ## Build Commands
 
