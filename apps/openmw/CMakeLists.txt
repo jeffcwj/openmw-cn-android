@@ -113,7 +113,7 @@ add_openmw_dir (mwstate
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager statemanager luamanager journallogger
+    inputmanager windowmanager statemanager luamanager
     )
 
 # Main executable
