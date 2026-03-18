@@ -173,7 +173,6 @@ target_link_libraries(openmw-lib
     "osg-ffmpeg-videoplayer"
     "oics"
     components
-    spdlog::spdlog
 )
 
 if (MSVC AND PRECOMPILE_HEADERS_WITH_MSVC)
