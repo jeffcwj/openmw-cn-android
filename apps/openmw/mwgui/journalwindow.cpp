@@ -17,6 +17,7 @@
 #include "../mwbase/journal.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwdialogue/quest.hpp"
+#include "../mwdialogue/topic.hpp"
 
 #include "bookpage.hpp"
 #include "journalbooks.hpp"
@@ -51,13 +52,11 @@ namespace
         struct DisplayState
         {
             unsigned int mPage;
-            Book mBook;
+            std::shared_ptr<MWGui::TypesetBook> mBook;
         };
 
-        typedef std::stack<DisplayState> DisplayStateStack;
-
-        DisplayStateStack mStates;
-        Book mTopicIndexBook;
+        std::stack<DisplayState> mStates;
+        std::shared_ptr<MWGui::TypesetBook> mTopicIndexBook;
         bool mQuestMode;
         bool mOptionsMode;
         bool mTopicsMode;
@@ -126,7 +125,7 @@ namespace
             {
                 MWGui::BookPage::ClickCallback callback;
 
-                callback = std::bind(&JournalWindowImpl::notifyTopicClicked, this, std::placeholders::_1);
+                callback = [this](MWGui::TypesetBook::InteractiveId id) { notifyTopicClicked(id); };
 
                 getPage(LeftBookPage)->adviseLinkClicked(callback);
                 getPage(RightBookPage)->adviseLinkClicked(callback);
@@ -238,7 +237,7 @@ namespace
 
             setBookMode();
 
-            Book journalBook;
+            std::shared_ptr<MWGui::TypesetBook> journalBook;
             if (mModel->isEmpty())
                 journalBook = createEmptyJournalBook();
             else
@@ -263,8 +262,8 @@ namespace
         {
             mModel->unload();
 
-            getPage(LeftBookPage)->showPage(Book(), 0);
-            getPage(RightBookPage)->showPage(Book(), 0);
+            getPage(LeftBookPage)->showPage({}, 0);
+            getPage(RightBookPage)->showPage({}, 0);
 
             while (!mStates.empty())
                 mStates.pop();
@@ -308,7 +307,7 @@ namespace
 
             // TODO: figure out how to make "options" page overlay book page
             //       correctly, so that text may show underneath
-            getPage(RightBookPage)->showPage(Book(), 0);
+            getPage(RightBookPage)->showPage({}, 0);
 
             // If in quest mode, ensure the quest list is updated
             if (mQuestMode)
@@ -317,20 +316,20 @@ namespace
                 notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
         }
 
-        void pushBook(Book book, unsigned int page)
+        void pushBook(std::shared_ptr<MWGui::TypesetBook> book, unsigned int page)
         {
             DisplayState bs;
             bs.mPage = page;
-            bs.mBook = book;
+            bs.mBook = std::move(book);
             mStates.push(bs);
             updateShowingPages();
             updateCloseJournalButton();
         }
 
-        void replaceBook(Book book, unsigned int page)
+        void replaceBook(std::shared_ptr<MWGui::TypesetBook> book, unsigned int page)
         {
             assert(!mStates.empty());
-            mStates.top().mBook = book;
+            mStates.top().mBook = std::move(book);
             mStates.top().mPage = page;
             updateShowingPages();
         }
@@ -350,7 +349,7 @@ namespace
 
         void updateShowingPages()
         {
-            Book book;
+            std::shared_ptr<MWGui::TypesetBook> book;
             unsigned int page;
             unsigned int relPages;
 
@@ -383,8 +382,8 @@ namespace
             setVisible(PageOneNum, relPages > 0);
             setVisible(PageTwoNum, relPages > 1);
 
-            getPage(LeftBookPage)->showPage((relPages > 0) ? book : Book(), page + 0);
-            getPage(RightBookPage)->showPage((relPages > 0) ? book : Book(), page + 1);
+            getPage(LeftBookPage)->showPage((relPages > 0) ? book : std::shared_ptr<MWGui::TypesetBook>(), page + 0);
+            getPage(RightBookPage)->showPage((relPages > 0) ? book : std::shared_ptr<MWGui::TypesetBook>(), page + 1);
 
             setText(PageOneNum, page + 1);
             setText(PageTwoNum, page + 2);
@@ -409,7 +408,15 @@ namespace
                 return;
             }
 
-            Book topicBook = createTopicBook(linkId);
+            // 正值 linkId 表示 topic 关键词热链接（由 AddSpan 创建）
+            // 还原为 Topic 指针
+            const auto* topic = reinterpret_cast<const MWDialogue::Topic*>(linkId);
+            notifyTopicClicked(*topic);
+        }
+
+        void notifyTopicClicked(const MWDialogue::Topic& topic)
+        {
+            std::shared_ptr<MWGui::TypesetBook> topicBook = createTopicBook(topic);
 
             if (mStates.size() > 1)
                 replaceBook(topicBook, 0);
@@ -430,19 +437,19 @@ namespace
         {
             ESM::RefId topic = ESM::RefId::stringRefId(topicIdString);
             const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
-            intptr_t topicId = 0; /// \todo get rid of intptr ids
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
                 if (i->first == topic)
-                    topicId = intptr_t(&i->second);
+                {
+                    notifyTopicClicked(i->second);
+                    return;
+                }
             }
-
-            notifyTopicClicked(topicId);
         }
 
         void notifyQuestClicked(const std::string& name, int id)
         {
-            Book book = createQuestBook(name);
+            std::shared_ptr<MWGui::TypesetBook> book = createQuestBook(name);
 
             if (mStates.size() > 1)
                 replaceBook(book, 0);
@@ -627,7 +634,7 @@ namespace
             if (!mStates.empty())
             {
                 unsigned int& page = mStates.top().mPage;
-                Book book = mStates.top().mBook;
+                std::shared_ptr<MWGui::TypesetBook> book = mStates.top().mBook;
 
                 if (page + 2 < book->pageCount())
                 {

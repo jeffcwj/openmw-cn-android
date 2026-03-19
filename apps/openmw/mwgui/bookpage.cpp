@@ -107,9 +107,9 @@ namespace MWGui
 
         virtual ~TypesetBookImpl() {}
 
-        Range addContent(const BookTypesetter::Utf8Span& text)
+        Range addContent(std::string_view text)
         {
-            Contents::iterator i = mContents.insert(mContents.end(), Content(text.first, text.second));
+            Contents::iterator i = mContents.insert(mContents.end(), Content(text.begin(), text.end()));
 
             if (i->empty())
                 return Range(Utf8Point(nullptr), Utf8Point(nullptr));
@@ -269,7 +269,7 @@ namespace MWGui
 
         virtual ~Typesetter() {}
 
-        Style* createStyle(const std::string& fontName, const Colour& fontColour, bool useBookFont) override
+        Style* createStyle(const std::string& fontName, const MyGUI::Colour& fontColour, bool useBookFont) override
         {
             std::string fullFontName;
             if (fontName.empty())
@@ -298,8 +298,8 @@ namespace MWGui
             return &style;
         }
 
-        Style* createHotStyle(Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
-            const Colour& activeColour, InteractiveId id, bool unique) override
+        Style* createHotStyle(Style* baseStyle, const MyGUI::Colour& normalColour, const MyGUI::Colour& hoverColour,
+            const MyGUI::Colour& activeColour, InteractiveId id, bool unique) override
         {
             StyleImpl* BaseStyle = static_cast<StyleImpl*>(baseStyle);
 
@@ -319,30 +319,30 @@ namespace MWGui
             return &style;
         }
 
-        void write(Style* style, Utf8Span text) override
+        void write(Style* style, std::string_view text) override
         {
             Range range = mBook->addContent(text);
 
             writeImpl(static_cast<StyleImpl*>(style), range.first, range.second);
         }
 
-        intptr_t addContent(Utf8Span text, bool select) override
+        const Content* addContent(std::string_view text, bool select) override
         {
             add_partial_text();
 
-            Contents::iterator i = mBook->mContents.insert(mBook->mContents.end(), Content(text.first, text.second));
+            Contents::iterator i = mBook->mContents.insert(mBook->mContents.end(), Content(text.begin(), text.end()));
 
             if (select)
                 mCurrentContent = &(*i);
 
-            return reinterpret_cast<intptr_t>(&(*i));
+            return &(*i);
         }
 
-        void selectContent(intptr_t contentHandle) override
+        void selectContent(const Content* contentHandle) override
         {
             add_partial_text();
 
-            mCurrentContent = reinterpret_cast<Content const*>(contentHandle);
+            mCurrentContent = contentHandle;
         }
 
         void write(Style* style, size_t begin, size_t end) override
@@ -391,7 +391,7 @@ namespace MWGui
             mCurrentAlignment = sectionAlignment;
         }
 
-        TypesetBook::Ptr complete() override
+        std::shared_ptr<TypesetBook> complete() override
         {
             int curPageStart = 0;
             int curPageStop = 0;
@@ -655,7 +655,7 @@ namespace MWGui
         }
     };
 
-    BookTypesetter::Ptr BookTypesetter::create(int pageWidth, int pageHeight)
+    std::shared_ptr<BookTypesetter> BookTypesetter::create(int pageWidth, int pageHeight)
     {
         return std::make_shared<TypesetBookImpl::Typesetter>(pageWidth, pageHeight);
     }
@@ -1046,7 +1046,7 @@ namespace MWGui
             }
         }
 
-        void showPage(TypesetBook::Ptr book, size_t newPage)
+        void showPage(std::shared_ptr<TypesetBook> book, size_t newPage)
         {
             std::shared_ptr<TypesetBookImpl> newBook = std::dynamic_pointer_cast<TypesetBookImpl>(book);
 
@@ -1282,14 +1282,17 @@ namespace MWGui
         {
         }
 
-        void showPage(TypesetBook::Ptr book, size_t page) override { mPageDisplay->showPage(std::move(book), page); }
+        void showPage(std::shared_ptr<TypesetBook> book, size_t page) override
+        {
+            mPageDisplay->showPage(std::move(book), page);
+        }
 
-        void adviseLinkClicked(std::function<void(InteractiveId)> linkClicked) override
+        void adviseLinkClicked(ClickCallback linkClicked) override
         {
             mPageDisplay->mLinkClicked = std::move(linkClicked);
         }
 
-        void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = std::function<void(InteractiveId)>(); }
+        void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = ClickCallback(); }
 
     protected:
         void initialiseOverride() override

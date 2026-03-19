@@ -5,10 +5,16 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 
 #include <components/misc/utf8stream.hpp>
 
 #include "../mwdialogue/quest.hpp"
+
+namespace MWDialogue
+{
+    class Topic;
+}
 
 namespace MWGui
 {
@@ -22,25 +28,17 @@ namespace MWGui
     {
         typedef std::shared_ptr<JournalViewModel> Ptr;
 
-        typedef intptr_t QuestId;
-        typedef intptr_t TopicId;
-        typedef uint8_t const* Utf8Point;
-        typedef std::pair<Utf8Point, Utf8Point> Utf8Span;
-
         /// The base interface for both journal entries and topics.
         struct Entry
         {
             /// returns the body text for the journal entry
-            ///
-            /// This function returns a borrowed reference to the body of the
-            /// journal entry. The returned reference becomes invalid when the
-            /// entry is destroyed.
-            virtual Utf8Span body() const = 0;
+            virtual std::string_view body() const = 0;
 
             /// Visits each subset of text in the body, delivering the beginning
-            /// and end of the span relative to the body, and a valid topic ID if
-            /// the span represents a keyword, or zero if not.
-            virtual void visitSpans(std::function<void(TopicId, size_t, size_t)> visitor) const = 0;
+            /// and end of the span relative to the body, and a valid Topic pointer if
+            /// the span represents a keyword, or nullptr if not.
+            virtual void visitSpans(
+                std::function<void(const MWDialogue::Topic*, size_t, size_t)> visitor) const = 0;
 
             virtual ~Entry() = default;
         };
@@ -48,9 +46,8 @@ namespace MWGui
         /// An interface to topic data.
         struct TopicEntry : Entry
         {
-            /// Returns a pre-formatted span of UTF8 encoded text representing
-            /// the name of the NPC this portion of dialog was heard from.
-            virtual Utf8Span source() const = 0;
+            /// Returns the name of the NPC this portion of dialog was heard from.
+            virtual std::string_view source() const = 0;
 
             virtual ~TopicEntry() = default;
         };
@@ -58,9 +55,8 @@ namespace MWGui
         /// An interface to journal data.
         struct JournalEntry : Entry
         {
-            /// Returns a pre-formatted span of UTF8 encoded text representing
-            /// the in-game date this entry was added to the journal.
-            virtual Utf8Span timestamp() const = 0;
+            /// Returns the in-game date this entry was added to the journal.
+            virtual std::string_view timestamp() const = 0;
 
             virtual ~JournalEntry() = default;
         };
@@ -79,18 +75,23 @@ namespace MWGui
 
         /// walks over the journal entries related to all quests with the given name
         /// If \a questName is empty, simply visits all journal entries
-        virtual void visitJournalEntries(
-            std::string_view questName, std::function<void(JournalEntry const&, const MWDialogue::Quest*)> visitor) const = 0;
+        virtual void visitJournalEntries(std::string_view questName,
+            std::function<void(JournalEntry const&, const MWDialogue::Quest*)> visitor) const
+            = 0;
 
-        /// provides the name of the topic specified by its id
-        virtual void visitTopicName(TopicId topicId, std::function<void(Utf8Span)> visitor) const = 0;
+        /// provides the name of the topic
+        virtual void visitTopicName(
+            const MWDialogue::Topic& topic, std::function<void(std::string_view)> visitor) const
+            = 0;
 
         /// walks over the topics whose names start with the character
         virtual void visitTopicNamesStartingWith(
             Utf8Stream::UnicodeChar character, std::function<void(std::string_view)> visitor) const = 0;
 
-        /// walks over the topic entries for the topic specified by its identifier
-        virtual void visitTopicEntries(TopicId topicId, std::function<void(TopicEntry const&)> visitor) const = 0;
+        /// walks over the topic entries for the given topic
+        virtual void visitTopicEntries(
+            const MWDialogue::Topic& topic, std::function<void(TopicEntry const&)> visitor) const
+            = 0;
 
         // create an instance of the default journal view model implementation
         static Ptr create();

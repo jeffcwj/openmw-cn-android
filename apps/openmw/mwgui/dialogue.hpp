@@ -108,12 +108,10 @@ namespace MWGui
         void activated() override;
     };
 
-    typedef MWDialogue::KeywordSearch<intptr_t> KeywordSearchT;
-
     struct DialogueText
     {
         virtual ~DialogueText() = default;
-        virtual void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        virtual void write(std::shared_ptr<BookTypesetter> typesetter, MWDialogue::KeywordSearch* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
         std::string mText;
     };
@@ -121,9 +119,10 @@ namespace MWGui
     struct Response : DialogueText
     {
         Response(std::string_view text, std::string_view title = {}, bool needMargin = true);
-        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        void write(std::shared_ptr<BookTypesetter> typesetter, MWDialogue::KeywordSearch* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
-        void addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
+        void addTopicLink(std::shared_ptr<BookTypesetter> typesetter, intptr_t topicId, size_t begin,
+            size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
     };
@@ -131,7 +130,7 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(std::string_view text);
-        void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
+        void write(std::shared_ptr<BookTypesetter> typesetter, MWDialogue::KeywordSearch* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
     };
 
@@ -204,7 +203,7 @@ namespace MWGui
 
         std::vector<std::unique_ptr<Link>> mDeleteLater;
 
-        KeywordSearchT mKeywordSearch;
+        MWDialogue::KeywordSearch mKeywordSearch;
 
         BookPage* mHistory;
         Gui::MWList* mTopicsList;

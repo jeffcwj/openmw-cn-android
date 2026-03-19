@@ -1064,10 +1064,7 @@ namespace MWWorld
     // Dialogue
     //=========================================================================
 
-    Store<ESM::Dialogue>::Store()
-        : mKeywordSearchModFlag(true)
-    {
-    }
+    Store<ESM::Dialogue>::Store() = default;
 
     void Store<ESM::Dialogue>::setUp()
     {
@@ -1085,7 +1082,6 @@ namespace MWWorld
         std::sort(mShared.begin(), mShared.end(),
             [](const ESM::Dialogue* l, const ESM::Dialogue* r) -> bool { return l->mId < r->mId; });
 
-        mKeywordSearchModFlag = true;
     }
 
     const ESM::Dialogue* Store<ESM::Dialogue>::search(const ESM::RefId& id) const
@@ -1144,15 +1140,12 @@ namespace MWWorld
             dialogue.mId = found->second.mId;
         }
 
-        mKeywordSearchModFlag = true;
-
         return RecordId(dialogue.mId, isDeleted);
     }
 
     bool Store<ESM::Dialogue>::eraseStatic(const ESM::RefId& id)
     {
-        if (eraseFromMap(mStatic, id))
-            mKeywordSearchModFlag = true;
+        eraseFromMap(mStatic, id);
 
         return true;
     }
@@ -1162,27 +1155,6 @@ namespace MWWorld
         list.reserve(list.size() + getSize());
         for (const auto& dialogue : mShared)
             list.push_back(dialogue->mId);
-    }
-
-    const MWDialogue::KeywordSearch<int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
-    {
-        if (mKeywordSearchModFlag)
-        {
-            mKeywordSearch.clear();
-
-            std::vector<std::string> keywordList;
-            keywordList.reserve(getSize());
-            for (const auto& it : *this)
-                keywordList.push_back(Misc::StringUtils::lowerCase(it.mStringId));
-            sort(keywordList.begin(), keywordList.end());
-
-            for (const auto& it : keywordList)
-                mKeywordSearch.seed(it, 0 /*unused*/);
-
-            mKeywordSearchModFlag = false;
-        }
-
-        return mKeywordSearch;
     }
 
     // ESM4 Cell

@@ -1,4 +1,5 @@
 #include <components/esm3/loaddial.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
 
@@ -46,10 +47,20 @@ namespace MWDialogue
 
         void tokenizeKeywords(const std::string& text, std::vector<Token>& tokens)
         {
-            const auto& keywordSearch
-                = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().getDialogIdKeywordSearch();
+            // 构建关键词搜索实例，遍历所有 Topic 类型的对话记录
+            KeywordSearch keywordSearch;
+            const auto& dialogueStore = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
+            for (auto it = dialogueStore.begin(); it != dialogueStore.end(); ++it)
+            {
+                if (it->mType == ESM::Dialogue::Topic)
+                {
+                    const std::string name(it->mId.getRefIdString());
+                    std::string topicId = Misc::StringUtils::lowerCase(name);
+                    keywordSearch.seed(name, topicId);
+                }
+            }
 
-            std::vector<KeywordSearch<int /*unused*/>::Match> matches;
+            std::vector<KeywordSearch::Match> matches;
             keywordSearch.highlightKeywords(text.begin(), text.end(), matches);
 
             for (const auto& match : matches)

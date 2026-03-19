@@ -8,6 +8,8 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <string_view>
+#include <vector>
 
 #include <components/settings/values.hpp>
 
@@ -15,10 +17,12 @@ namespace MWGui
 {
     /// A formatted and paginated document to be used with
     /// the book page widget.
+    /// A formatted and paginated document to be used with
+    /// the book page widget.
     struct TypesetBook
     {
-        typedef std::shared_ptr<TypesetBook> Ptr;
         typedef intptr_t InteractiveId;
+        using Content = std::vector<uint8_t>;
 
         /// Returns the number of pages in the document.
         virtual size_t pageCount() const = 0;
@@ -77,12 +81,6 @@ namespace MWGui
     /// A factory class for creating a typeset book instance.
     struct BookTypesetter
     {
-        typedef std::shared_ptr<BookTypesetter> Ptr;
-        typedef TypesetBook::InteractiveId InteractiveId;
-        typedef MyGUI::Colour Colour;
-        typedef uint8_t const* Utf8Point;
-        typedef std::pair<Utf8Point, Utf8Point> Utf8Span;
-
         virtual ~BookTypesetter() = default;
 
         enum Alignment
@@ -99,16 +97,18 @@ namespace MWGui
         struct Style;
 
         /// A factory function for creating the default implementation of a book typesetter
-        static Ptr create(int pageWidth, int pageHeight);
+        static std::shared_ptr<BookTypesetter> create(int pageWidth, int pageHeight);
 
         /// Create a simple text style consisting of a font and a text color.
-        virtual Style* createStyle(const std::string& fontName, const Colour& colour, bool useBookFont = true) = 0;
+        virtual Style* createStyle(const std::string& fontName, const MyGUI::Colour& colour, bool useBookFont = true)
+            = 0;
 
         /// Create a hyper-link style with a user-defined identifier based on an
         /// existing style. The unique flag forces a new instance of this style
         /// to be created even if an existing instance is present.
-        virtual Style* createHotStyle(Style* BaseStyle, const Colour& NormalColour, const Colour& HoverColour,
-            const Colour& ActiveColour, InteractiveId Id, bool Unique = true)
+        virtual Style* createHotStyle(Style* BaseStyle, const MyGUI::Colour& NormalColour,
+            const MyGUI::Colour& HoverColour, const MyGUI::Colour& ActiveColour, TypesetBook::InteractiveId Id,
+            bool Unique = true)
             = 0;
 
         /// Insert a line break into the document. Newline characters in the input
@@ -126,22 +126,22 @@ namespace MWGui
         virtual void setSectionAlignment(Alignment sectionAlignment) = 0;
 
         // Layout a block of text with the specified style into the document.
-        virtual void write(Style* Style, Utf8Span Text) = 0;
+        virtual void write(Style* style, std::string_view text) = 0;
 
         /// Adds a content block to the document without laying it out. An
         /// identifier is returned that can be used to refer to it. If select
         /// is true, the block is activated to be references by future writes.
-        virtual intptr_t addContent(Utf8Span Text, bool Select = true) = 0;
+        virtual const TypesetBook::Content* addContent(std::string_view text, bool select = true) = 0;
 
         /// Select a previously created content block for future writes.
-        virtual void selectContent(intptr_t contentHandle) = 0;
+        virtual void selectContent(const TypesetBook::Content* contentHandle) = 0;
 
         /// Layout a span of the selected content block into the document
         /// using the specified style.
-        virtual void write(Style* Style, size_t Begin, size_t End) = 0;
+        virtual void write(Style* style, size_t begin, size_t end) = 0;
 
         /// Finalize the document layout, and return a pointer to it.
-        virtual TypesetBook::Ptr complete() = 0;
+        virtual std::shared_ptr<TypesetBook> complete() = 0;
     };
 
     /// An interface to the BookPage widget.
@@ -149,11 +149,10 @@ namespace MWGui
     {
         MYGUI_RTTI_DERIVED(BookPage)
     public:
-        typedef TypesetBook::InteractiveId InteractiveId;
-        typedef std::function<void(InteractiveId)> ClickCallback;
+        using ClickCallback = std::function<void(TypesetBook::InteractiveId)>;
 
         /// Make the widget display the specified page from the specified book.
-        virtual void showPage(TypesetBook::Ptr Book, size_t Page) = 0;
+        virtual void showPage(std::shared_ptr<TypesetBook> book, size_t page) = 0;
 
         /// Set the callback for a clicking a hyper-link in the document.
         virtual void adviseLinkClicked(ClickCallback callback) = 0;
