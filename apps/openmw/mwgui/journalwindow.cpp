@@ -16,6 +16,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwdialogue/quest.hpp"
 
 #include "bookpage.hpp"
 #include "journalbooks.hpp"
@@ -399,6 +400,15 @@ namespace
 
         void notifyTopicClicked(intptr_t linkId)
         {
+            if (linkId < 0)
+            {
+                // 负值 linkId 表示 quest 标题热链接（由 AddJournalEntry 创建）
+                // 还原为 quest 指针，获取 quest 名称后打开 quest book
+                const auto* quest = reinterpret_cast<const MWDialogue::Quest*>(-linkId);
+                notifyQuestClicked(std::string(quest->getName()), 0);
+                return;
+            }
+
             Book topicBook = createTopicBook(linkId);
 
             if (mStates.size() > 1)

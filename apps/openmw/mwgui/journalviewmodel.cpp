@@ -250,13 +250,13 @@ namespace MWGui
             {
                 if (timestamp_buffer.empty())
                 {
-                    std::string dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
+                    // std::string dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
 
                     std::ostringstream os;
 
-                    os << itr->mDayOfMonth << ' '
-                       << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(itr->mMonth) << " ("
-                       << dayStr << " " << (itr->mDay) << ')';
+                    os << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(itr->mMonth)
+                       << " " << itr->mDayOfMonth
+                       << "\xe6\x97\xa5 (\xe7\xac\xac" << itr->mDay << "\xe5\xa4\xa9)";
 
                     timestamp_buffer = os.str();
                 }
@@ -266,22 +266,23 @@ namespace MWGui
         };
 
         void visitJournalEntries(
-            std::string_view questName, std::function<void(JournalEntry const&)> visitor) const override
+            std::string_view questName, std::function<void(JournalEntry const&, const MWDialogue::Quest*)> visitor) const override
         {
             MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
-            if (!questName.empty())
+            // if (!questName.empty())
             {
                 std::vector<MWDialogue::Quest const*> quests;
                 for (MWBase::Journal::TQuestIter questIt = journal->questBegin(); questIt != journal->questEnd();
                      ++questIt)
                 {
-                    if (Misc::StringUtils::ciEqual(questIt->second.getName(), questName))
+                    if (questName.empty() || Misc::StringUtils::ciEqual(questIt->second.getName(), questName))
                         quests.push_back(&questIt->second);
                 }
 
                 for (MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end(); ++i)
                 {
+                    bool visited = false;
                     for (std::vector<MWDialogue::Quest const*>::iterator questIt = quests.begin();
                          questIt != quests.end(); ++questIt)
                     {
@@ -289,15 +290,17 @@ namespace MWGui
                         for (MWDialogue::Topic::TEntryIter j = quest->begin(); j != quest->end(); ++j)
                         {
                             if (i->mInfoId == j->mInfoId)
-                                visitor(JournalEntryImpl<MWBase::Journal::TEntryIter>(this, i));
+                            {
+                                visitor(JournalEntryImpl<MWBase::Journal::TEntryIter>(this, i),
+                                    questName.empty() ? quest : nullptr);
+                                visited = true;
+                                break;
+                            }
                         }
                     }
+                    if (!visited && questName.empty())
+                        visitor(JournalEntryImpl<MWBase::Journal::TEntryIter>(this, i), nullptr);
                 }
-            }
-            else
-            {
-                for (MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end(); ++i)
-                    visitor(JournalEntryImpl<MWBase::Journal::TEntryIter>(this, i));
             }
         }
 
@@ -312,15 +315,14 @@ namespace MWGui
         {
             MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
+            character = Utf8Stream::toLowerUtf8(character);
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
                 Utf8Stream stream(i->second.getName());
                 Utf8Stream::UnicodeChar first = Utf8Stream::toLowerUtf8(stream.peek());
 
-                if (first != Utf8Stream::toLowerUtf8(character))
-                    continue;
-
-                visitor(i->second.getName());
+                if (Translation::isFirstChar(first, (char)character))
+                    visitor(i->second.getName());
             }
         }
 
