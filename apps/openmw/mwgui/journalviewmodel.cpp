@@ -13,6 +13,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwdialogue/keywordsearch.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 namespace MWGui
 {
@@ -21,7 +22,7 @@ namespace MWGui
 
     struct JournalViewModelImpl : JournalViewModel
     {
-        typedef MWDialogue::KeywordSearch<std::string, intptr_t> KeywordSearchT;
+        typedef MWDialogue::KeywordSearch<intptr_t> KeywordSearchT;
 
         mutable bool mKeywordSearchLoaded;
         mutable KeywordSearchT mKeywordSearch;
@@ -56,7 +57,7 @@ namespace MWGui
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
                 for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
-                    mKeywordSearch.seed(i->first.getRefIdString(), intptr_t(&i->second));
+                    mKeywordSearch.seed(i->second.getName(), intptr_t(&i->second));
 
                 mKeywordSearchLoaded = true;
             }
@@ -116,10 +117,10 @@ namespace MWGui
                             std::string link = utf8text.substr(pos_begin + 1, pos_end - pos_begin - 1);
                             const char specialPseudoAsteriskCharacter = 127;
                             std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                            std::string topicName = MWBase::Environment::get()
-                                                        .getWindowManager()
-                                                        ->getTranslationDataStorage()
-                                                        .topicStandardForm(link);
+                            std::string_view topicName = MWBase::Environment::get()
+                                                         .getWindowManager()
+                                                         ->getTranslationDataStorage()
+                                                         .topicStandardForm(link);
 
                             std::string displayName = link;
                             while (displayName[displayName.size() - 1] == '*')
@@ -253,8 +254,9 @@ namespace MWGui
 
                     std::ostringstream os;
 
-                    os << itr->mDayOfMonth << ' ' << MWBase::Environment::get().getWorld()->getMonthName(itr->mMonth)
-                       << " (" << dayStr << " " << (itr->mDay) << ')';
+                    os << itr->mDayOfMonth << ' '
+                       << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(itr->mMonth) << " ("
+                       << dayStr << " " << (itr->mDay) << ')';
 
                     timestamp_buffer = os.str();
                 }
@@ -312,7 +314,7 @@ namespace MWGui
 
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
-                Utf8Stream stream(i->first.getRefIdString().c_str());
+                Utf8Stream stream(i->second.getName());
                 Utf8Stream::UnicodeChar first = Utf8Stream::toLowerUtf8(stream.peek());
 
                 if (first != Utf8Stream::toLowerUtf8(character))
