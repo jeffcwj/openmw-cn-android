@@ -8,6 +8,7 @@
 #include "MyGUI_RenderManager.h"
 #include "MyGUI_TextureUtility.h"
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/utf8stream.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/settings/values.hpp>
@@ -1042,7 +1043,9 @@ namespace MWGui
                 mLastDown = MyGUI::MouseButton::None;
 
                 if (clicked && mLinkClicked && item && item->mInteractiveId != 0)
+                {
                     mLinkClicked(item->mInteractiveId);
+                }
             }
         }
 

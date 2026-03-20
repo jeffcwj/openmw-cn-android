@@ -37,8 +37,10 @@ namespace
 
             const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
             if (topicId)
+            {
                 style = mTypesetter->createHotStyle(mBodyStyle, textColours.journalLink, textColours.journalLinkOver,
                     textColours.journalLinkPressed, topicId);
+            }
 
             mTypesetter->write(style, begin, end);
         }
@@ -87,7 +89,10 @@ namespace
                 auto questName = quest->getName();
                 if (!questName.empty())
                 {
-                    intptr_t id = -reinterpret_cast<intptr_t>(quest);
+                    // 使用最低位 tag 区分 quest（bit0=1）和 topic（bit0=0）
+                    // 对齐保证指针 bit0 始终为 0，设置 bit0=1 标记为 quest
+                    // 这替代了之前用正负号区分的方式，后者在 ARM64 MTE 指针下会失败
+                    intptr_t id = reinterpret_cast<intptr_t>(quest) | 1;
                     auto style = mTypesetter->createHotStyle(mBodyStyle, MyGUI::Colour(0.60f, 0.00f, 0.00f),
                         MyGUI::Colour(0.70f, 0.10f, 0.10f), MyGUI::Colour(0.80f, 0.20f, 0.20f), id);
                     mTypesetter->write(style, MWGui::to_utf8_span(questName)); // mHeaderStyle

@@ -10,6 +10,7 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/misc/strings/algorithm.hpp>
+
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
 
@@ -392,9 +393,12 @@ namespace
 
         void notifyTopicClicked(intptr_t linkId)
         {
-            if (linkId < 0)
+            // 使用最低位 tag 区分 quest（bit0=1）和 topic（bit0=0）
+            // 替代之前用正负号区分的方式，后者在 ARM64 MTE 指针下会失败
+            if (linkId & 1)
             {
-                const auto* quest = reinterpret_cast<const MWDialogue::Quest*>(-linkId);
+                // Quest：清除 bit0 还原指针
+                const auto* quest = reinterpret_cast<const MWDialogue::Quest*>(linkId & ~intptr_t(1));
                 notifyQuestClicked(std::string(quest->getName()), 0);
                 return;
             }

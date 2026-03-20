@@ -1,6 +1,8 @@
 ﻿#include "journalviewmodel.hpp"
 
 #include <map>
+#include <sstream>
+#include <iomanip>
 
 #include <MyGUI_LanguageManager.h>
 
@@ -13,7 +15,13 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwdialogue/keywordsearch.hpp"
+#include "../mwdialogue/quest.hpp"
 #include "../mwworld/datetimemanager.hpp"
+
+// 编译期安全检查：确保 Quest/Topic 对齐 >= 2，保证指针 bit0 始终为 0
+// 这是 journalbooks.cpp 中使用最低位 tag 区分 quest/topic 的前提条件
+static_assert(alignof(MWDialogue::Quest) >= 2, "Quest alignment must be >= 2 for LSB tagging");
+static_assert(alignof(MWDialogue::Topic) >= 2, "Topic alignment must be >= 2 for LSB tagging");
 
 namespace MWGui
 {
@@ -57,7 +65,10 @@ namespace MWGui
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
                 for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
-                    mKeywordSearch.seed(i->second.getName(), intptr_t(&i->second));
+                {
+                    intptr_t ptr = intptr_t(&i->second);
+                    mKeywordSearch.seed(i->second.getName(), ptr);
+                }
 
                 mKeywordSearchLoaded = true;
             }
@@ -184,6 +195,8 @@ namespace MWGui
                          ++it)
                     {
                         const KeywordSearchT::Match& match = *it;
+
+                        std::string matchedText(match.mBeg, match.mEnd);
 
                         if (i != match.mBeg)
                             visitor(0, i - utf8text.begin(), match.mBeg - utf8text.begin());

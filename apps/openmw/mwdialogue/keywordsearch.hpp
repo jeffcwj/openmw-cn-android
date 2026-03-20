@@ -282,7 +282,10 @@ namespace MWDialogue
                     }
                 }
                 if (depth + 1 == keyword.size())
-                    j->second.mKeyword = value;
+                {
+                    j->second.mKeyword = keyword;
+                    j->second.mValue = std::move(value);
+                }
                 else // depth+1 < keyword.size()
                     seed_impl(keyword, std::move(value), depth + 1, j->second);
             }
