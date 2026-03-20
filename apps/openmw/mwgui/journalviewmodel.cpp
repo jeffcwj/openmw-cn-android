@@ -13,7 +13,13 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwdialogue/keywordsearch.hpp"
+#include "../mwdialogue/quest.hpp"
 #include "../mwworld/datetimemanager.hpp"
+
+// 编译期安全检查：确保 Quest/Topic 对齐 >= 2，保证指针 bit0 始终为 0
+// 这是 journalbooks.cpp 中使用最低位 tag 区分 quest/topic 的前提条件
+static_assert(alignof(MWDialogue::Quest) >= 2, "Quest alignment must be >= 2 for LSB tagging");
+static_assert(alignof(MWDialogue::Topic) >= 2, "Topic alignment must be >= 2 for LSB tagging");
 
 namespace MWGui
 {
