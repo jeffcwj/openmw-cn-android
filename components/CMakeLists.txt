@@ -161,6 +161,8 @@ add_component_dir (toutf8
     toutf8
     )
 
+add_subdirectory(Encoding)
+
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
     formid
     fourcc
@@ -626,6 +628,7 @@ target_link_libraries(components
     ${ICU_LIBRARIES}
     ZLIB::ZLIB
     minizip::minizip
+    Encoding
     )
 
 if(yaml-cpp_VERSION VERSION_GREATER_EQUAL 0.8.0)

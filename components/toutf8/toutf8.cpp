@@ -11,7 +11,7 @@
 #ifdef WIN32
 #include <windows.h>
 #else
-#include <clocale>
+#include <iconv.h>
 #endif
 
 /* This file contains the code to translate from WINDOWS-1252 (native
@@ -132,20 +132,17 @@ std::string_view StatelessUtf8Encoder::getUtf8(
             resize(n * 3, bufferAllocationPolicy, buffer);
             n = WideCharToMultiByte(CP_UTF8, 0, wchars, n, buffer.data(), n * 3, 0, 0);
 #else
-            std::setlocale(LC_ALL, "zh_CN.gbk");
+            iconv_t cd = iconv_open("UTF-8", "GBK");
             size_t n = input.size();
-            resize(n + 1, bufferAllocationPolicy, buffer);
-            memcpy(buffer.data(), input.data(), n);
-            buffer.data()[n] = 0;
-            wchar_t* wchars = (wchar_t*)alloca((n + 1) * sizeof(wchar_t));
-            memset(wchars, 0, (n + 1) * sizeof(wchar_t));
-            size_t r = std::mbstowcs(wchars, buffer.data(), n);
-            n = r == (size_t)-1 ? wcslen(wchars) : r;
-            std::setlocale(LC_ALL, "en_US.utf8");
-            resize(n * 3, bufferAllocationPolicy, buffer);
-            memset(buffer.data(), 0, n * 3);
-            r = std::wcstombs(buffer.data(), wchars, n * 3);
-            n = r == (size_t)-1 ? strnlen(buffer.data(), n) : r;
+            size_t outlen = n * 4;
+            resize(outlen, bufferAllocationPolicy, buffer);
+            char* inbuf = const_cast<char*>(input.data());
+            char* outbuf = buffer.data();
+            size_t inleft = n;
+            size_t outleft = outlen;
+            iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
+            iconv_close(cd);
+            n = outlen - outleft;
 #endif
             return std::string_view(buffer.data(), n);
         }
@@ -201,20 +198,17 @@ std::string_view StatelessUtf8Encoder::getLegacyEnc(
             resize(n * 2, bufferAllocationPolicy, buffer);
             n = WideCharToMultiByte(936, 0, wchars, n, buffer.data(), n * 2, 0, 0);
 #else
-            std::setlocale(LC_ALL, "en_US.utf8");
+            iconv_t cd = iconv_open("GBK", "UTF-8");
             size_t n = input.size();
-            resize(n + 1, bufferAllocationPolicy, buffer);
-            memcpy(buffer.data(), input.data(), n);
-            buffer.data()[n] = 0;
-            wchar_t* wchars = (wchar_t*)alloca((n + 1) * sizeof(wchar_t));
-            memset(wchars, 0, (n + 1) * sizeof(wchar_t));
-            size_t r = std::mbstowcs(wchars, buffer.data(), n);
-            n = r == (size_t)-1 ? wcslen(wchars) : r;
-            std::setlocale(LC_ALL, "zh_CN.gbk");
-            resize(n * 2, bufferAllocationPolicy, buffer);
-            memset(buffer.data(), 0, n * 2);
-            r = std::wcstombs(buffer.data(), wchars, n * 2);
-            n = r == (size_t)-1 ? strnlen(buffer.data(), n) : r;
+            size_t outlen = n * 2;
+            resize(outlen, bufferAllocationPolicy, buffer);
+            char* inbuf = const_cast<char*>(input.data());
+            char* outbuf = buffer.data();
+            size_t inleft = n;
+            size_t outleft = outlen;
+            iconv(cd, &inbuf, &inleft, &outbuf, &outleft);
+            iconv_close(cd);
+            n = outlen - outleft;
 #endif
             return std::string_view(buffer.data(), n);
         }
